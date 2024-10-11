@@ -1,0 +1,33 @@
+<?php
+
+return array(
+    'home' => 'ホーム',
+    'about' => '会社情報',
+    'contact' => 'お問い合わせ',
+    'blogs' => 'ブログ',
+    'quick_links' => 'クイックリンク ',
+    'login' => 'ログイン',
+    'register' => '登録',
+    'call_now' => '電話',
+    'pricing' => '価格',
+    'save_jobs' => '求人情報を保存する',
+    'faq' => 'よくある質問',
+    'privacy' => 'プライバシーポリシー',
+    'terms' => '利用規約',
+    'support' => 'ヘルプ',
+    'customer_support' => 'カスタマーサポート',
+    'copyright' => '著作権',
+    'all_rights_reserved' => '無断転載を禁じます',
+    'browse_jobs' => '求人を検索',
+    'browse_employers' => 'プロジェクトを検索',
+    'employers' => 'プロジェクト ',
+    'browse_employees' => '従業員検索',
+    'candidates' => '人材',
+    'candidate_dashboard' => '人材ダッシュボード',
+    'post_a_job' => 'Post a Job',
+    'browse_candidates' => '求人情報を投稿する',
+    'employer_dashboard' => 'プロジェクトダッシュボード ',
+    'applications' => 'Applications',
+    'address' => '東京都江東区豊洲',
+    'phone' => '(319) 555-0115'
+);

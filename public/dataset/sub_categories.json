@@ -1,0 +1,512 @@
+[
+  {
+    "id": 1,
+    "title": "PMO\r",
+    "slug": "pmo",
+    "display_order": 1,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "title": "PM/PL\r",
+    "slug": "pm-pl",
+    "display_order": 2,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "title": "Strategy",
+    "slug": "strategy",
+    "display_order": 3,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 4,
+    "title": "Business",
+    "slug": "business",
+    "display_order": 4,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 5,
+    "title": "IT\r",
+    "slug": "it",
+    "display_order": 5,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 6,
+    "title": "RPA\r",
+    "slug": "rpa",
+    "display_order": 6,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 7,
+    "title": "ERP/PKG\r",
+    "slug": "erp-pkg",
+    "display_order": 7,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 8,
+    "title": "Security\r",
+    "slug": "security",
+    "display_order": 8,
+    "category_id": 1,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 9,
+    "title": "PMO\r",
+    "slug": "pmo-2",
+    "display_order": 1,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 10,
+    "title": "PM/PL\r",
+    "slug": "pm-pl-2",
+    "display_order": 2,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 11,
+    "title": "Architect\r",
+    "slug": "architect",
+    "display_order": 3,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 12,
+    "title": "Bridge SE\r",
+    "slug": "bridge-se",
+    "display_order": 4,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 13,
+    "title": "Business System\r",
+    "slug": "business-system",
+    "display_order": 5,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 14,
+    "title": "Web system\r",
+    "slug": "web-system",
+    "display_order": 6,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 15,
+    "title": "iOS\r",
+    "slug": "ios",
+    "display_order": 7,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 16,
+    "title": "Android\r",
+    "slug": "android",
+    "display_order": 8,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 17,
+    "title": "Main Frame",
+    "slug": "main-frame",
+    "display_order": 9,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 18,
+    "title": "Control",
+    "slug": "control",
+    "display_order": 10,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 19,
+    "title": "Embedded\r",
+    "slug": "embedded",
+    "display_order": 11,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 20,
+    "title": "IoT\r",
+    "slug": "iot",
+    "display_order": 12,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 21,
+    "title": "AI/DL\r",
+    "slug": "ai-dl",
+    "display_order": 13,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 22,
+    "title": "Front end\r",
+    "slug": "front-end",
+    "display_order": 14,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 23,
+    "title": "Backend\r",
+    "slug": "backend",
+    "display_order": 15,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 24,
+    "title": "Game",
+    "slug": "game",
+    "display_order": 16,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 25,
+    "title": "RPA\r",
+    "slug": "rpa",
+    "display_order": 17,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 26,
+    "title": "ERP\r",
+    "slug": "erp-2",
+    "display_order": 18,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 27,
+    "title": "Operation and Maintenance\r",
+    "slug": "operation-and-maintenance",
+    "display_order": 19,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 28,
+    "title": "Test\r",
+    "slug": "test",
+    "display_order": 20,
+    "category_id": 2,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 29,
+    "title": "PMO\r",
+    "slug": "pmo-3",
+    "display_order": 1,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 30,
+    "title": "PM/PL\r",
+    "slug": "pm-pl-3",
+    "display_order": 2,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 31,
+    "title": "Server",
+    "slug": "server",
+    "display_order": 3,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 32,
+    "title": "Network",
+    "slug": "network",
+    "display_order": 4,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 33,
+    "title": "Database\r",
+    "slug": "database",
+    "display_order": 5,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 34,
+    "title": "Cloud\r",
+    "slug": "cloud",
+    "display_order": 6,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 35,
+    "title": "Virtualization\r",
+    "slug": "virtualization",
+    "display_order": 7,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 36,
+    "title": "Main Frame",
+    "slug": "main-frame",
+    "display_order": 8,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 37,
+    "title": "Operation and Maintenance\r",
+    "slug": "operation-and-maintenance-2",
+    "display_order": 9,
+    "category_id": 3,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 38,
+    "title": "Help Desk",
+    "slug": "help-desk-2",
+    "display_order": 1,
+    "category_id": 4,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 39,
+    "title": "In-house IT engineer\r",
+    "slug": "in-house-it-engineer",
+    "display_order": 2,
+    "category_id": 4,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 40,
+    "title": "PMO Support\r",
+    "slug": "pmo-support",
+    "display_order": 3,
+    "category_id": 4,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 41,
+    "title": "Direction",
+    "slug": "direction-2",
+    "display_order": 1,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 42,
+    "title": "SEO\r",
+    "slug": "seo",
+    "display_order": 2,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 43,
+    "title": "Email\r",
+    "slug": "email",
+    "display_order": 3,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 44,
+    "title": "Social Media\r",
+    "slug": "social-media",
+    "display_order": 4,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 45,
+    "title": "Listing",
+    "slug": "listing",
+    "display_order": 5,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 46,
+    "title": "Affiliate\r",
+    "slug": "affiliate",
+    "display_order": 6,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 47,
+    "title": "Movie",
+    "slug": "movie",
+    "display_order": 7,
+    "category_id": 5,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 48,
+    "title": "Web system\r",
+    "slug": "web-system",
+    "display_order": 1,
+    "category_id": 6,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 49,
+    "title": "UI/UX\r",
+    "slug": "ui-ux",
+    "display_order": 2,
+    "category_id": 6,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 50,
+    "title": "Character",
+    "slug": "character",
+    "display_order": 3,
+    "category_id": 6,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  },
+  {
+    "id": 51,
+    "title": "Graphic",
+    "slug": "graphic",
+    "display_order": 4,
+    "category_id": 6,
+    "created_at": "2024-09-18 03:47:22",
+    "updated_at": "2024-09-18 03:47:22",
+    "deleted_at": null
+  }
+]

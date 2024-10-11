@@ -1,0 +1,25 @@
+<?php
+
+return array(
+    'title' => 'Welcome',
+    'job_and_project' => 'Job & Project',
+    'companies' => 'Companies',
+    'registered_talents' => 'Registered Talents',
+    'new_jobs_and_projects' => 'New Jobs & Projects',
+    'categories' => 'Categories',
+    'category'  => ' Category',
+    'explore_by' => 'Explore by',
+    'view_all' => 'View All',
+    'open_positions' => 'Open positions',
+    'location' => 'Location',
+    'start_posting_jobs_and_project' => 'Start Posting<span> jobs and projects </span>today',
+    'sign_up_free' => 'Sign Up for free',
+    'how_it_works' => 'How It <span>&nbsp;Works</span>',
+    'post_a_job_or_search_for_opportunities' => 'Post a Job or Search for Opportunities',
+    'find_the_perfect_match' => 'Find the Perfect Match',
+    'start_collaborating_jobs' => 'Start Collaborating',
+    'featured_jobs_and_projects' => 'Featured <span>&nbsp; job & projects</span>',
+    'contract_base' => 'Contract Base',
+    'apply_now' => 'Apply Now',
+    'top_companies_and_employer' => 'Top <span>&nbsp; companies & employers</span>',
+);

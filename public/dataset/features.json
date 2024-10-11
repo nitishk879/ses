@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "Over 700,000 yen",
+    "slug": "over_700000_yen",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "title": "Over 1 million yen",
+    "slug": "over_1_million_yen",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 4,
+    "title": "Less than 1 year OK",
+    "slug": "newcomers_are_also_welcome",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 5,
+    "title": "Newcomers are also welcome",
+    "slug": "leader_wanted",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 6,
+    "title": "Ages 50 and over are welcome",
+    "slug": "takeaway_ok",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 7,
+    "title": "Foreign nationals welcome",
+    "slug": "partially_remote",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 9,
+    "title": "Leader wanted",
+    "slug": "ages_50_and_over_are_welcome",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 10,
+    "title": "English skills",
+    "slug": "english_skills",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 11,
+    "title": "1 interview",
+    "slug": "4_days_or_less_per_week",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 12,
+    "title": "Takeaway OK",
+    "slug": "full_remote",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 13,
+    "title": "4 days or less per week",
+    "slug": "less_than_1_year_ok",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 14,
+    "title": "Team proposals OK",
+    "slug": "foreign_nationals_welcome",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 15,
+    "title": "Partially remote",
+    "slug": "1_interview",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 16,
+    "title": "Full remote",
+    "slug": "team_proposals_ok",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  },
+  {
+    "id": 17,
+    "title": "Online interview available",
+    "slug": "online_interview_available",
+    "created_at": "2024-10-01 06:22:55",
+    "updated_at": "2024-10-01 06:22:55",
+    "deleted_at": null
+  }
+]

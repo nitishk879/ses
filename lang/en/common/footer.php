@@ -1,0 +1,33 @@
+<?php
+
+return array(
+    'home' => 'Home',
+    'about' => 'About',
+    'contact' => 'Contact',
+    'blogs' => 'Blogs',
+    'quick_links' => 'Quick Links',
+    'login' => 'Login',
+    'register' => 'Register',
+    'call_now' => 'Call now',
+    'pricing' => 'Pricing',
+    'save_jobs' => 'Save jobs',
+    'faq' => 'FAQ',
+    'privacy' => 'Privacy Policies',
+    'terms' => 'Terms & Conditions',
+    'support' => 'Support',
+    'customer_support' => 'Customer Support',
+    'copyright' => 'Copyright',
+    'all_rights_reserved' => 'All Rights Reserved',
+    'browse_jobs' => 'Browse Jobs',
+    'browse_employers' => 'Browse Employers',
+    'employers' => 'Employers',
+    'browse_employees' => 'Browse Employees',
+    'candidates' => 'Candidates',
+    'candidate_dashboard' => 'Candidate Dashboard',
+    'post_a_job' => 'Post a Job',
+    'browse_candidates' => 'Browse Candidates',
+    'employer_dashboard' => 'Employer Dashboard',
+    'applications' => 'Applications',
+    'address' => '6391 Elgin St. Celina, Delaware 10299, New York, United States of America',
+    'phone' => '(319) 555-0115'
+);

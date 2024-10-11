@@ -1,0 +1,33 @@
+<?php
+
+return array(
+    'project' => 'Project',
+    'projects' => 'Projects',
+    'name' => 'Name',
+    'description' => 'Description',
+    'home'  => "Home",
+    'jobs'  => "Jobs",
+    'job' => 'Job',
+    'apply_to_project' => 'Apply to this project',
+    'apply' => 'Apply',
+    'project_requirements' => 'Project Requirements',
+    'project_description' => 'Project Description',
+    'skill_requirements' => 'Skill Requirements',
+    'share_project' => 'Share this job',
+    'project_category' => 'Project Category',
+    'project_status' => 'Status of the project',
+    'project_flow' => 'Project Flow',
+    'project_type' => 'Type of Contract',
+    'confirmed' => 'Confirmed',
+    'primary_contract' => 'Primary Contract',
+    'business_outreach' => 'Business Outreach',
+    'project_you_may_like' => 'Project You May Like',
+    'project_budget' => 'Project Budget',
+    'remote'    => 'Remote',
+    'project_detail' => 'View Project',
+    // oct 9, 2024
+    'monthly_salary' => 'Monthly Salary',
+    'contract_period' => 'Contract Period',
+    'location' => 'Location',
+    'eligible_applicants' => 'Eligible Applicants',
+);

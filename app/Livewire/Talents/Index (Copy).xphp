@@ -1,0 +1,217 @@
+<?php
+
+namespace App\Livewire\Talents;
+
+use App\Models\Talent;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
+
+class Index extends Component
+{
+    use WithPagination;
+    public Talent $talent;
+
+    #[Url]
+    public ?string $search = '';
+    #[Url]
+    public $startingDate = '';
+    #[Url]
+    public $endDate = '';
+    #[Url]
+    public bool $available_immediately = false;
+    #[Url]
+    public bool $available_future = false;
+    #[Url]
+    public bool $available_inquire = false;
+    #[Url]
+    public array $availability = [];
+    #[Url]
+    public $gender = '';
+    #[Url]
+    public array $nationality = [];
+    #[Url]
+    public array $age = [];
+    #[Url]
+    public ?array $workLocation = array();
+    #[Url]
+    public $affiliation = '';
+    #[Url]
+    public $contract = '';
+    #[Url]
+    public $min_salary = '';
+    #[Url]
+    public $max_salary = '';
+    #[Url]
+    public $category = [];
+    #[Url]
+    public $sortBy = 'created_at';
+    #[Url]
+    public $sortDirection = 'asc';
+
+    public ?int $id = null;
+    public ?int $pages = 10;
+
+    protected $listeners = ['filterUpdated' => 'updateFilters'];
+
+    /**
+     * Indicates if user deletion is being confirmed.
+     *
+     * @var bool
+     */
+    public bool $confirmingDisplayingResume = false;
+
+    public function updateFilters($filters): void
+    {
+        $this->search = $filters['search'];
+        $this->startingDate = $filters['starting_date'];
+        $this->endDate = $filters['end_date'];
+        $this->available_immediately = $filters['available_immediately'];
+        $this->available_future = $filters['available_future'];
+        $this->available_inquire = $filters['available_inquire'];
+        $this->availability = $filters['availability'];
+        $this->age = $filters['age'];
+        $this->gender = $filters['gender'];
+        $this->nationality = $filters['nationality'];
+        $this->workLocation = $filters['work_location'];
+        $this->affiliation = $filters['affiliation'];
+        $this->contract = $filters['contract'];
+        $this->min_salary = $filters['min_salary'];
+        $this->max_salary = $filters['max_salary'];
+        $this->category = $filters['category'];
+
+        $this->resetPage();
+    }
+
+    public function sortBy($field): void
+    {
+        if ($this->sortBy === $field) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortDirection = 'asc';
+        }
+
+        $this->sortBy = $field;
+    }
+
+    /**
+     * Confirm that the user would like to delete their account.
+     *
+     * @param $id
+     * @return void
+     */
+    public function confirmDisplayResume($id): void
+    {
+        $this->resetErrorBag();
+
+        $this->talent = Talent::findOrFail($id);
+
+//        $this->dispatchBrowserEvent('confirming-display-resume');
+
+        $this->confirmingDisplayingResume = true;
+    }
+    public $ages = [
+        '20-30',
+        '30-40',
+        '40-50',
+        '50-60',
+        '60+',
+    ];
+
+    /**
+     * Check if there is any filter or search keyword set for the list of talents
+     *
+     * @return Factory|View|Application|\Illuminate\View\View
+     */
+    public function render(): Factory|Application|View|\Illuminate\View\View
+    {
+        if (
+            $this->search || $this->min_salary || $this->max_salary
+            || $this->gender || $this->age || $this->startingDate ||
+            $this->availability
+        )
+        {
+            $queryResult = Talent::query()->with('user')
+                ->when($this->search, function ($query) {
+                    $query->where('experience_pr', 'like', '%' . $this->search . '%')
+                        ->orWhere('qualifications', 'like', '%' . $this->search . '%')
+                        ->orWhereHas('user', function ($query) {
+                            $query->where('firstname', 'like', '%' . $this->search . '%')
+                                ->orWhere('lastname', 'like', '%' . $this->search . '%');
+                        });
+                })
+                ->when($this->gender, function ($query) {
+                    $query->whereHas('user', function ($query) {
+                        $query->where('gender', $this->gender);
+                    });
+                })
+                ->when($this->nationality, function ($query) {
+                    $query->whereHas('user', function ($query) {
+                        $query->whereIn('nationality', $this->nationality);
+                    });
+                })
+                ->when($this->age, function ($query) {
+                    $query->whereHas('user', function ($q) {
+                        foreach ($this->age as $age) {
+                            switch ($age) {
+                                case '20-30':
+                                    $q->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 20 AND 30');
+                                    break;
+                                case '30-40':
+                                    $q->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 30 AND 40');
+                                    break;
+                                case '40-50':
+                                    $q->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 40 AND 50');
+                                    break;
+                                case '50-60':
+                                    $q->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) BETWEEN 50 AND 60');
+                                    break;
+                                case '60+':
+                                    $q->orWhereRaw('TIMESTAMPDIFF(YEAR, date_of_birth, CURDATE()) > 60');
+                                    break;
+                            }
+                        }
+                    });
+                })
+                ->when($this->category, function ($query) {
+                    $query->whereHas('subcategories', function ($query) {
+                        return $query->whereIn('category_id', $this->category);
+                    });
+                })
+                ->when($this->startingDate, function ($query) {
+                    $query->whereDate('joining_date', '>=', $this->startingDate);
+                })
+                ->when($this->endDate, function ($query) {
+                    $query->whereDate('joining_date', '<=', $this->endDate);
+                })
+                ->when($this->available_immediately, function ($query) {
+                    $query->whereIn('availability', $this->availability);
+                })
+                ->when($this->available_immediately, function ($query) {
+                    $query->whereNotNull('availability');
+                })
+                ->when($this->available_future, function ($query) {
+                    $query->whereNotNull('available_for_dispatch');
+                })
+                ->when($this->available_inquire, function ($query) {
+                    $query->whereNotNull('available_for_contract');
+                })
+                ->when($this->min_salary, function ($query) {
+                    $query->where('min_monthly_price', '>', $this->min_salary);
+                })
+                ->when($this->max_salary, function ($query) {
+                    $query->where('max_monthly_price', '<', $this->max_salary);
+                })
+                ->orderBy($this->sortBy, $this->sortDirection)
+                ->paginate($this->pages);
+        } else {
+            $queryResult = Talent::latest()->paginate($this->pages);
+        }
+
+        return view('livewire.talents.index', ['talents' => $queryResult ]);
+    }
+}

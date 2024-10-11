@@ -1,0 +1,20 @@
+// Required
+@import "bootstrap/scss/functions";
+
+// Default variable overrides
+//$body-bg: #B4D3F2;
+//$body-color: #1D1D1D;
+
+$primary: #0080FF;
+
+// Required
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+
+// Optional Bootstrap components here
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+// etc
