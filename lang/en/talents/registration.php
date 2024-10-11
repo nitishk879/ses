@@ -75,6 +75,6 @@ return array(
     "experience_in_9" => "Leadership experience",
     "experience_in_10" => "Local projects available",
     "experience_in_11" => "Some permanent staff available",
-    "experience_in_12" => "Shift work request",
+    "experience_in_12" => "Shift work request"
 
 );

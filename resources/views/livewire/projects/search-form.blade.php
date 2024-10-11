@@ -177,27 +177,38 @@
                     </h2>
                     <div id="flush-collapseInterview" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
-                            @foreach($interviews as $index => $range)
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox"
-                                           wire:model.live="interview"
-                                           value="{{ is_array($range) ? implode('-', $range) : $range }}"  {{-- Fix the value --}}
-                                           id="interview_{{ is_array($range) ? implode('_', $range) : $range }}"> {{-- Unique ID --}}
-                                    <label class="form-check-label" for="interview_{{ is_array($range) ? implode('_', $range) : $range }}">
-                                        @if($index == 0)
-                                            {{ __("common/sidebar.interview_1-2") }}
-                                        @elseif($index == 1)
-                                            {{ __("common/sidebar.interview_2-3") }}
-                                        @elseif($index == 2)
-                                            {{ __("common/sidebar.interview_3-4") }}
-                                        @elseif($index == 3)
-                                            {{ __("common/sidebar.interview_4-5") }}
-                                        @else
-                                            {{ __("common/sidebar.interview_{$range}") }}
-                                        @endif
-                                    </label>
-                                </div>
-                            @endforeach
+{{--                            @foreach($interviews as $index => $range)--}}
+{{--                                <div class="form-check">--}}
+{{--                                    <input class="form-check-input" type="checkbox"--}}
+{{--                                           wire:model.live="interview"--}}
+{{--                                           value="{{ is_array($range) ? implode('-', $range) : $range }}"  --}}{{-- Fix the value --}}
+{{--                                           id="interview_{{ is_array($range) ? implode('_', $range) : $range }}"> --}}{{-- Unique ID --}}
+{{--                                    <label class="form-check-label" for="interview_{{ is_array($range) ? implode('_', $range) : $range }}">--}}
+{{--                                        @if($index == 0)--}}
+{{--                                            {{ __("common/sidebar.interview_1-2") }}--}}
+{{--                                        @elseif($index == 1)--}}
+{{--                                            {{ __("common/sidebar.interview_2-3") }}--}}
+{{--                                        @elseif($index == 2)--}}
+{{--                                            {{ __("common/sidebar.interview_3-4") }}--}}
+{{--                                        @elseif($index == 3)--}}
+{{--                                            {{ __("common/sidebar.interview_4-5") }}--}}
+{{--                                        @else--}}
+{{--                                            {{ __("common/sidebar.interview_{$range}") }}--}}
+{{--                                        @endif--}}
+{{--                                    </label>--}}
+{{--                                </div>--}}
+{{--                            @endforeach--}}
+                            <div class="d-block mb-3">
+                                @foreach(\App\Enums\InterviewEnum::cases() as $case)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"
+                                               wire:model.live="interview"
+                                               value="{{ $case->value }}"
+                                               id="interview_{{ $case->value }}">
+                                        <label class="form-check-label" for="interview_{{ $case->value }}">{{ __("common/sidebar.interview_{$case->name}") }}</label>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>

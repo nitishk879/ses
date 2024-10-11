@@ -5,7 +5,7 @@
 @section('content')
     <div class="container" id="dashboard">
         <div class="row">
-            <div class="col-md-12">
+            <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('talents/registration.registration') }}</h1>
             </div>
         </div>

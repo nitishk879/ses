@@ -33,6 +33,8 @@ return array(
     'Primary' => 'Prime Contractor',
     'Secondary' => 'Secondary Claim',
     'Third' => 'Third and Subsequent Clients',
-    'interview_1-2' => '1-2 times',
-    'interview_2-3' => '3-5 times'
+    'interview_once' => 'Once',
+    'interview_one_two' => '1-2 times',
+    'interview_twice' => 'Twice',
+    'interview_thrice' => '3-5 times'
 );

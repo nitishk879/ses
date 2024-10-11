@@ -54,10 +54,10 @@
                         </div>
                         <div class="d-flex gap-2 user-data">
                             <div class="avatar-view me-3">
-                                <img src="https://picsum.photos/32/32" alt="" class="img-fluid" />
+                                <img src="{{ $project->company->company_logo_url ?? 'https://picusm.photos/32/32' }}" alt="" class="img-fluid" height="32" width="32"/>
                                 <span class="online"></span>
                             </div>
-                            <h6 class="mt-3">{{ Auth::user()->name }}</h6>
+                            <h6 class="mt-3">{{ $project->company->company_name ?? Auth::user()->name }}</h6>
                         </div>
                     </div>
                     <div class="col-md-4 pt-5">
@@ -103,13 +103,15 @@
                                 </div>
                                 <div class="flex-grow-1 align-items-center ms-3">
                                     <h5 class="main-title">{{ __("projects/show.location") }}</h5>
-                                    <h4 class="main-sub-title">{{ __("common/home.japan_tokyo") }}</h4>
+                                    <h4 class="main-sub-title">{{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</h4>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="job-description gap-3">
+                    <h5>{{ __("projects/show.project_id") }}</h5>
+                    <p>{{ $project->project_id }}</p>
                     <h3 class="heading-1">{{ __("projects/show.project_description") }}</h3>
                     <div class="d-block">
                         {!! \Illuminate\Support\Str::limit($project->project_description, 200) ?? '<p>Integer aliquet pretium consequat. Donec et sapien id leo accumsan pellentesque eget maximus tellus. Duis et est ac leo rhoncus tincidunt vitae vehicula augue. Donec in suscipit diam. Pellentesque quis justo sit amet arcu commodo sollicitudin. Integer finibus blandit condimentum. Vivamus sit amet ligula ullamcorper, pulvinar ante id, tristique erat. Quisque sit amet aliquam urna. Maecenas blandit felis id massa sodales finibus. Integer bibendum eu nulla eu sollicitudin. Sed lobortis diam tincidunt accumsan faucibus. Quisque blandit augue quis turpis auctor, dapibus euismod ante ultricies. Ut non felis lacinia turpis feugiat euismod at id magna. Sed ut orci arcu. Suspendisse sollicitudin faucibus aliquet.</p>
@@ -131,14 +133,16 @@
                             @endforeach
                         </div>
                     </div>
-                    <div class="skill-required">
-                        <h4>{{ __("projects/show.eligible_applicants") }}</h4>
-                        <div class="d-flex flex-wrap w-100 gap-3">
-                            @foreach(json_decode($project->affiliation) as $eligibility)
-                                <a href="" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
-                            @endforeach
+                    @if($project->affiliation)
+                        <div class="skill-required">
+                            <h4>{{ __("projects/show.eligible_applicants") }}</h4>
+                            <div class="d-flex flex-wrap w-100 gap-3">
+                                @foreach(json_decode($project->affiliation) as $eligibility)
+                                    <a href="" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
+                    @endif
                     <div class="d-flex gap-3 sharing-jobs">
                         {{ __("projects/show.share_project") }}:
                         <a href="" class="social-search facebook"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
@@ -193,7 +197,7 @@
                             </div>
                             <div class="flex-grow-1 align-items-center ms-3">
                                 <h5 class="requirement-title">{{ __('projects/show.project_status') }}</h5>
-                                <h4 class="requirement-sub-title">{{ __("projects/show.confirmed") }}</h4>
+                                <h4 class="requirement-sub-title">{{ $project->project_status ?? __("projects/show.confirmed") }}</h4>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -214,7 +218,7 @@
                             </div>
                             <div class="flex-grow-1 align-items-center ms-3">
                                 <h5 class="requirement-title">{{ __("projects/show.project_flow") }}</h5>
-                                <h4 class="requirement-sub-title">{{ __("projects/show.primary_contract") }}</h4>
+                                <h4 class="requirement-sub-title">{{ __("projects/show.{$project->project_flow}") }}</h4>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -227,7 +231,7 @@
                             </div>
                             <div class="flex-grow-1 align-items-center ms-3">
                                 <h5 class="requirement-title">{{ __("projects/show.project_type") }}</h5>
-                                <h4 class="requirement-sub-title">{{ __("projects/show.business_outreach") }}</h4>
+                                <h4 class="requirement-sub-title">{{ __("talents/index.{$project->contract_type}") }}</h4>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -251,7 +255,7 @@
                             </div>
                             <div class="flex-grow-1 align-items-center ms-3">
                                 <h5 class="requirement-title">{{ __("common/home.no_of_interviews") }}</h5>
-                                <h4 class="requirement-sub-title">5</h4>
+                                <h4 class="requirement-sub-title">{{ __("common/sidebar.interview_{$project->total_interviews}") }}</h4>
                             </div>
                         </div>
                     </div>
@@ -276,11 +280,13 @@
                     <div class="project-card">
                         <a href="" class="add-to-favourite"><i class="fas fa-star"></i> </a>
                         <div class="project-card-body p-3">
-                            <div class="project-payout-type">Hourly Price Project</div>
-                            <span class="project-date">{{ $similar_project->created_at->format('M d, Y') }}</span>
+                            <div class="d-md-flex justify-content-between">
+                                <div class="d-inline-flex pe-2 project-payout-type">{{ __("common/home.fixed") }}</div>
+                                <span class="project-date">{{ $similar_project->created_at->format('M d, Y') }}</span>
+                            </div>
                             <h2 class="project-title">{{ $similar_project->title }}</h2>
-                            <h6 class="project-budget">{{ __("projects/show.project_budget") }}: <span>JPY 500k-800k/month</span></h6>
-                            <p class="project-overview">{{ \Illuminate\Support\Str::limit($similar_project->project_details, 180) }}</p>
+                            <h6 class="project-budget">{{ __("projects/show.project_budget") }}: <span>{{ __("talents/index.currency_text") }}{{ $project->salary_range }}/{{ __("common/home.month") }}</span></h6>
+                            <p class="project-overview">{{ \Illuminate\Support\Str::limit($similar_project->project_description, 180) }}</p>
                             <div class="d-flex gap-3">
                                 <h5 class="project-location"><i class="fas fa-location-dot"></i> {{ __("common/home.japan_tokyo") }}</h5>
                                 <h6 class="project-location">{{ __("projects/show.remote") }}</h6>
@@ -298,12 +304,12 @@
                         <div class="project-card-footer">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0">
-                                    <img src="https://picsum.photos/32/32?random=1" alt="..." class="img-avatar">
+                                    <img src="{{ $similar_project->company->company_logo_url }}" alt="..." class="img-avatar" height="32" width="32">
                                 </div>
                                 <div class="flex-grow-1 ms-3">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div class="avatar">
-                                            <span class="text-break">Manav K. Sinha</span>
+                                            <span class="text-break">{{ $similar_project->company->company_name ?? __("pro") }}</span>
                                             <i class="fa-regular fa-circle-check"></i>
                                         </div>
                                         <a href="{{ route("project.show", $similar_project) }}" class="btn btn-theme">{{ __("projects/show.project_detail") }}</a>

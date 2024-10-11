@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\CommercialFlow;
+use App\Enums\ContractClassificationEnum;
+use App\Enums\InterviewEnum;
+use App\Enums\TradeClassification;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -64,6 +66,10 @@ class Project extends Model
             'contract_start_date' => 'datetime',
             'contract_end_date' => 'datetime',
             'affiliation' => 'array',
+            'commercial_flow' => CommercialFlow::class,
+            'number_of_interviewers' => InterviewEnum::class,
+            'trade_classification' => TradeClassification::class,
+            'contract_classification' =>ContractClassificationEnum::class
         ];
     }
 
@@ -145,6 +151,67 @@ class Project extends Model
     {
         return Attribute::make(
             get: fn (mixed $value) => "{$this->formatNumber($this->minimum_price)} - {$this->formatNumber($this->maximum_price)}",
+        );
+    }
+
+    /**
+     * Let's make project id based on
+     * company id, company Owner id and project id
+     *
+     * @return Attribute
+    */
+    public function projectId(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => "PRJ-{$this->company->id}-{$this->company->owner->id}-{$this->id}",
+        );
+    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+    */
+    public function totalInterviews(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->number_of_interviewers ? $this->number_of_interviewers->name : '',
+        );
+    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+    */
+    public function projectStatus(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->commercial_flow ? $this->commercial_flow->name : '',
+        );
+    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+    */
+    public function projectFlow(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->trade_classification ? $this->trade_classification->name : '',
+        );
+    }
+
+    /**
+     * Contract Classification is contract type in the project
+     *
+     * @return Attribute
+    */
+    public function contractType(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->contract_classification ? $this->contract_classification->value : '',
         );
     }
 

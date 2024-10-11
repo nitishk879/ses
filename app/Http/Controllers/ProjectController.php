@@ -25,7 +25,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $categories = Category::limit(2)->get();
+        $categories = Category::get();
         $features = Feature::all();
 
         return view('projects.create', compact('categories', 'features'));
@@ -60,6 +60,7 @@ class ProjectController extends Controller
             "eligibility" => 'nullable',
             "is_public" => 'nullable',
             "company_info_disclose" => 'nullable',
+            "locations" => 'required'
         ]);
 
         $project = Project::create([
@@ -74,6 +75,7 @@ class ProjectController extends Controller
             "contract_end_date" => $validated["contract_end_date"] ?? '',
             "possible_to_continue" => $validated["possible_to_continue"] ?? false,
             "project_description" => $validated["project_description"] ?? '',
+            "personnel_requirement" => $validated["personnel_requirement"] ?? '',
             "person_in_charge" => $validated["person_in_charge"] ?? auth()->user()->name,
             "is_public" => $validated["is_public"] ?? false,
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
@@ -90,6 +92,10 @@ class ProjectController extends Controller
         $project->subCategories()->attach($request->input('category_id'));
 
         $project->features()->attach($request->input("project_features") ?? []);
+
+        $project->locations()->attach($request->input("locations") ?? []);
+
+        return redirect()->route('project.index')->with('success', 'Project created successfully.');
 
     }
 

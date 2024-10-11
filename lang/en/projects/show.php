@@ -30,4 +30,9 @@ return array(
     'contract_period' => 'Contract Period',
     'location' => 'Location',
     'eligible_applicants' => 'Eligible Applicants',
+    'End' => 'End',
+    'Primary' => 'Prime contractor',
+    'Secondary' => 'Secondary Claim',
+    'Third' => 'Third and Subsequent order',
+    'project_id' => 'Project ID',
 );

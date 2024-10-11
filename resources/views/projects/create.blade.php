@@ -93,7 +93,6 @@
                                         @error('contract_end_date') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                     </div>
                                 </div>
-
                                 <div class="row mb-3">
                                     <div class="col-md-6 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.status_of_the_project") }}</label>
@@ -120,28 +119,28 @@
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.skill_matching") }}</label>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch" name="skill_matching" value="{{ old("skill_matching" ?? 1) }}" id="projectSkill" aria-label="{{ __("projects/form.skill_matching") }}">
-{{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
+                                            {{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.project_finalise") }}</label>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch" name="project_finalized" value="{{ old("project_finalized" ?? 1) }}" id="projectSkill" aria-label="{{ __("projects/form.project_finalise") }}">
-{{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
+                                            {{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="projectSustainability" class="col-form-label required">{{ __("projects/form.possible_to_continue") }}</label>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch" name="possible_to_continue" value="{{ old("possible_to_continue" ?? 1) }}" id="projectSustainability" aria-label="{{ __("projects/form.possible_to_continue") }}">
-{{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
+                                            {{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
                                         </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="projectSustainability" class="col-form-label required">{{ __("projects/form.remote_operation_possible") }}</label>
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" role="switch" name="remote_operation_possible" value="{{ old("remote_operation_possible" ?? 1) }}" id="projectSustainability" aria-label="{{ __("projects/form.remote_operation_possible") }}">
-{{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
+                                            {{--                                            <label class="form-check-label" for="projectSkill">{{ __("projects/form.skill_matching") }}</label>--}}
                                         </div>
                                     </div>
                                 </div>
@@ -172,30 +171,44 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="preferredLocation"
-                                           class="form-label">{{ __('talents/registration.preferred_location') }}</label>
-                                    <input type="text" class="form-control @error('preferred_location') is-invalid @enderror"
-                                           name="preferred_location" id="preferredLocation"
-                                           placeholder="{{ __('talents/registration.location_placeholder') }}"
-                                           value="{{ old("preferred_location") ?? '' }}"
-                                           >
-                                    @error('preferred_location')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
+                                <div class="row mb-3">
+                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)
+                                        <div class="mb-3 col-md-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="locations[]"
+                                                       id="{{ $location->slug."_".$location->id }}"
+                                                       value="{{ $location->id }}">
+                                                <label class="form-check-label"
+                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                                <div class="mb-3">
-                                    <label for="otherDesiredLocation"
-                                           class="form-label">{{ __('talents/registration.other_desired_location') }}</label>
-                                    <input type="text"
-                                           class="form-control @error('other_desired_location') is-invalid @enderror"
-                                           name="other_desired_location" id="otherDesiredLocation"
-                                           value="{{ old("other_desired_location") ?? "" }}"
-                                           placeholder="{{ __('talents/registration.location_placeholder') }}">
-                                    @error('other_desired_location')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-                                </div>
+{{--                                <div class="mb-3">--}}
+{{--                                    <label for="preferredLocation"--}}
+{{--                                           class="form-label">{{ __('talents/registration.preferred_location') }}</label>--}}
+{{--                                    <input type="text" class="form-control @error('preferred_location') is-invalid @enderror"--}}
+{{--                                           name="preferred_location" id="preferredLocation"--}}
+{{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}"--}}
+{{--                                           value="{{ old("preferred_location") ?? '' }}"--}}
+{{--                                           >--}}
+{{--                                    @error('preferred_location')--}}
+{{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
+{{--                                    @enderror--}}
+{{--                                </div>--}}
+{{--                                <div class="mb-3">--}}
+{{--                                    <label for="otherDesiredLocation"--}}
+{{--                                           class="form-label">{{ __('talents/registration.other_desired_location') }}</label>--}}
+{{--                                    <input type="text"--}}
+{{--                                           class="form-control @error('other_desired_location') is-invalid @enderror"--}}
+{{--                                           name="other_desired_location" id="otherDesiredLocation"--}}
+{{--                                           value="{{ old("other_desired_location") ?? "" }}"--}}
+{{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}">--}}
+{{--                                    @error('other_desired_location')--}}
+{{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
+{{--                                    @enderror--}}
+{{--                                </div>--}}
                             </div>
                         </div>
                     </div>
@@ -284,6 +297,58 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-md-12 mb-4">
+                            <div class="bg-light p-3">
+                                <div class="row align-items-center">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="projectDeadline" class="form-label required">{{ __('projects/form.deadline') }}</label>
+                                        <input type="date" class="form-control @error('deadline') is-invalid @enderror"
+                                               name="deadline"
+                                               id="projectDeadline"
+                                               value="{{ old("deadline") ?? '' }}"
+                                               placeholder="{{ __('projects/form.deadline_placeholder') }}" required
+                                        />
+                                        @error('deadline')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="expectedApplications" class="form-label required">{{ __('projects/form.no_of_application') }}</label>
+                                        <input type="number" class="form-control @error('number_of_application') is-invalid @enderror"
+                                               name="number_of_application"
+                                               id="expectedApplications"
+                                               value="{{ old("number_of_application") ?? '' }}"
+                                               placeholder="{{ __('projects/form.no_of_application_placeholder') }}" required
+                                        />
+                                        @error('number_of_application')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                    </div>
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <h5>{{ __("projects/form.number_of_interview") }}</h5>
+                                    @for($i=1; $i <=4; $i++)
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i}}" id="interview_{{$i}}">
+                                            <label class="form-check-label" for="interview_{{$i}}">
+                                                {{ __("projects/form.interview_{$i}") }}
+                                            </label>
+                                            @error('number_of_interviewers') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        </div>
+                                    @endfor
+                                </div>
+                                <div class="mb-3">
+                                    <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
+                                    <select class="form-select @error('affiliation') is-invalid @enderror"
+                                            name="affiliation" id="commercialFlow" aria-label="affiliation" required>
+                                        <option value="">{{ __("talents/registration.choose") }}</option>
+                                        @foreach(\App\Enums\CommercialFlow::cases() as $case)
+                                            <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('affiliation')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -334,7 +399,6 @@
                         event.preventDefault()
                         event.stopPropagation()
                     }
-
                     form.classList.add('was-validated')
                 }, false)
             })
