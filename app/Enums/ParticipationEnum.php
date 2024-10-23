@@ -12,9 +12,9 @@ enum ParticipationEnum: string
     {
         // TODO: Implement cases() method.
         return match ($value) {
-            self::IMMEDIATELY => "Ready to operate immediately",
-            self::FUTURE => "Possible to participate in the future",
-            self::FROM_DATE => "Please inquire about participation date"
+            self::IMMEDIATELY => __("common/sidebar.immediately") ?? "Ready to operate immediately",
+            self::FUTURE =>  __("common/sidebar.future") ?? "Possible to participate in the future",
+            self::FROM_DATE =>  __("common/sidebar.from_date") ?? "Please inquire about participation date"
         };
     }
 }

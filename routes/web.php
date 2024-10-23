@@ -22,7 +22,16 @@ Route::resource('talents', TalentController::class)->middleware(['auth', 'role:u
 Route::resource('companies', CompanyController::class)->middleware(['auth', 'role:user']);
 Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');
 
+Route::get('project-chart/{term}', [ProjectController::class, 'chart'])->name('project.chart');
+
 Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
+
+/**
+ * Let's setup user-admin routes here
+*/
+Route::get('/dashboard', function (){
+    return view('admin.dashboard');
+})->middleware('auth')->name('dashboard');
 
 //Route::put('/post/{id}', function (string $id) {
 //    // ...

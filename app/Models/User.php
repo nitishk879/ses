@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\GenderEnum;
+use App\Enums\LangEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -35,6 +36,7 @@ class User extends Authenticatable
         'gender',
         'nationality',
         'country',
+        'languages',
         'nearest_station_prefecture',
         'nearest_station_line',
         'station_name',
@@ -63,7 +65,8 @@ class User extends Authenticatable
             'password' => 'hashed',
             'date_of_birth' => 'datetime',
             'gender' => GenderEnum::class,
-            'nationality' => 'string'
+            'nationality' => 'string',
+            'languages' => LangEnum::class
         ];
     }
 

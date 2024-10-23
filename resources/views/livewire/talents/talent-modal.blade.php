@@ -69,13 +69,27 @@
                                         <div class="p-head mb-2"> {{ __("talents/index.qualification") }}</div>
                                         <div>{!! $talent->qualifications !!}</div>
                                     </div>
-                                    <div class="col-md-12 my-2">
-                                        <div class="p-head mb-2"> {{ __("talents/show.hr_char") }}</div>
-                                        <div>{!! $talent->qualifications !!}</div>
-                                    </div>
+                                    @if($talent->characteristics)
+                                        <div class="col-md-12 my-2">
+                                            <div class="p-head mb-2"> {{ __("talents/show.hr_char") }}</div>
+                                            <div>
+                                                <ul class="list-group list-group-flush">
+                                                    @foreach($talent->characteristics as $characteristic)
+                                                        <li class="list-group-item">{{ $characteristic }}</li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-md-12 my-2">
                                         <div class="p-head mb-2"> {{ __("talents/show.work_location_details") }}</div>
-                                        <div>{!! $talent->qualifications !!}</div>
+                                        <div>
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($talent->locations as $location)
+                                                    <li class="list-group-item">{{ $location->title }}</li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -112,12 +126,4 @@
             </div>
         </div>
     @endif
-
-    @script
-        <script>
-            $('.print-window').click(function() {
-                window.print();
-            });
-        </script>
-    @endscript
 </div>

@@ -2,9 +2,13 @@
 
 namespace App\Livewire\Projects;
 
+use App\Enums\InterviewEnum;
 use App\Models\Category;
 use App\Models\Project;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Foundation\Application;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -55,6 +59,8 @@ class SearchResult extends Component
     #[Url]
     public ?array $category = [];
     #[Url]
+    public ?string $location = '';
+    #[Url]
     public $sortBy = 'created_at';
     #[Url]
     public $sortDirection = 'asc';
@@ -62,9 +68,18 @@ class SearchResult extends Component
     public ?int $id = null;
     public ?int $pages = 10;
 
+    /**
+     * Let's update values on change or on event occurrence
+     *
+    */
     protected $listeners = ['filterUpdated' => 'updateFilters'];
 
-
+    /**
+     * Following variables should update on changes
+     *
+     * @param $filters
+     * @return void
+     */
     public function updateFilters($filters): void
     {
         $this->search = $filters['search'];
@@ -87,10 +102,17 @@ class SearchResult extends Component
         $this->min_salary = $filters['min_salary'];
         $this->max_salary = $filters['max_salary'];
         $this->category = $filters['category'];
+        $this->location = $filters['location'];
 
         $this->resetPage();
     }
 
+    /**
+     * Let's sort results
+     *
+     * @param $field
+     * @return void
+     */
     public function sortBy($field): void
     {
         if ($this->sortBy === $field) {
@@ -102,7 +124,12 @@ class SearchResult extends Component
         $this->sortBy = $field;
     }
 
-    public function render()
+    /**
+     * Let's render page view
+     *
+     * @return Factory|View|Application|\Illuminate\View\View
+     */
+    public function render(): Factory|Application|View|\Illuminate\View\View
     {
         // Build the query based on filters
         $query = Project::query()->with('locations');
@@ -141,6 +168,12 @@ class SearchResult extends Component
             });
         }
 
+        if (!empty($this->location)) {
+            $query->whereHas('locations', function ($q) {
+                $q->where('locations.title', 'like', '%' . $this->location . '%');
+            });
+        }
+
         if (!empty($this->affiliation)) {
             $query->whereIn('affiliation', $this->affiliation);
         }
@@ -150,19 +183,28 @@ class SearchResult extends Component
         }
 
         if (!empty($this->interview)) {
-            $myRange = [];
-            // Iterate over each range
-            foreach ($this->interview as $range) {
-                [$min, $max] = explode('-', $range);
-                // Push each value within the range into the array
-                for ($i = $min; $i <= $max; $i++) {
-                    $myRange[] = $i;
+            $interviewCounts = [];
+
+            // Check if $this->interview is an array
+            if (is_array($this->interview)) {
+                foreach ($this->interview as $interview) {
+                    // Convert the interview value to its corresponding enum
+                    $interviewEnum = InterviewEnum::tryFrom($interview);
+
+                    // If the enum is valid, get its array representation
+                    if ($interviewEnum) {
+                        $interviewArray = InterviewEnum::toArray($interviewEnum->value);
+
+                        // Merge the arrays, in case each InterviewEnum::toArray returns multiple values
+                        $interviewCounts = array_merge($interviewCounts, $interviewArray);
+                    }
                 }
             }
+            // Ensure interview counts are unique
+            $interviewCounts = array_unique($interviewCounts);
 
-            $query->whereIn('number_of_interviewers', $myRange);
+            $query->whereIn('number_of_interviewers', $interviewCounts);
         }
-
 
         // Filter by salary range
         if (!empty($this->min_salary) && !empty($this->max_salary)) {

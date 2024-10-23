@@ -37,7 +37,7 @@ class CompanySeeder extends Seeder
                 "introduction" => $company->introduction,
                 "company_information_disclose" => $company->company_information_disclose,
                 "updater_id" => $company->updater_id,
-                "deleter_id" => $company->deleter_id,
+                "deleter_id" => $company->deleter_id ?? null,
                 'user_id' => $company->user_id,
             ]);
 
@@ -48,6 +48,8 @@ class CompanySeeder extends Seeder
                 'state' => Str::random(8),
                 'country' => "Japan"
             ]);
+
+            $current->owner()->associate($company);
         }
     }
 }

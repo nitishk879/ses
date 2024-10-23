@@ -99,13 +99,13 @@
                             </div>
                             <div class="col-md-5"></div>
                             <div class="col-md-6 mb-3">
-                                <div class="search-block input-group mb-3">
+                                <form action="{{ route("project.index") }}" class="search-block input-group mb-3">
                                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                    <input type="text" class="form-control" placeholder="Job tittle, Projects or Keywords..." aria-label="Username">
+                                    <input type="text" class="form-control" name="search" placeholder="Job tittle, Projects or Keywords..." aria-label="Username">
                                     <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                                    <input type="text" class="form-control" placeholder="Preferred Location" aria-label="Server">
-                                    <button class="btn btn-primary" type="button" id="button-addon2">Button</button>
-                                </div>
+                                    <input type="text" class="form-control" name="location" placeholder="Preferred Location" aria-label="Server">
+                                    <button class="btn btn-primary" type="submit" id="button-addon2">Search</button>
+                                </form>
                                 <p class="suggestion">
                                     <span>Suggestion:</span>
                                     <span class="darken"> Designer,</span>

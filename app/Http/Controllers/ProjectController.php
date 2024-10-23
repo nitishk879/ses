@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ProjectController extends Controller
@@ -52,6 +53,7 @@ class ProjectController extends Controller
             "project_finalized" => 'nullable',
             "trade_classification" => 'required',
             "contract_classification" => 'required',
+            "workLocations" => 'nullable',
             "deadline" => 'nullable',
             "number_of_application" => 'nullable',
             "number_of_interviewers" => 'nullable',
@@ -81,6 +83,7 @@ class ProjectController extends Controller
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
             "contract_classification" => $validated["contract_classification"] ?? '',
             "deadline" => $validated["deadline"] ?? '',
+            'work_location_prefer' => $validated["workLocations"] ?? '',
             "affiliation" => json_encode($validated["eligibility"]) ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
             "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
@@ -129,5 +132,65 @@ class ProjectController extends Controller
     public function destroy(Project $project)
     {
         //
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function chart($term)
+    {
+        $data = $this->generateDataForPeriod($term);
+
+        return response()->json($data);
+    }
+
+    public function generateDataForPeriod($term)
+    {
+        switch ($term) {
+            case 'week':
+                // Group data by day of the week
+                $entries = DB::table('projects')
+                    ->select(DB::raw('DAYNAME(created_at) as day, COUNT(*) as count'))
+                    ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                    ->groupBy('day')
+                    ->orderBy('created_at', 'asc')
+                    ->pluck('count', 'day');
+
+                return [
+                    'labels' => $entries->keys()->toArray(),
+                    'data' => $entries->values()->toArray(),
+                ];
+
+            case 'month':
+                // Group data by week of the month
+                $entries = DB::table('projects')
+                    ->select(DB::raw('WEEK(created_at) as week, COUNT(*) as count'))
+                    ->whereMonth('created_at', now()->month)
+                    ->groupBy('week')
+                    ->orderBy('week', 'asc')
+                    ->pluck('count', 'week');
+
+                return [
+                    'labels' => $entries->keys()->toArray(),
+                    'data' => $entries->values()->toArray(),
+                ];
+
+            case 'year':
+                // Group data by month
+                $entries = DB::table('projects')
+                    ->select(DB::raw('MONTHNAME(created_at) as month, COUNT(*) as count'))
+                    ->whereYear('created_at', now()->year)
+                    ->groupBy('month')
+                    ->orderBy('created_at', 'asc')
+                    ->pluck('count', 'month');
+
+                return [
+                    'labels' => $entries->keys()->toArray(),
+                    'data' => $entries->values()->toArray(),
+                ];
+
+            default:
+                return ['labels' => [], 'data' => []];
+        }
     }
 }

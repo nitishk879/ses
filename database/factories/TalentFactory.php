@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\AffiliationEnum;
 use App\Enums\ParticipationEnum;
 use App\Enums\TalentCharEnum;
+use App\Enums\WorkLocationEnum;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,7 +23,7 @@ class TalentFactory extends Factory
     public function definition(): array
     {
         return [
-            'resume' => $this->faker->text(24),
+            'resume' => $this->faker->filePath(),
             'availability' => $this->faker->randomElement(ParticipationEnum::cases())->value,
             'joining_date' => $this->faker->date(),
             'affiliation' => $this->faker->randomElement(AffiliationEnum::cases())->value,
@@ -31,15 +32,18 @@ class TalentFactory extends Factory
             'available_for_dispatch' => $this->faker->boolean(),
             'request_for_contract' => $this->faker->boolean(),
             'remote_work_preferred' => $this->faker->boolean(),
-            'work_location_prefer' => $this->faker->text(),
-            'characteristics' => $this->faker->randomElement(json_encode(TalentCharEnum::cases()))->value,
+            'work_location_prefer' => $this->faker->numberBetween(1, count(WorkLocationEnum::cases())),
+            'characteristics' => $this->faker->randomElements(
+                array_map(fn($enum) => $enum->value, TalentCharEnum::cases()),
+                $this->faker->numberBetween(2, count(TalentCharEnum::cases()))
+            ),
             'experience_pr' => $this->faker->text(),
             'qualifications' => $this->faker->text(),
             'min_monthly_price' => $this->faker->randomFloat(2, 100000, 1000000),
             'max_monthly_price' => $this->faker->randomFloat(2, 100000, 1000000),
             'other_desire_conditions' => $this->faker->text(),
             'user_id' => User::factory(),
-            'company_id' => $this->faker->numberBetween(1, 5),
+            'company_id' => rand(1, Company::count()),
         ];
     }
 }

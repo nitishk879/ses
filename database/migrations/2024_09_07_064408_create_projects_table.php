@@ -24,10 +24,13 @@ return new class extends Migration {
             $table->boolean('remote_operation_possible')->default(false);
             $table->string('contract_start_date')->nullable();
             $table->string('contract_end_date')->nullable();
+            $table->json('experience')->nullable();
+            $table->json('languages')->nullable();
             $table->boolean('possible_to_continue')->default(false);
             $table->text('project_description');
             $table->text('personnel_requirement')->nullable();
             $table->boolean('project_finalized')->default(false);
+            $table->integer('work_location_prefer')->nullable();
             $table->enum('trade_classification',[
                 TradeClassification::End->value,
                 TradeClassification::Primary->value,

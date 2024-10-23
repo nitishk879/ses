@@ -22,9 +22,9 @@ enum ContractClassificationEnum: string
     public static function toName($value): string
     {
         return match ($value) {
-            self::OUTSOURCING => __("quasi_delegation_possible"),
-            self::OUTSOURCING_CONTRACT => __("available_for_contract"),
-            self::DISPATCH_CONTRACT => __("available_for_dispatch"),
+            self::OUTSOURCING => __("talents/index.quasi_delegation_possible"),
+            self::OUTSOURCING_CONTRACT => __("talents/index.available_for_contract"),
+            self::DISPATCH_CONTRACT => __("talents/index.available_for_dispatch"),
         };
     }
 

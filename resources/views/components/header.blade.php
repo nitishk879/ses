@@ -99,6 +99,11 @@
                                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                     @csrf
                                 </form>
+                                @if(Auth::user()->company)
+                                    <a class="dropdown-item" href="{{ route('dashboard') }}">
+                                        {{ __('common/header.my_dashboard') }}
+                                    </a>
+                                @endif
                             </div>
                         </li>
                     @endguest

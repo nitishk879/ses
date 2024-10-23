@@ -70,6 +70,16 @@ class Company extends Model
     }
 
     /**
+     * A company can have multiple projects.
+     *
+     * @returns HasMany
+    */
+    public function talents(): HasMany
+    {
+        return $this->hasMany(Talent::class);
+    }
+
+    /**
      * A company can have multiple addresses.
      *
      * @returns HasMany

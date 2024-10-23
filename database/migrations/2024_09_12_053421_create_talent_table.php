@@ -17,6 +17,7 @@ return new class extends Migration
         Schema::create('talent', function (Blueprint $table) {
             $table->id();
             $table->text('resume')->nullable();
+            $table->integer('experience')->nullable();
             $table->enum('availability',[
                 ParticipationEnum::IMMEDIATELY->value, ParticipationEnum::FUTURE->value, ParticipationEnum::FROM_DATE->value
             ]);
@@ -32,7 +33,7 @@ return new class extends Migration
             $table->boolean('available_for_dispatch')->default(false);
             $table->boolean('request_for_contract')->default(false);
             $table->boolean('remote_work_preferred')->default(false);
-            $table->text('work_location_prefer')->nullable();
+            $table->integer('work_location_prefer')->nullable();
             $table->text('experience_pr')->nullable();
             $table->text('qualifications')->nullable();
             $table->integer('min_monthly_price')->nullable();

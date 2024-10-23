@@ -23,18 +23,18 @@ enum TalentCharEnum: int
     public static function toName($value): string
     {
         return match ($value) {
-            self::user_support => "Experience in user support",
-            self::price_negotiable => "Price negotiable",
-            self::full_time => "Full-time staff available",
-            self::over_100 => "Experience in projects with over 100 people",
-            self::english_exp => "English business use experience",
-            self::consulting_firm => "From a consulting firm",
-            self::full_remote => "Full remote work preferred",
-            self::long_term => "Long-term hope",
-            self::leadership => "Leadership experience",
-            self::local_project => "Local projects available",
-            self::permanent_staff => "Some permanent staff available",
-            self::shift_work => "Shift work request"
+            self::user_support->value => __("talents/characteristics.user_support") ?? "Experience in user support",
+            self::price_negotiable->value => __("talents/characteristics.price_negotiable") ?? "Price negotiable",
+            self::full_time->value => __("talents/characteristics.full_time") ?? "Full-time staff available",
+            self::over_100->value => __("talents/characteristics.over_100") ?? "Experience in projects with over 100 people",
+            self::english_exp->value => __("talents/characteristics.english_exp") ?? "English business use experience",
+            self::consulting_firm->value => __("talents/characteristics.consulting_firm") ?? "From a consulting firm",
+            self::full_remote->value => __("talents/characteristics.full_remote") ?? "Full remote work preferred",
+            self::long_term->value => __("talents/characteristics.long_term") ?? "Long-term hope",
+            self::leadership->value => __("talents/characteristics.leadership") ?? "Leadership experience",
+            self::local_project->value => __("talents/characteristics.local_project") ?? "Local projects available",
+            self::permanent_staff->value => __("talents/characteristics.permanent_staff") ?? "Some permanent staff available",
+            self::shift_work->value => __("talents/characteristics.shift_work") ?? "Shift work request"
         };
     }
 }

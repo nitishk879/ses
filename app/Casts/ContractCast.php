@@ -13,7 +13,7 @@ class ContractCast implements CastsAttributes
      *
      * @param  array<string, mixed>  $attributes
      */
-    public function get(Model $model, string $key, mixed $value, array $attributes): mixed
+    public function get(Model $model, string $key, mixed $value, array $attributes): string
     {
 //        return $value;
         return ContractClassificationEnum::toName($value);

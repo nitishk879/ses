@@ -3,7 +3,9 @@
         <x-ui.card-layout :item="$project">
             <x-slot:header>
                 <div class="col-md-6 d-flex gap-2">
-                    <span class="job-status">{{ __("common/home.new") }}</span>
+                    @if($project->created_at >= today()->subDays(7))
+                        <span class="job-status">{{ __("common/home.new") }}</span>
+                    @endif
                     <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</span>
                 </div>
                 <div class="col-md-6 text-end">
@@ -23,7 +25,6 @@
                 <p class="job-overview">
                     {!! \Illuminate\Support\Str::limit($project->project_description, 200) !!}
                 </p>
-
             </div>
             <div class="col-md-4 text-end">
                 <div class="d-grid d-md-block gap-2">
@@ -42,7 +43,7 @@
                         </div>
                     </div>
                     <div class="col-md text-center">
-                        <div class="job-pill">{{ __("common/home.no_of_interviews") }}: <span>{{ $project->number_of_interviewers ?? __('5') }}</span></div>
+                        <div class="job-pill">{{ __("common/home.no_of_interviews") }}: <span>{{ \App\Enums\InterviewEnum::toName($project->number_of_interviewers) ?? __('5') }}</span></div>
                     </div>
                     <div class="col-md text-center">
                         <div class="job-pill">{{ __("common/home.eligibility") }}: <span>{{ __('B.Tech') }}</span></div>
@@ -111,9 +112,7 @@
 {{--            </div>--}}
 {{--        </div>--}}
     @endforeach
-    <div class="">
-        <div class="col-md-12">
-            {{ $projects->links() }}
-        </div>
+    <div class="paginator">
+        {{ $projects->links() }}
     </div>
 </div>

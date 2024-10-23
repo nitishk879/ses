@@ -23,4 +23,6 @@ return array(
     'japanese' => 'Japanese',
     'pricing_plan' => 'Pricing Plan',
     'customer_support' => 'Customer Support',
+    // Oct21, 2024
+    'my_dashboard' => 'My Dashboard',
 );

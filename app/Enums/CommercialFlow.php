@@ -16,8 +16,8 @@ enum CommercialFlow: int
     public static function toName($value): string
     {
         return match ($value) {
-            self::Commercial => __("Enter into the business flow"),
-            self::Intermediary => __("Intermediary only")
+            self::Commercial => __("projects/form.Commercial") ?? __("Enter into the business flow"),
+            self::Intermediary => __("projects/form.Intermediary") ?? __("Intermediary only")
         };
     }
 }

@@ -16,7 +16,7 @@ class FeatureSeeder extends Seeder
      */
     public function run(): void
     {
-        ProjectFeature::truncate();
+        Feature::truncate();
         $datafile = File::get(public_path('dataset/features.json'));
         $project_features = json_decode($datafile);
 

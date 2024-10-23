@@ -77,7 +77,7 @@
                                 </div>
                                 <div class="flex-grow-1 align-items-center ms-3">
                                     <h5 class="main-title">{{ __("projects/show.contract_period") }}</h5>
-                                    <h4 class="main-sub-title">{{ round($project->contract_start_date->diffInDays($project->contract_end_date)) }} Days</h4>
+                                    <h4 class="main-sub-title">{{ $project->contract_end_date->diffForHumans() }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -137,7 +137,7 @@
                         <div class="skill-required">
                             <h4>{{ __("projects/show.eligible_applicants") }}</h4>
                             <div class="d-flex flex-wrap w-100 gap-3">
-                                @foreach(json_decode($project->affiliation) as $eligibility)
+                                @foreach($project->affiliation as $eligibility)
                                     <a href="" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
                                 @endforeach
                             </div>
@@ -145,17 +145,15 @@
                     @endif
                     <div class="d-flex gap-3 sharing-jobs">
                         {{ __("projects/show.share_project") }}:
-                        <a href="" class="social-search facebook"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
-                        <a href="" class="social-search pinterest"><i class="fa-brands fa-pinterest"></i> Pinterest</a>
+                        <a href="" class="social-search facebook"><i class="fa-brands fa-facebook-f"></i> {{ __("projects/show.facebook") }}</a>
+                        <a href="" class="social-search pinterest"><i class="fa-brands fa-pinterest"></i> {{ __("projects/show.pinterest") }}</a>
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="job-right-sidebar">
                     <div class="d-grid gap-2">
-                        <a href="" class="btn btn-primary">
-                            {{ __("projects/show.apply_to_project") }}
-                        </a>
+                        <livewire:projects.apply-for-project :project="$project"/>
                     </div>
                     <div class="requirements">
                         <h4 class="requirement-heading">{{ __("projects/show.project_requirements") }}</h4>

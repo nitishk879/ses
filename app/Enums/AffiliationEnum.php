@@ -16,12 +16,12 @@ enum AffiliationEnum: int
     {
         // TODO: Implement cases() method.
         return match ($value) {
-            self::COMPANY_EMPLOYEE => "Company employees",
-            self::PARTNER_COMPANY_EMPLOYEE => "Partner company employees",
-            self::FREELANCER => "Freelancer",
-            self::FREELANCER_SINGLE => "Freelance One company",
-            self::PARTNER_COMPANY_EMPLOYEE_PLUS => "Partner company employees: 2 companies or more",
-            self::FREELANCER_MORE => "Freelance: Two companies or more",
+            self::COMPANY_EMPLOYEE => __("projects/form.COMPANY_EMPLOYEE") ?? "Company employees",
+            self::PARTNER_COMPANY_EMPLOYEE => __("projects/form.PARTNER_COMPANY_EMPLOYEE") ?? "Partner company employees",
+            self::FREELANCER => __("projects/form.FREELANCER") ?? "Freelancer",
+            self::FREELANCER_SINGLE => __("projects/form.FREELANCER_SINGLE") ?? "Freelance One company",
+            self::PARTNER_COMPANY_EMPLOYEE_PLUS => __("projects/form.PARTNER_COMPANY_EMPLOYEE_PLUS") ?? "Partner company employees: 2 companies or more",
+            self::FREELANCER_MORE => __("projects/form.FREELANCER_MORE") ?? "Freelance: Two companies or more",
         };
     }
 }

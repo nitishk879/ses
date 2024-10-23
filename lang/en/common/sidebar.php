@@ -36,5 +36,13 @@ return array(
     'interview_once' => 'Once',
     'interview_one_two' => '1-2 times',
     'interview_twice' => 'Twice',
-    'interview_thrice' => '3-5 times'
+    'interview_thrice' => '3-5 times',
+    // Oct 17, 2024
+    'clear' => 'Clear',
+    'en' => 'English',
+    'jp' => 'Japanese',
+    'bl' => 'Bilingual',
+    'abroad' => 'Abroad',
+    'consignment' => 'Request for consignment',
+    'remote'    => 'Remote work preferred'
 );

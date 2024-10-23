@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\LangEnum;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -19,8 +20,8 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('phone')->unique()->nullable();
             $table->string('date_of_birth');
-//            $table->string('gender')->nullable();
             $table->enum('gender', ['Male', 'Female', 'Other']);
+            $table->integer('languages')->nullable();
             $table->string('nationality')->default('Japanese');
             $table->string('country')->default('Japan');
             $table->string('nearest_station_prefecture')->nullable();

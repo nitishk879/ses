@@ -72,8 +72,7 @@
                                 <div class="col-md-5">
                                     <div class="row align-items-center">
                                         <div class="col-6 col-md-5 feature-head">{{ __("talents/index.monthly_income") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->min_monthly_price ?? '' }} -
-                                            {{ $talent->max_monthly_price ?? '' }} {{ __('talents/index.currency_text') }}</div>
+                                        <div class="col-6 col-md-7 feature-text">{{ $talent->salary_range ?? '' }} {{ __('talents/index.currency_text') }}</div>
                                     </div>
                                     <div class="row align-items-center">
                                         <div class="col-6 col-md-5 feature-head">{{ __("talents/index.nationality") }}: </div>

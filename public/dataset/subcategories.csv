@@ -1,7 +1,0 @@
-  id, title, slug, display_order, category_id, created_at, updated_at, deleted_at
-1, 'Software Development', 'software-development',1,, '2024-09-16 10:00:00', '2024-09-16 11:00:00', NULL)
-2, 'Data Science', 'data-science',2,, '2024-09-16 10:05:00', '2024-09-16 11:05:00', NULL)
-3, 'Project Management', 'project-management',3,, '2024-09-16 10:10:00', '2024-09-16 11:10:00', NULL)
-4, 'Cybersecurity', 'cybersecurity',4,, '2024-09-16 10:15:00', '2024-09-16 11:15:00', NULL)
-5, 'AI & Machine Learning', 'ai-machine-learning',5,, '2024-09-16 10:20:00', '2024-09-16 11:20:00', NULL)
-6, 'Cloud Computing', 'cloud-computing',6,, '2024-09-16 10:25:00', '2024-09-16 11:25:00', NULL);

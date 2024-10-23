@@ -35,4 +35,12 @@ return array(
     'Secondary' => 'Secondary Claim',
     'Third' => 'Third and Subsequent order',
     'project_id' => 'Project ID',
+    // oct 23 2024
+    'facebook' => 'Facebook',
+    'twitter' => 'Twitter',
+    'linkedin' => 'Linkedin',
+    'google' => 'Google',
+    'instagram' => 'Instagram',
+    'youtube' => 'Youtube',
+    'pinterest' => 'Pinterest',
 );

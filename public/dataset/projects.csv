@@ -1,4 +1,7 @@
   id, title, minimum_price, maximum_price, skill_matching, accept, remote_operation_possible, contract_start_date, contract_end_date, sustainability, project_details, personnel_requirement, project_finalized, trade_classification, contract_classification, deadline, number_of_application, number_of_interviewers, commercial_flow, person_in_charge, is_public, company_info_disclose, company_id, user_id, updater_id, deleter_id, created_at, updated_at, deleted_at
-1, Web Development Project,500000,1000000,1,0,1, 2024-10-01, 2024-12-31,0, Develop a corporate website, 2 senior developers,1, Software, Fixed-term, 2024-09-30,10,2, direct, John Doe,1,1,123,456, , ,2024-09-16 12:00:00, 2024-09-16 13:00:00,
-2, Data Analysis for Finance,800000,1500000,1,1,0, 2024-11-01, 2025-01-31,1, Financial data analysis project, 1 data scientist,0, Finance, Ongoing, 2024-10-15,5,3, subcontract, Jane Smith,1,0,124,457, , ,2024-09-16 12:05:00, 2024-09-16 13:05:00,
-3, Mobile App Development,700000,1200000,1,0,1, 2024-09-20, 2024-12-01,0, Develop a mobile app for e-commerce, 3 developers,1, Software, Fixed-term, 2024-09-19,8,1, direct, James Brown,1,1,125,458, , , 2024-09-16 12:10:00, 2024-09-16 13:10:00,
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+1, 'Web Development Project',500000,1000000,1, 'accepted',1, '2024-10-01', '2024-12-31', 'sustainable', 'Develop a corporate website', '2 senior developers',1, 'Software', 'Fixed-term', '2024-09-30',10,2, 'direct', 'John Doe',1,1,123,456,, ,2024-09-16 12:00:00', '2024-09-16 13:00:00', NULL)
+  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+2, 'Data Analysis for Finance',800000,1500000,1, 'pending',0, '2024-11-01', '2025-01-31', 'green', 'Financial data analysis project', '1 data scientist',0, 'Finance', 'Ongoing', '2024-10-15',5,3, 'subcontract', 'Jane Smith',1,0,124,457,, ,2024-09-16 12:05:00', '2024-09-16 13:05:00', NULL)
+  ,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+3, 'Mobile App Development',700000,1200000,1, 'rejected',1, '2024-09-20', '2024-12-01', 'sustainable', 'Develop a mobile app for e-commerce', '3 developers',1, 'Software', 'Fixed-term', '2024-09-19',8,1, 'direct', 'James Brown',1,1,125,458, ,, '2024-09-16 12:10:00', '2024-09-16 13:10:00', NULL);

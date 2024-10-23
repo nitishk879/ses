@@ -2,8 +2,6 @@
 
 namespace App\Enums;
 
-use function PHPUnit\Framework\matches;
-
 enum InterviewEnum :int
 {
     case once = 1;
@@ -18,11 +16,26 @@ enum InterviewEnum :int
     public static function toName($value): string
     {
         return match ($value){
-            self::once => 'Once',
-            self::one_two => 'One Two',
-            self::twice => 'Twice',
-            self::thrice => 'Thrice'
+            self::once => __("common/sidebar.interview_once") ?? 'Once',
+            self::one_two => __("common/sidebar.interview_one_two") ?? 'One Two',
+            self::twice => __("common/sidebar.interview_twice") ?? 'Twice',
+            self::thrice => __("common/sidebar.interview_thrice") ?? 'Thrice'
         };
     }
 
+    /**
+     * This will make array set for matching values accordingly
+     *
+     * @param int $value
+     * @return array
+     */
+    public static function toArray(int $value): array
+    {
+        return match ($value){
+            self::once->value => [1],
+            self::one_two->value => [1,2],
+            self::twice->value => [2],
+            self::thrice->value => [3,4,5],
+        };
+    }
 }

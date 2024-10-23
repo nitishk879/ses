@@ -2,7 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Enums\LangEnum;
+use App\Models\Feature;
+use App\Models\Industry;
+use App\Models\Location;
 use App\Models\Project;
+use App\Models\SubCategory;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -20,20 +25,24 @@ class ProjectSeeder extends Seeder
         $projects = json_decode($datafile);
 
         foreach ($projects as $project) {
-            Project::create([
+            $currentProject = Project::create([
                 "title" => $project->title,
                 "slug" => Str::slug($project->title, '-'),
                 "minimum_price" => $project->minimum_price,
                 "maximum_price" => $project->maximum_price,
                 "skill_matching" => $project->skill_matching,
                 "accept" => $project->accept,
+                "experience" => $project->experience ?? json_encode([1,2,3]),
+                "languages" => $project->languages ?? LangEnum::toArray(LangEnum::en->value),
                 "remote_operation_possible" => $project->remote_operation_possible,
-                "contract_start_date" => $project->contract_start_date,
-                "contract_end_date" => $project->contract_end_date,
+                "contract_start_date" => $project->contract_start_date ?? today()->addDays(7),
+                "contract_end_date" => $project->contract_end_date ?? today()->addMonth(),
+                'work_location_prefer' => $project->work_location_prefer ?? random_int(1, 3),
                 "possible_to_continue" => $project->possible_to_continue ?? false,
                 "project_description" => $project->project_details,
                 "personnel_requirement" => $project->personnel_requirement,
                 "project_finalized" => $project->project_finalized,
+                "affiliation" => $project->affiliation,
                 "trade_classification" => $project->trade_classification,
                 "contract_classification" => $project->contract_classification,
                 "deadline" => $project->deadline,
@@ -47,7 +56,11 @@ class ProjectSeeder extends Seeder
                 "updater_id" => $project->updater_id,
                 "deleter_id" => $project->deleter_id,
                 'user_id' => $project->user_id,
-            ])->subCategories()->attach([1, 2, 3]);
+            ]);
+            $currentProject->subCategories()->attach([random_int(1, SubCategory::count()), random_int(1, SubCategory::count())]);
+            $currentProject->locations()->attach([random_int(1, 46), random_int(1, 46), random_int(1, 46)]);
+            $currentProject->features()->attach([random_int(1, Feature::count()), random_int(1, Feature::count())]);
+            $currentProject->industries()->attach([random_int(1, Industry::count()), random_int(1, Industry::count())]);
         }
     }
 }

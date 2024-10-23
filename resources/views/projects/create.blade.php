@@ -185,6 +185,20 @@
                                         </div>
                                     @endforeach
                                 </div>
+                                <div class="row mb-3">
+                                    @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
+                                        <div class="mb-3 col-md-6">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="workLocations[]"
+                                                       id="{{ __("work_{$workLocation->value}") }}"
+                                                       value="{{ $workLocation->value }}">
+                                                <label class="form-check-label"
+                                                       for="{{ __("work_{$workLocation->value}") }}">{{ __("common/sidebar.{$workLocation->name}") ?? '' }}</label>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
 {{--                                <div class="mb-3">--}}
 {{--                                    <label for="preferredLocation"--}}
 {{--                                           class="form-label">{{ __('talents/registration.preferred_location') }}</label>--}}

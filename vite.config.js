@@ -7,6 +7,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/sass/app.scss',
+                'resources/sass/dashboard.scss',
                 'resources/js/app.js',
             ],
             refresh: false, // False for livewire

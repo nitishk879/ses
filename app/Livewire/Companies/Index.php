@@ -14,6 +14,8 @@ class Index extends Component
     #[Url]
     public ?string $search = '';
 
+    public ?int $pages = 10;
+
     public function search(): void
     {
         $this->resetPage();
@@ -22,7 +24,7 @@ class Index extends Component
     public function render()
     {
         return view('livewire.companies.index', [
-            'companies' => Company::where('company_name', 'like', '%'.$this->search.'%')->paginate(10)
+            'companies' => Company::where('company_name', 'like', '%'.$this->search.'%')->paginate($this->pages)
         ]);
     }
 }

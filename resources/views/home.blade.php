@@ -20,7 +20,8 @@
                     </div>
                 </div>
             </div>
-            @foreach(\App\Models\Project::all() as $project)
+            @php($projects = \App\Models\Project::paginate(10))
+            @foreach($projects as $project)
                 <div class="job-list">
                     <a href="" class="add-to-favourite">
                         <i class="fa-solid fa-star"></i>
@@ -79,7 +80,9 @@
                     </div>
                 </div>
             @endforeach
+            {{ $projects->links() }}
         </div>
+
     </div>
 </div>
 @endsection
