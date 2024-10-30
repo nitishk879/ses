@@ -41,7 +41,7 @@ return array(
     "over_1_million_yen" => "Over 1 million yen",
     "newcomers_are_also_welcome" => "Newcomers are also welcome",
     "leader_wanted" => "Leader wanted",
-    "takeaway_ok" => "Takeaway OK",
+    "takeaway_ok" => "Outsourcing OK", //Oct 30, 2024
     "partially_remote" => "Partially remote",
     "ages_50_and_over_are_welcome" => "Ages 50 and over are welcome",
     "english_skills" => "English skills",
@@ -55,17 +55,17 @@ return array(
     "OUTSOURCING" => 'Business outsourcing (quasi-entrustment)',
     "OUTSOURCING_CONTRACT" => 'Business outsourcing (contract)',
     "DISPATCH_CONTRACT" => "Dispatch contract",
-    "End" => 'End',
+    "End" => 'End Contract', // Oct 25, 2024
     'Primary' => 'Prime contractor',
-    'Secondary' => 'Secondary Claim',
+    'Secondary' => 'Secondary contract', // Oct25, 2024
     'Third' => 'Third and Subsequent order',
     'COMPANY_EMPLOYEE' => 'Company employees',
     'PARTNER_COMPANY_EMPLOYEE' => 'Partner company employees',
-    'PARTNER_COMPANY_EMPLOYEE_PLUS' => 'Freelancer',
-    'FREELANCER' => 'Freelance One company',
-    'FREELANCER_SINGLE' => 'Partner company employees: 2 companies or more',
+    'PARTNER_COMPANY_EMPLOYEE_PLUS' => 'Self Employed', // Oct 25, 2024
+    'FREELANCER' => 'Freelancer', // Oct 25, 2024
+    'FREELANCER_SINGLE' => 'Self Employed', // Oct 25, 2024
     'FREELANCER_MORE' => 'Freelance: Two companies or more',
-    'Commercial' => 'Enter into the business flow',
+    'Commercial' => 'Yes', //Oct 30, 2024
     'Intermediary' => 'Intermediary only',
     'skill_matching' => 'Skill matching',
     'project_finalise'  => 'Project finalised',
@@ -74,8 +74,8 @@ return array(
     // Oct 10, 2024
     'affiliation_1' => 'Company employees',
     'affiliation_2' => 'Partner company employees',
-    'affiliation_3' => 'Freelancer',
-    'affiliation_4' => 'Freelance One company',
+    'affiliation_3' => 'Self Employed', //oct 25, 2024
+    'affiliation_4' => 'Freelancer', //oct 25, 2024
     'affiliation_5' => 'Partner company employees: 2 companies or more',
     'affiliation_6' => 'Freelance: Two companies or more',
     "deadline" => "Deadline for project",

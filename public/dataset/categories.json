@@ -4,8 +4,8 @@
     "title": "Consulting",
     "slug": "consulting",
     "display_order": 1,
-    "created_at": "2024-09-15 03:18:00",
-    "updated_at": "2024-09-15 03:18:00",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
     "deleted_at": null
   },
   {
@@ -13,8 +13,8 @@
     "title": "Development",
     "slug": "development",
     "display_order": 2,
-    "created_at": "2024-09-15 03:18:00",
-    "updated_at": "2024-09-15 03:18:00",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
     "deleted_at": null
   },
   {
@@ -22,35 +22,53 @@
     "title": "Infrastructure",
     "slug": "infrastructure",
     "display_order": 3,
-    "created_at": "2024-09-15 03:18:00",
-    "updated_at": "2024-09-15 03:18:00",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
     "deleted_at": null
   },
   {
     "id": 4,
     "title": "Help desk",
-    "slug": "help-desk",
+    "slug": "help_desk",
     "display_order": 4,
-    "created_at": "2024-09-15 03:18:00",
-    "updated_at": "2024-09-15 03:18:00",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
     "deleted_at": null
   },
   {
     "id": 5,
-    "title": "Web Marketing",
-    "slug": "web-marketing",
+    "title": "PMO",
+    "slug": "pmo",
     "display_order": 5,
-    "created_at": "2024-09-15 03:18:00",
-    "updated_at": "2024-09-15 03:18:00",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
     "deleted_at": null
   },
   {
     "id": 6,
-    "title": "Design",
-    "slug": "design",
+    "title": "Bridge (SE)",
+    "slug": "bridge",
     "display_order": 6,
-    "created_at": "2024-09-16 16:24:44",
-    "updated_at": "2024-09-16 16:24:46",
+    "created_at": "2024-10-24 03:01:00",
+    "updated_at": "2024-10-24 03:01:00",
+    "deleted_at": null
+  },
+  {
+    "id": 7,
+    "title": "ERP(SAP)",
+    "slug": "erp_sap",
+    "display_order": 7,
+    "created_at": "2024-10-25 13:41:32",
+    "updated_at": "2024-10-25 13:41:33",
+    "deleted_at": null
+  },
+  {
+    "id": 8,
+    "title": "Project Management",
+    "slug": "project_management",
+    "display_order": 8,
+    "created_at": "2024-10-25 13:41:32",
+    "updated_at": "2024-10-25 13:41:33",
     "deleted_at": null
   }
 ]

@@ -32,7 +32,7 @@ class TalentFactory extends Factory
             'available_for_dispatch' => $this->faker->boolean(),
             'request_for_contract' => $this->faker->boolean(),
             'remote_work_preferred' => $this->faker->boolean(),
-            'work_location_prefer' => $this->faker->numberBetween(1, count(WorkLocationEnum::cases())),
+            'work_location_prefer' => $this->faker->randomElement(WorkLocationEnum::cases())->value,
             'characteristics' => $this->faker->randomElements(
                 array_map(fn($enum) => $enum->value, TalentCharEnum::cases()),
                 $this->faker->numberBetween(2, count(TalentCharEnum::cases()))

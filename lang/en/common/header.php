@@ -25,4 +25,6 @@ return array(
     'customer_support' => 'Customer Support',
     // Oct21, 2024
     'my_dashboard' => 'My Dashboard',
+    // Oct 25, 2024
+    'bookmarks' => 'Bookmarks',
 );

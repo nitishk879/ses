@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\LanguagesCast;
 use App\Enums\CommercialFlow;
 use App\Enums\ContractClassificationEnum;
 use App\Enums\InterviewEnum;
 use App\Enums\LangEnum;
+use App\Enums\ProjectStatusEnum;
 use App\Enums\TradeClassification;
 use App\Enums\WorkLocationEnum;
+use App\Http\Traits\FormatNumberTrait;
 use App\Http\Traits\ProjectTalentMatchingTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
-    use HasFactory, SoftDeletes, ProjectTalentMatchingTrait;
+    use HasFactory, SoftDeletes, FormatNumberTrait, ProjectTalentMatchingTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -45,6 +48,8 @@ class Project extends Model
         "trade_classification",
         "contract_classification",
         "deadline",
+        "languages",
+        "experience",
         "affiliation",
         "number_of_application",
         "number_of_interviewers",
@@ -76,8 +81,9 @@ class Project extends Model
             'number_of_interviewers' => InterviewEnum::class,
             'trade_classification' => TradeClassification::class,
             'contract_classification' => ContractClassificationEnum::class,
-            'languages' => 'array',
-            'work_location_prefer' => WorkLocationEnum::class,
+            'languages' => LanguagesCast::class,
+            'work_location_prefer' => 'array',
+            'project_status' => ProjectStatusEnum::class,
         ];
     }
 
@@ -125,6 +131,18 @@ class Project extends Model
             'id', // Local key on projects table
             'category_id' // Local key on sub_categories table that points to categories
         );
+    }
+
+    /**
+     * Let's get all talents related to project
+     *
+     * @return BelongsToMany
+     */
+    public function talents(): BelongsToMany
+    {
+        return $this->belongsToMany(Talent::class)
+            ->withPivot('status', 'interview_count', 'remarks')
+            ->withTimestamps();
     }
 
     /**
@@ -219,7 +237,7 @@ class Project extends Model
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
-                return json_encode($value);
+                return $value; //json_encode($value);
             }
         );
     }
@@ -245,6 +263,18 @@ class Project extends Model
         );
     }
 
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+     */
+//    public function workLocationPreferred(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
+//        );
+//    }
     /**
      * Let's fetch salary range min-max
      *
@@ -279,24 +309,5 @@ class Project extends Model
         return Attribute::make(
             get: fn (mixed $value) => $this->contract_classification ? $this->contract_classification->value : '',
         );
-    }
-
-    /**
-     * Let's format Numbers
-     *
-     * @param $number
-     * @return string
-     */
-    public function formatNumber($number): string
-    {
-        if ($number >= 1000000000) {
-            return round($number / 1000000000, 1) . 'B'; // Billions
-        } elseif ($number >= 1000000) {
-            return round($number / 1000000, 1) . 'M'; // Millions
-        } elseif ($number >= 1000) {
-            return round($number / 1000, 1) . 'K'; // Thousands
-        } else {
-            return $number; // Less than 1000, no abbreviation
-        }
     }
 }

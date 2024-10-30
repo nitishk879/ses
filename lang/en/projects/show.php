@@ -43,4 +43,14 @@ return array(
     'instagram' => 'Instagram',
     'youtube' => 'Youtube',
     'pinterest' => 'Pinterest',
+    // oct 25, 2024
+    'invited'   => 'Invited',
+    'hired'     => 'Hired',
+    'rejected'   => 'Rejected',
+    'in_review'  => 'In Review',
+    'open'  =>'Open',
+    'in_progress'  =>'In progress',
+    'completed'  =>'Completed',
+    'on_hold'  =>'On Hold',
+    'unknown'   => 'Unknown'
 );

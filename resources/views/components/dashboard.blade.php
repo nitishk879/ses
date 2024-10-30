@@ -50,25 +50,25 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link " href="">
+                    <a class="nav-link " href="{{ route("messages") }}">
                         <i class="fa-regular fa-message align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.messages") }}</span> <span class="badge bg-primary rounded-5 ms-auto">3</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link " href="">
+                    <a class="nav-link " href="{{ route("company-profile") }}">
                         <i class="fa-regular fa-building align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.company_profile") }}</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link " href="">
+                    <a class="nav-link " href="{{ route("job-applicants") }}">
                         <i class="fa-solid fa-users-between-lines align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.all_applicants") }}</span>
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link " href="">
+                    <a class="nav-link " href="{{ route("job-listing") }}">
                         <i class="fa-regular fa-rectangle-list align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.job_listings") }}</span>
                     </a>
                 </li>

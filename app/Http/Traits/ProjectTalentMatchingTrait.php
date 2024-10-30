@@ -10,19 +10,76 @@ use App\Models\Talent;
 trait ProjectTalentMatchingTrait
 {
     /**
-     * Calculate match percentage between a project and a talent.
+     * Calculate the match percentage between a project and a talent.
      *
      * @param Project $project
      * @param Talent $talent
-     * @return int|float
+     * @return array
      */
-    public function calculateMatch(Project $project, Talent $talent): int|float
+    public function calculateMatch(Project $project, Talent $talent): array
     {
-        $totalWeight = 0; // Total match score is 100%
-        $matchScore = 100;
+        $totalWeight = 0;
+        $matchScore = [];
+        $totalScore = 100;
 
-        // Define criteria weights (example: skills have the most weight)
-        $weights = [
+        // Criteria weights
+        $weights = $this->getCriteriaWeights();
+
+        // Calculate skill match
+        $requiredSkills = $project->subCategories->pluck('id')->toArray();
+        $talentSkills = $talent->subCategories->pluck('id')->toArray();
+        $matchScore['skills'] = $this->calculateSkillMatch($requiredSkills, $talentSkills, $weights['skills']);
+
+        // Calculate experience match
+        if (isset($project->experience)) {
+            $matchScore['experience'] = $this->calculateExperienceMatch($project->experience, $talent->experience, $weights['experience']);
+        }
+
+        // Calculate location match
+        $requiredLocations = $project->locations->pluck('id')->toArray();
+        $talentLocations = $talent->locations->pluck('id')->toArray();
+        $matchScore['location'] = $this->calculateLocationMatch($requiredLocations, $talentLocations, $weights['location']);
+
+        // Calculate salary match
+        $matchScore['salary'] = ($this->calculateCostMatch($project->minimum_price, $project->maximum_price, $talent->min_monthly_price, $talent->max_monthly_price) * $weights['salary'])/100;
+
+        // Calculate language match
+        if (is_array($project->languages) && count($project->languages) > 0) {
+            $matchedLanguages = array_intersect($project->languages, $talent->user->languages);
+            $matchScore['languages'] = $this->safeDivide(count($matchedLanguages), count($project->languages)) * $weights['language'];
+        }
+
+        // Calculate hybrid work preference match
+        if (isset($project->work_location_prefer)) {
+            $matchedWorking = array_intersect($project->work_location_prefer, $talent->work_location_prefer);
+            $matchScore['work_location'] = $this->safeDivide(count($matchedWorking), count($project->work_location_prefer)) * $weights['hybrid'];
+        }
+
+        // Calculate domain match
+        $projectDomain = $project->industries()->pluck('industry_id')->toArray();
+        $talentDomain = $talent->industries()->pluck('industry_id')->toArray();
+        $matchScore['domain'] = $this->safeDivide(count(array_intersect($projectDomain, $talentDomain)), count($projectDomain)) * $weights['domain'];
+
+        // Calculate total match score
+        foreach ($matchScore as $score) {
+            $totalWeight += $score;
+        }
+
+        // Return percentage
+        return [
+            'score' => max(round($totalWeight * $totalScore, 2), 0),
+            'details' => $matchScore
+        ];
+    }
+
+    /**
+     * Get predefined weights for each matching criteria.
+     *
+     * @return array
+     */
+    private function getCriteriaWeights(): array
+    {
+        return [
             'skills' => 0.4,
             'experience' => 0.1,
             'location' => 0.1,
@@ -31,101 +88,123 @@ trait ProjectTalentMatchingTrait
             'language' => 0.1,
             'domain' => 0.1,
         ];
-
-        /**
-         * Skills match - sub-categories belongsToMany
-         *
-         */
-        $requiredSkills = $project->subCategories->pluck('id')->toArray();
-        $talentSkills = $talent->subCategories->pluck('id')->toArray();
-        $skillNumerator = count(array_intersect($requiredSkills, $talentSkills));
-        $skillDenominator = count($requiredSkills);
-        $totalWeight += $this->safeDivide($skillNumerator, $skillDenominator) * $weights['skills'];
-
-        /**
-         * Experience required for project
-         *
-        */
-        if (isset($project->experience)) {
-            $expo = json_decode($project->experience, true);
-            $minExperience = min($expo);
-            $maxExperience = max($expo);
-            $talentExperience = $talent->experience;
-
-            // Check if talent's experience is within the project's range
-            if ($talentExperience >= $minExperience && $talentExperience <= $maxExperience) {
-                $experienceScore = 1; // Full match
-            } elseif ($talentExperience < $minExperience) {
-                $experienceScore = $this->safeDivide($talentExperience, $minExperience); // Partial match
-            } else {
-                $experienceScore = $this->safeDivide($maxExperience, $talentExperience); // Partial match if talent experience exceeds max range
-            }
-
-            // Add experience match score to total weight
-            $totalWeight += $experienceScore * $weights['experience'];
-        }
-
-        /**
-         * locations match - sub-categories belongsToMany
-         */
-        $requiredLocations = $project->locations->pluck('id')->toArray();
-        $talentLocations = $talent->locations->pluck('id')->toArray();
-        $locationNumerator = count(array_intersect($requiredLocations, $talentLocations)); // count(array_intersect($requiredLocations, $talentLocations))
-        $locationDenominator = count($requiredLocations);
-        $totalWeight += $this->safeDivide($locationNumerator, $locationDenominator) * $weights['location'];
-
-        /**
-         * let's calculate salary range
-        */
-        $salaryMatch = $this->calculateCostMatch($project->minimum_price, $project->maximum_price, $talent->min_monthly_price, $talent->max_monthly_price);
-        $totalWeight += $salaryMatch * $weights['salary'];
-
-        /**
-         * Language Matching (Weight: 10%)
-        */
-//        $projectLanguages = json_decode($project->languages, true);
-        if (is_array($project->languages) && count($project->languages) > 0) {
-            // Get the talent's language abilities as an array using the enum
-            $talentLanguages = LangEnum::toArray($talent->user->language);
-            // Find how many required languages match with talent's abilities
-            $matchedLanguages = array_intersect($project->languages, $talentLanguages);
-
-            $totalWeight += $this->safeDivide(count($matchedLanguages), count($project->languages))* $weights['language']; // Return the match percentage
-        }
-
-        /**
-         * Remote/hybrid
-        */
-        if (isset($project->features)) {
-            $requiredWorking = $project->features->pluck('id')->toArray();
-            $talentWorking = WorkLocationEnum::toArray($talent->work_location_prefer);
-            $matchedWorking = array_intersect($requiredWorking, $talentWorking);
-            $totalWeight += $this->safeDivide(count($matchedWorking), count($requiredWorking)) * $weights['hybrid'];
-        }
-        /**
-         * Domain (Dev, QA, etc.) (Weight: 5%)
-        */
-
-        $projectDomain = $project->industries()->pluck('industriables.id')->toArray();
-        $talentDomain = $talent->industries()->pluck('industriables.id')->toArray();
-        $projectDomainNumerator = count(array_intersect($projectDomain, $talentDomain));
-        $talentDomainDenominator = count($projectDomain);
-        $totalWeight += $this->safeDivide($projectDomainNumerator, $talentDomainDenominator) * $weights['domain'];
-
-
-        // Return as an integer percentage
-        $score = intval($totalWeight * $matchScore);
-        return max($score, 0);
     }
 
     /**
-     * Let's make sure if denominator isn't 0
+     * Calculate the experience match score.
      *
-     * @param $numerator
-     * @param $denominator
+     * @param $projectExperience
+     * @param int $talentExperience
+     * @param float $weight
+     * @return float
+     */
+    private function calculateExperienceMatch($projectExperience, int $talentExperience, float $weight): float
+    {
+        $minExperience = min(json_decode($projectExperience, true));
+        $maxExperience = max(json_decode($projectExperience, true));
+
+        if ($talentExperience >= $minExperience && $talentExperience <= $maxExperience) {
+            return $weight; // Full match
+        } elseif ($talentExperience < $minExperience) {
+            return $this->safeDivide($talentExperience, $minExperience) * $weight; // Partial match
+        } else {
+            return $this->safeDivide($maxExperience, $talentExperience) * $weight; // Partial match
+        }
+    }
+
+    /**
+     * Calculate the skill match score.
+     *
+     * @param array $requiredSkills
+     * @param array $talentSkills
+     * @param float $weight
+     * @return float
+     */
+    private function calculateSkillMatch(array $requiredSkills, array $talentSkills, float $weight): float
+    {
+        $matchedSkills = array_intersect($requiredSkills, $talentSkills);
+        $matchPercentage = $this->safeDivide(count($matchedSkills), count($requiredSkills));
+        return $matchPercentage * $weight;
+    }
+
+    /**
+     * Calculate the cost match score.
+     *
+     * @param float $projectMinBudget
+     * @param float $projectMaxBudget
+     * @param float $talentMinCost
+     * @param float $talentMaxCost
      * @return float|int
      */
-    private function safeDivide($numerator, $denominator): float|int
+    private function calculateCostMatch(float $projectMinBudget, float $projectMaxBudget, float $talentMinCost, float $talentMaxCost): float|int
+    {
+        if ($talentMinCost <= $projectMaxBudget && $talentMaxCost >= $projectMinBudget) {
+            $overlapMin = max($projectMinBudget, $talentMinCost);
+            $overlapMax = min($projectMaxBudget, $talentMaxCost);
+            return $this->safeDivide($overlapMax - $overlapMin, $projectMaxBudget - $projectMinBudget) * 100;
+        } elseif ($talentMinCost > $projectMaxBudget) {
+            return max(0, 100 - (($talentMinCost - $projectMaxBudget) / $projectMaxBudget) * 100);
+        } elseif ($talentMaxCost < $projectMinBudget) {
+            return max(0, 100 - (($projectMinBudget - $talentMaxCost) / $projectMinBudget) * 100);
+        }
+        return 0;
+    }
+
+    /**
+     * Calculate the location match score.
+     *
+     * @param array $requiredLocations
+     * @param array $talentLocations
+     * @param float $weight
+     * @return float
+     */
+    private function calculateLocationMatch(array $requiredLocations, array $talentLocations, float $weight): float
+    {
+        if (empty($requiredLocations) || empty($talentLocations)) {
+            return 0;
+        }
+
+        $totalMatchScore = 0;
+        $maxScore = 0;
+
+        foreach ($requiredLocations as $projIndex => $projectLocation) {
+            foreach ($talentLocations as $talentIndex => $talentLocation) {
+                if ($projectLocation == $talentLocation) {
+                    $totalMatchScore += $this->getLocationWeight($projIndex, $talentIndex);
+                    break;
+                }
+            }
+            $maxScore += 100;
+        }
+
+        return $this->safeDivide($totalMatchScore, $maxScore) * $weight;
+    }
+
+    /**
+     * Get the location match weight based on the index.
+     *
+     * @param int $projIndex
+     * @param int $talentIndex
+     * @return float
+     */
+    private function getLocationWeight(int $projIndex, int $talentIndex): float
+    {
+        return match ([$projIndex, $talentIndex]) {
+            [0, 0] => 100,
+            [0, 1], [1, 0] => 66,
+            [0, 2], [2, 0] => 33,
+            default => 0,
+        };
+    }
+
+    /**
+     * Safe division to avoid division by zero.
+     *
+     * @param mixed $numerator
+     * @param mixed $denominator
+     * @return float|int
+     */
+    private function safeDivide(mixed $numerator, mixed $denominator): float|int
     {
         return $denominator > 0 ? $numerator / $denominator : 0;
     }
@@ -142,74 +221,14 @@ trait ProjectTalentMatchingTrait
         $matches = [];
 
         foreach ($talents as $talent) {
-            $matchPercentage = $this->calculateMatch($project, $talent);
             $matches[] = [
                 'talent' => $talent,
-                'match_percentage' => $matchPercentage,
+                'match_percentage' => $this->calculateMatch($project, $talent),
             ];
         }
 
-        // Sort talents by match percentage descending
         usort($matches, fn($a, $b) => $b['match_percentage'] <=> $a['match_percentage']);
 
         return $matches;
-    }
-
-    /**
-     * Let's get cost calculated for the talent
-     *
-     * @param $projectMinBudget
-     * @param $projectMaxBudget
-     * @param $talentMinCost
-     * @param $talentMaxCost
-     * @return float|int
-     */
-    public function calculateCostMatch($projectMinBudget, $projectMaxBudget, $talentMinCost, $talentMaxCost): float|int
-    {
-        // Perfect overlap, 100% match
-        if ($talentMinCost <= $projectMaxBudget && $talentMaxCost >= $projectMinBudget) {
-            $overlapMin = max($projectMinBudget, $talentMinCost);
-            $overlapMax = min($projectMaxBudget, $talentMaxCost);
-            $totalRange = $projectMaxBudget - $projectMinBudget;
-            $overlapRange = $overlapMax - $overlapMin;
-
-            return ($overlapRange / $totalRange) * 100;
-        }
-        // Partial overlap: Score reduction for partial match based on proximity
-        if ($talentMinCost > $projectMaxBudget) {
-            // Talent's cost is higher than the budget, reduce score based on how far out of range
-            $excess = $talentMinCost - $projectMaxBudget;
-            return max(0, 100 - ($excess / $projectMaxBudget) * 100);
-        }
-
-        if ($talentMaxCost < $projectMinBudget) {
-            // Talent's cost is lower than the budget, reduce score based on how far out of range
-            $shortfall = $projectMinBudget - $talentMaxCost;
-            return max(0, 100 - ($shortfall / $projectMinBudget) * 100);
-        }
-
-        return 0;
-    }
-
-    /**
-     * Location match
-     *
-     * @param $projectLocation
-     * @param $talentPreferredLocations
-     * @return int
-     */
-    protected function getLocationScore($projectLocation, $talentPreferredLocations): int
-    {
-        if (in_array($projectLocation, $talentPreferredLocations)) {
-            $index = array_search($projectLocation, $talentPreferredLocations);
-            // Higher score if 1st preference matches, lower score for other preferences
-            return match ($index) {
-                0 => 100,
-                1 => 75,
-                2 => 50,
-                default => 25,
-            };
-        }
-        return 0;  // No matching location
     }
 }

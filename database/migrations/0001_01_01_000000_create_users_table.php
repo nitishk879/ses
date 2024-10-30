@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('phone')->unique()->nullable();
             $table->string('date_of_birth');
             $table->enum('gender', ['Male', 'Female', 'Other']);
-            $table->integer('languages')->nullable();
+            $table->json('languages')->nullable();
             $table->string('nationality')->default('Japanese');
             $table->string('country')->default('Japan');
             $table->string('nearest_station_prefecture')->nullable();

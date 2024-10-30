@@ -32,7 +32,7 @@
                 document.getElementById('userPhone').innerText = response.data.phone;
 
                 // Show the modal
-                var userModal = new bootstrap.Modal(document.getElementById('userModal'));
+                const userModal = new bootstrap.Modal(document.getElementById('userModal'));
                 userModal.show();
             })
             .catch(function (error) {

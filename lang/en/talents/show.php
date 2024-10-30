@@ -10,5 +10,7 @@ return array(
     'resume_details' => 'Resume Details',
     'search_error' => "There is no result for the criteria you're looking. Please modify your search and change filter to different values.",
     'japanese' => 'Japanese',
-    'other' => 'Other'
+    'other' => 'Other',
+    // Oct 25, 2024
+    'check' => 'Select'
 );

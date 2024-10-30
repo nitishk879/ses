@@ -2,17 +2,21 @@
 
 namespace App\Models;
 
+use App\Http\Traits\FormatNumberTrait;
 use App\Http\Traits\HasCompanyLogoTrait;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Notifications\Notification;
 
 class Company extends Model
 {
-    use HasFactory, SoftDeletes, HasCompanyLogoTrait;
+    use HasFactory, SoftDeletes, FormatNumberTrait, HasCompanyLogoTrait, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -41,6 +45,17 @@ class Company extends Model
     ];
 
     /**
+     * Route notifications for the mail channel.
+     *
+     * @return  array<string, string>|string
+     */
+    public function routeNotificationForMail(Notification $notification): array|string
+    {
+        // Return email address only...
+        return $this->company_email;
+    }
+
+    /**
      * The accessors to append to the model's array form.
      *
      * @var array<int, string>
@@ -48,6 +63,17 @@ class Company extends Model
     protected $appends = [
         'company_logo_url' => 'string',
     ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'capital' => 'string',
+        ];
+    }
 
     /**
      * A particular company belongs to the user table i.e. company owner
@@ -107,5 +133,17 @@ class Company extends Model
     public function favoriteTalent(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'company_favorite_user', 'company_id', 'user_id');
+    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+     */
+    public function capital(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => "{$this->formatNumber($value)}",
+        );
     }
 }

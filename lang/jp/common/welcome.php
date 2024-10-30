@@ -1,0 +1,25 @@
+<?php
+
+return array(
+    'title' => 'Welcome',
+    'job_and_project' => 'プロフィール&プロジェクト',
+    'companies' => '企業',
+    'registered_talents' => '登録プロフィール',
+    'new_jobs_and_projects' => '新しいプロフィールとプロジェクト',
+    'categories' => 'カテゴリー',
+    'category'  => ' カテゴリー',
+    'explore_by' => '探検',
+    'view_all' => 'すべて表示',
+    'open_positions' => '募集職種',
+    'location' => '場所',
+    'start_posting_jobs_and_project' => 'Start Posting<span> jobs and projects </span>today',
+    'sign_up_free' => '無料でサインアップ',
+    'how_it_works' => 'How It <span>&nbsp;Works</span>',
+    'post_a_job_or_search_for_opportunities' => 'Post a Job or Search for Opportunities',
+    'find_the_perfect_match' => 'Find the Perfect Match',
+    'start_collaborating_jobs' => 'Start Collaborating',
+    'featured_jobs_and_projects' => 'Featured <span>&nbsp; job & projects</span>',
+    'contract_base' => 'Contract Base',
+    'apply_now' => '今すぐ申し込む',
+    'top_companies_and_employer' => 'Top <span>&nbsp; companies & employers</span>',
+);

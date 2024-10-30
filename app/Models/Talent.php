@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
+use App\Casts\AffiliationCast;
 use App\Casts\ContractCast;
+use App\Casts\WorkLocationCast;
+use App\Casts\WorkLocationsCast;
 use App\Enums\AffiliationEnum;
 use App\Enums\ContractClassificationEnum;
 use App\Enums\ParticipationEnum;
 use App\Enums\TalentCharEnum;
 use App\Enums\WorkLocationEnum;
+use App\Http\Traits\FormatNumberTrait;
 use App\Http\Traits\HasTalentDocumentTrait;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -20,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 class Talent extends Model
 {
-    use HasFactory, HasTalentDocumentTrait;
+    use HasFactory, FormatNumberTrait, HasTalentDocumentTrait;
 
     protected $fillable = [
         'resume',
@@ -52,12 +56,13 @@ class Talent extends Model
     protected function casts(): array
     {
         return [
-            'affiliation' => AffiliationEnum::class,
+            'affiliation' => AffiliationCast::class,
             'participation' => ParticipationEnum::class,
             'contract' => ContractCast::class,
             'contracts' => AsEnumCollection::of(ContractClassificationEnum::class),
             'characteristics' => 'array',
-            'work_location' => WorkLocationEnum::class,
+            'work_location_prefer' => 'array',
+            'availability' => ParticipationEnum::class,
         ];
     }
 
@@ -121,6 +126,18 @@ class Talent extends Model
     }
 
     /**
+     * Let's get all Projects related to the talent
+     *
+     * @return BelongsToMany
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class)
+            ->withPivot('status', 'interview_count', 'remarks')
+            ->withTimestamps();
+    }
+
+    /**
      * Contract type, my current contract
      *
      * @return Attribute
@@ -170,6 +187,18 @@ class Talent extends Model
      *
      * @return Attribute
      */
+//    public function affiliation(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => $value ? AffiliationEnum::toName($this->affiliation->value) : '',
+//        );
+//    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+     */
     public function salaryRange(): Attribute
     {
         return Attribute::make(
@@ -188,7 +217,7 @@ class Talent extends Model
             get: function ($value) {
                 // Decode the JSON and map to enum names
                 $decoded = json_decode($value, true);
-                return array_map(fn($val) => TalentCharEnum::toName($val), $decoded);
+                return array_map(fn(int $val) => TalentCharEnum::toName($val), $decoded);
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
@@ -207,13 +236,44 @@ class Talent extends Model
         return Attribute::make(
             get: function ($value) {
                 // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
+                $decoded = json_decode($this->work_location_prefer, true);
+//                dd($this->work_location_prefer);
                 return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
                 return json_encode($value);
             }
+        );
+    }
+
+    /**
+     * Let's get work location from array
+     *
+     * @return Attribute
+     */
+    public function work_location_prefer(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                $decoded = json_decode($value, true);
+                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
+            },
+            set: function ($value){
+                return json_encode($value);
+            }
+        );
+    }
+
+    /**
+     * Let's fetch salary range min-max
+     *
+     * @return Attribute
+     */
+    public function workLocationPreferred(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
         );
     }
 
@@ -225,24 +285,5 @@ class Talent extends Model
     public function industries(): MorphToMany
     {
         return $this->morphToMany(Industry::class, 'industriable');
-    }
-
-    /**
-     * Let's format Numbers
-     *
-     * @param $number
-     * @return string
-     */
-    public function formatNumber($number): string
-    {
-        if ($number >= 1000000000) {
-            return round($number / 1000000000, 1) . 'B'; // Billions
-        } elseif ($number >= 1000000) {
-            return round($number / 1000000, 1) . 'M'; // Millions
-        } elseif ($number >= 1000) {
-            return round($number / 1000, 1) . 'K'; // Thousands
-        } else {
-            return $number; // Less than 1000, no abbreviation
-        }
     }
 }

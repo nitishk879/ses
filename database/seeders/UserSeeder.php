@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
                 'phone' => $talent->phone ?? random_int(6000000000, 9999999999),
                 'date_of_birth' => $talent->date_of_birth,
                 'gender' => $talent->gender,
-                'languages' => $talent->languages ?? random_int(1, 3),
+                'languages' => $talent->languages ?? json_encode([random_int(1, 3)]),
                 'nationality' => $talent->nationality,
                 'country' => $talent->country,
                 'nearest_station_prefecture' => $talent->nearest_station_prefecture,

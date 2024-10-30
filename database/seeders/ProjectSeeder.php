@@ -3,11 +3,13 @@
 namespace Database\Seeders;
 
 use App\Enums\LangEnum;
+use App\Enums\WorkLocationEnum;
 use App\Models\Feature;
 use App\Models\Industry;
 use App\Models\Location;
 use App\Models\Project;
 use App\Models\SubCategory;
+use Exception;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\File;
@@ -37,7 +39,7 @@ class ProjectSeeder extends Seeder
                 "remote_operation_possible" => $project->remote_operation_possible,
                 "contract_start_date" => $project->contract_start_date ?? today()->addDays(7),
                 "contract_end_date" => $project->contract_end_date ?? today()->addMonth(),
-                'work_location_prefer' => $project->work_location_prefer ?? random_int(1, 3),
+                'work_location_prefer' => $project->work_location_prefer ?? json_encode(random_int(1, count(WorkLocationEnum::cases()))),
                 "possible_to_continue" => $project->possible_to_continue ?? false,
                 "project_description" => $project->project_details,
                 "personnel_requirement" => $project->personnel_requirement,
@@ -57,10 +59,30 @@ class ProjectSeeder extends Seeder
                 "deleter_id" => $project->deleter_id,
                 'user_id' => $project->user_id,
             ]);
-            $currentProject->subCategories()->attach([random_int(1, SubCategory::count()), random_int(1, SubCategory::count())]);
-            $currentProject->locations()->attach([random_int(1, 46), random_int(1, 46), random_int(1, 46)]);
-            $currentProject->features()->attach([random_int(1, Feature::count()), random_int(1, Feature::count())]);
-            $currentProject->industries()->attach([random_int(1, Industry::count()), random_int(1, Industry::count())]);
+
+//            $currentProject->subCategories()->attach([random_int(1, SubCategory::count()), random_int(1, SubCategory::count())]);
+//            $currentProject->locations()->attach([random_int(1, 46), random_int(1, 46), random_int(1, 46)]);
+//            $currentProject->features()->attach([random_int(1, Feature::count()), random_int(1, Feature::count())]);
+//            $currentProject->industries()->attach([random_int(1, Industry::count()), random_int(1, Industry::count())]);
+            $currentProject->subCategories()->attach($this->uniqueRandomIds(1, SubCategory::count(), 2));
+            $currentProject->locations()->attach($this->uniqueRandomIds(1, 46, 3));
+            $currentProject->features()->attach($this->uniqueRandomIds(1, Feature::count(), 2));
+            $currentProject->industries()->attach($this->uniqueRandomIds(1, Industry::count(), 2));
         }
+    }
+
+    public function uniqueRandomIds(int $min, int $max, int $count): array
+    {
+        if ($count > ($max - $min + 1)) {
+            throw new Exception("Count is greater than the number of unique values in the range.");
+        }
+
+        $uniqueIds = [];
+        while (count($uniqueIds) < $count) {
+            $randomId = random_int($min, $max);
+            $uniqueIds[$randomId] = true; // Using associative keys for uniqueness
+        }
+
+        return array_keys($uniqueIds);
     }
 }

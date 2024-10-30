@@ -23,13 +23,13 @@ return array(
     "type_your_address_here" => "Type your address here",
     "cover_letter_resume" => "Cover Letter & Resume",
     "cover_letter" => "Cover Letter",
-    "upload_resume" => "Upload Resume",
+    "upload_resume" => "Upload Profile", //Oct 30, 2024
     "write_bio" => "Write down your biography here. Let the employers know who you are...",
     "file_acceptance" => "File Accepted: pdf doc, docx, max size: 150kb",
     "qualification" => "Qualification",
     "education_details" => "Educational Details",
     "experience_details" => "Experience Details",
-    "Experience Fields" => "Experience Fields",
+    "experience_fields" => "Experience Fields",
     "option_1"  => "Experience in User Support",
     "option_2"  => "Web System",
     "resume_privacy"    => "Resume Privacy",
@@ -52,7 +52,7 @@ return array(
     "english" => "Other",
     "japanese" => "Japanese",
     "chinese"   => "Chinese",
-    "sample_input" => "Sample Input",
+    "sample_input" => "Sample",
     "salary_min_placeholder" => "e.g. 23k JPY",
     "salary_max_placeholder" => "e.g. 32k JPY",
     "private" => "Private",
@@ -75,6 +75,15 @@ return array(
     "experience_in_9" => "Leadership experience",
     "experience_in_10" => "Local projects available",
     "experience_in_11" => "Some permanent staff available",
-    "experience_in_12" => "Shift work request"
-
+    "experience_in_12" => "Shift work request",
+    // Oct 26, 2024
+    'min' => 'Min',
+    'max' => 'Max',
+    'language' => 'Language',
+    'characteristics' => 'Characteristics',
+    'work_experience'    => 'Work Experience',
+    'work_experience_placeholder' => 'in years',
+    'consult_sample_input'  => 'Consultant Sample',
+    'system_engineer_sample' => 'System Engineer Sample',
+    'infrastructure_engineer_sample' => 'Infrastructure Engineer Sample',
 );

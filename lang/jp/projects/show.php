@@ -25,4 +25,22 @@ return array(
     'project_budget' => '月額単価',
     'remote'    => 'リモート',
     'project_detail' => '案件内容',
+    // oct 9, 2024
+    'monthly_salary' => '月給',
+    'contract_period' => '契約期間',
+    'location' => '場所',
+    'eligible_applicants' => '応募資格',
+    'End' => 'エンド',
+    'Primary' => '主契約者',
+    'Secondary' => '二次契約業者',
+    'Third' => '3次以降の受注業者',
+    'project_id' => '案件ID',
+    // oct 23 2024
+    'facebook' => 'Facebook',
+    'twitter' => 'Twitter',
+    'linkedin' => 'Linkedin',
+    'google' => 'Google',
+    'instagram' => 'Instagram',
+    'youtube' => 'Youtube',
+    'pinterest' => 'Pinterest',  
 );

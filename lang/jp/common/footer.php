@@ -24,7 +24,7 @@ return array(
     'browse_employees' => '従業員検索',
     'candidates' => '人材',
     'candidate_dashboard' => '人材ダッシュボード',
-    'post_a_job' => 'Post a Job',
+    'post_a_job' => 'プロフィールを投稿する',
     'browse_candidates' => '求人情報を投稿する',
     'employer_dashboard' => 'プロジェクトダッシュボード ',
     'applications' => 'Applications',

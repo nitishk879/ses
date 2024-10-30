@@ -9,10 +9,10 @@ enum LangEnum: int
     case bl = 3;
 
     /**
-     * @param $value
+     * @param int $value
      * @return string
      */
-    public static function toName($value): string
+    public static function toName(int $value): string
     {
         return match ($value){
             self::en->value => __("common/sidebar.en") ?? 'English',
@@ -24,10 +24,10 @@ enum LangEnum: int
     /**
      * This will make array set for matching values accordingly
      *
-     * @param $value
+     * @param int $value
      * @return array
      */
-    public static function toArray($value): array
+    public static function toArray(int $value): array
     {
         return match ($value){
             self::en->value => [1],

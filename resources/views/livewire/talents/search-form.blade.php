@@ -168,7 +168,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" wire:model.live="affiliation" value="{{$case->value}}" id="affiliation_{{$case->value}}">
                                     <label class="form-check-label" for="affiliation_{{$case->value}}">
-                                        {{ __("talents/index.{$case->name}") }}
+                                        {{ \App\Enums\AffiliationEnum::toName($case->value) ?? __("talents/index.affiliation_{$case->value}") }}
                                     </label>
                                 </div>
                             @endforeach
@@ -187,11 +187,12 @@
                     <div id="flush-collapseSalary" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body px-0">
                             <div class="row g-0">
-                                <div class="col-md-5 px-0">
-                                    <input type="text" class="form-control" wire:model.live="min_salary" placeholder="{{ __("common/sidebar.min_salary_placeholder") }}" aria-label="First name">
+                                <div class="col-md-6 px-0">
+                                    <label class="form-label" for="minSalary">{{ __("common/sidebar.min_salary") }}</label>
+                                    <input type="text" class="form-control" wire:model.live="min_salary" placeholder="{{ __("common/sidebar.min_salary_placeholder") }}" aria-label="Min Salary">
                                 </div>
-                                <div class="col-md-2 px-2">{{ __("To") }}</div>
-                                <div class="col-md-5 px-0">
+                                <div class="col-md-6 px-0">
+                                    <label class="form-label" for="maxSalary">{{ __("common/sidebar.max_salary") }}</label>
                                     <input type="text" class="form-control" wire:model.live="max_salary" placeholder="{{ __("common/sidebar.max_salary_placeholder") }}" aria-label="Last name">
                                 </div>
                             </div>

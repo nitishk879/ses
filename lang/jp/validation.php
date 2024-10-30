@@ -48,7 +48,7 @@ return [
     'dimensions' => ':attribute フィールドに無効な画像サイズがあります。',
     'distinct' => ':attribute フィールドに重複した値があります。',
     'doesnt_end_with' => ':attribute フィールドは、次のいずれかで終わってはなりません: :values。',
-    'doesnt_start_with' => 'The :attribute field must not start with one of the following: :values.',
+    'doesnt_start_with' => ':attribute フィールドは、次のいずれかで始まってはなりません: :values。',
     'email' => ':attribute フィールドは有効な電子メール アドレスである必要があります。',
     'ends_with' => ':attribute フィールドは、次のいずれかで終わる必要があります: :values。',
     'enum' => '選択された :attributeは無効です。',

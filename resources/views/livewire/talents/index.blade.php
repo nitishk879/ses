@@ -29,7 +29,7 @@
                         <div class="col-md-4 ps-md-3">
                             <span class="talent-name">{{ $talent->user->short_name }}</span>
                             <div class="d-flex gap-2">
-                                <span class="talent-age">{{ __("talents/index.gender") }} : <b>{{ $talent->user->gender->value }}</b></span>
+                                <span class="talent-age">{{ __("talents/index.gender") }} : <b>{{ \App\Enums\GenderEnum::toName($talent->user->gender->value) }}</b></span>
                                 <span class="talent-age">{{ __("talents/index.age") }} : <b>{{ $talent->user->age }}</b></span>
                             </div>
                         </div>
@@ -48,7 +48,7 @@
                     <div class="row justify-content-between">
                         <div class="col-auto">
                             <h3 class="talent-availability">{{ __('talents/index.availability') }}:
-                                <span>{{ __("talents/index.{$talent->availability}") }}</span>
+                                <span>{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) ?? __("talents/index.{$talent->availability}") }}</span>
                             </h3>
                         </div>
                         <div class="col-md-12">
@@ -84,13 +84,13 @@
                                     </div>
                                     <div class="row align-items-center">
                                         <div class="col-6 col-md-5 feature-head">{{ __('talents/index.operations') }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ __("talents/index.{$talent->availability}") }}</div>
+                                        <div class="col-6 col-md-7 feature-text">{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) ?? __("talents/index.{$talent->availability}") }}</div>
                                     </div>
                                 </div>
                                 <div class="col-md-5">
                                     <div class="row align-items-center">
                                         <div class="col-6 col-md-5 feature-head">{{ __("talents/registration.affiliation") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->affiliation->toName($talent->affiliation) }}</div>
+                                        <div class="col-6 col-md-7 feature-text">{{ $talent->affiliation }}</div>
                                     </div>
                                     <div class="row align-items-center">
                                         <div class="col-6 col-md-5 feature-head">{{ __("talents/index.type_of_contract") }}</div>
@@ -129,14 +129,14 @@
                 </div>
             </div>
         @endforeach
+        <div>
+            {{ $talents->links() }}
+        </div>
     @else
         <div class="">
             <p>{!! __("talents/show.search_error") !!}</p>
         </div>
     @endif
-    <div class="row justify-content-center">
-        <div class="col-md-12">{{ $talents->links() }}</div>
-    </div>
     <livewire:talents.talent-modal />
 </div>
 @push('scripts')

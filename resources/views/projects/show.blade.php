@@ -153,7 +153,7 @@
             <div class="col-md-4">
                 <div class="job-right-sidebar">
                     <div class="d-grid gap-2">
-                        <livewire:projects.apply-for-project :project="$project"/>
+                        <a href="{{ route("project.edit", $project) }}" class="btn btn-primary">{{ __("projects/show.apply_to_project") }}</a>
                     </div>
                     <div class="requirements">
                         <h4 class="requirement-heading">{{ __("projects/show.project_requirements") }}</h4>

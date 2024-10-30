@@ -36,7 +36,7 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
-                                        <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                        <a href="#" onclick="openDynamicModal(1)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
@@ -50,7 +50,7 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
-                                        <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                        <a href="" onclick="openDynamicModal(2)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-id="" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                     </div>
                                 </div>
 
@@ -152,6 +152,7 @@
                                     <label for="expectedMinSalary" class="form-label required">{{ __('talents/registration.expected_salary') }}</label>
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="minBudget">{{ __("common/sidebar.min_salary") }}</label>
                                             <input type="text" class="form-control @error('minimum_price') is-invalid @enderror"
                                                    name="minimum_price"
                                                    id="expectedMinSalary"
@@ -161,6 +162,7 @@
                                             @error('minimum_price')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="col-md-6 mb-3">
+                                            <label class="form-label" for="maxBudget">{{ __("common/sidebar.max_salary") }}</label>
                                             <input type="text" class="form-control @error('maximum_price') is-invalid @enderror"
                                                    name="maximum_price"
                                                    id="expectedMaxSalary"
@@ -350,16 +352,28 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
-                                    <select class="form-select @error('affiliation') is-invalid @enderror"
-                                            name="affiliation" id="commercialFlow" aria-label="affiliation" required>
+                                    <select class="form-select @error('commercial_flow') is-invalid @enderror"
+                                            name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
                                         <option value="">{{ __("talents/registration.choose") }}</option>
                                         @foreach(\App\Enums\CommercialFlow::cases() as $case)
                                             <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
                                         @endforeach
                                     </select>
-                                    @error('affiliation')
+                                    @error('commercial_flow')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <h5>{{ __("talents/registration.language") }}</h5>
+                                    @foreach(\App\Enums\LangEnum::cases() as $lang)
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="languages" value="{{$lang->value}}" id="language_{{$lang->value}}">
+                                            <label class="form-check-label" for="language_{{$lang->value}}">
+                                                {{ __("common/sidebar.{$lang->name}") ?? __("projects/form.interview_{$lang->value}") }}
+                                            </label>
+                                            @error('languages') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
@@ -384,39 +398,70 @@
 {{--            <livewire:projects.new-project />--}}
         </div>
     </div>
-@endsection
-@push('scripts')
-    <!-- TinyMCE CDN -->
-    <script src="https://cdn.tiny.cloud/1/5rfctkmlgw069tt5rp30sjxqu32fzlox611u5kxk18tm9g0k/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
+                </div>
+                <div class="modal-body">
+                    <div class="cover-letter ">
+                        <h4 id="modalTitle">{{ __("Cover Letter") }}</h4>
+                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <script>
-        tinymce.init({
-            selector: 'textarea.tinyEditor',  // change this value according to your HTML
-            license_key: '5rfctkmlgw069tt5rp30sjxqu32fzlox611u5kxk18tm9g0k',
-            height: 220
-        });
-        document.addEventListener('focusin', (e) => {
-            if (e.target.closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
-                e.stopImmediatePropagation();
+    @push('scripts')
+        <!---- Summer note libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+        <script>
+            $('.tinyEditor').summernote({
+                placeholder: "{{ __("talents/registration.write_bio") }}",
+                tabsize: 2,
+                height: 120,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
+            });
+        </script>
+        <!---- Summer note libraries -->
+        <!-- Add Axios via CDN (optional if not already included) -->
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <!-- Modal Popup call -->
+        <script>
+            function openDynamicModal(id) {
+                // Make an Axios request to fetch data for the modal
+                axios.get('/sample/' + id)
+                    .then(response => {
+                        const data = response.data;
+                        console.log(data);
+                        // Set the modal title and content dynamically
+                        document.getElementById('staticBackdropLabel').textContent = data.title;
+                        document.getElementById('modalTitle').textContent = data.title;
+                        document.querySelector('.cover-letter-description').innerHTML = data.content;
+                    })
+                    .catch(error => {
+                        console.error('There was an error fetching the data!', error);
+                        alert('Failed to fetch data.');
+                    });
             }
-        });
-        (() => {
-            'use strict'
-
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            const forms = document.querySelectorAll('.needs-validation')
-
-            // Loop over them and prevent submission
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
-    </script>
-
-@endpush
+        </script>
+        <!-- Modal Popup call -->
+    @endpush
+@endsection

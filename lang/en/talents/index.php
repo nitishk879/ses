@@ -28,9 +28,9 @@ return array(
     "talent_q1" => "Integer imperdiet mauris eget nisi ultrices, quis hendrerit est consequat",
     "talent_q2" => "Vivamus et volutpat odio. Maecenas porta erat sed massa bibendum",
     "talent_q3" => "pellentesque. Integer imperdiet mauris eget nisi ultrices, quis hendrerit est",
-    "quasi_delegation_possible" => "Business outsourcing (quasi-entrust)",
-    "available_for_contract" => "Business outsourcing (contract)",
-    "available_for_dispatch" => "Dispatch contract",
+    "quasi_delegation_possible" => "Business outsourcing (quasi-entrust)", //Oct 30, 2024
+    "available_for_contract" => "Staff Augmentation", //Oct 30, 2024
+    "available_for_dispatch" => "Dispatch contract (Haken)", //Oct 30, 2024
     "COMPANY_EMPLOYEE" => "Company employees",
     "PARTNER_COMPANY_EMPLOYEE" => "Partner company employees",
     "FREELANCER" => "Freelancer",

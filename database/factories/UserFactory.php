@@ -33,7 +33,10 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
-            'languages' => $this->faker->numberBetween(1, 3),
+            'languages' => $this->faker->randomElements(
+                array_map(fn($lang) => $lang->value, LangEnum::cases()),
+                $this->faker->numberBetween(1, count(LangEnum::cases()))
+            ),
         ];
     }
 

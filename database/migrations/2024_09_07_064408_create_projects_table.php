@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->text('project_description');
             $table->text('personnel_requirement')->nullable();
             $table->boolean('project_finalized')->default(false);
-            $table->integer('work_location_prefer')->nullable();
+            $table->json('work_location_prefer')->nullable();
             $table->enum('trade_classification',[
                 TradeClassification::End->value,
                 TradeClassification::Primary->value,
@@ -42,6 +42,7 @@ return new class extends Migration {
                 ContractClassificationEnum::OUTSOURCING->value,
                 ContractClassificationEnum::DISPATCH_CONTRACT->value,
             ]);
+            $table->enum('status', ['open', 'in_progress', 'completed', 'on_hold'])->default('open');
             $table->json('affiliation')->nullable();
             $table->string('deadline')->nullable();
             $table->string('number_of_application')->nullable();

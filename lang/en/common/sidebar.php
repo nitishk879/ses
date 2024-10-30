@@ -35,14 +35,18 @@ return array(
     'Third' => 'Third and Subsequent Clients',
     'interview_once' => 'Once',
     'interview_one_two' => '1-2 times',
-    'interview_twice' => 'Twice',
+    'interview_twice' => '2 or more', // Oct 25, 2024
     'interview_thrice' => '3-5 times',
     // Oct 17, 2024
     'clear' => 'Clear',
     'en' => 'English',
     'jp' => 'Japanese',
     'bl' => 'Bilingual',
-    'abroad' => 'Abroad',
-    'consignment' => 'Request for consignment',
-    'remote'    => 'Remote work preferred'
+    // Oct 24, 2024
+    'abroad' => 'On site', //Oct 30, 2024
+    'consignment' => 'Hybrid', //Oct 30, 2024
+    'remote'    => 'Remote', //Oct 30, 2024
+    //oct 25, 2024
+    'min_salary' => 'Minimum',
+    'max_salary' => 'Maximum',
 );

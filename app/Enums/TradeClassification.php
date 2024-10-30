@@ -15,10 +15,10 @@ enum TradeClassification: int
     {
         // TODO: Implement cases() method.
         return match ($value) {
-            self::End => __("projects/form.End") ?? "End",
+            self::End => __("projects/form.End") ?? "End contract",
             self::Primary => __("projects/form.Primary") ?? "Prime contractor",
-            self::Secondary => __("projects/form.Secondary") ?? "Secondary Claim",
-            self::Third => __("projects/form.Third") ?? "Third and Subsequent order"
+            self::Secondary => __("projects/form.Secondary") ?? "Secondary contract",
+//            self::Third => __("projects/form.Third") ?? "Third and Subsequent order"
         };
     }
 

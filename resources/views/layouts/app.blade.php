@@ -28,8 +28,20 @@
 <body>
     <div id="app">
         <x-header/>
-
         <main class="" style="background: #F1F1F1!important;">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col-md-12 mt-3">
+                        <!--  Alert goes here  --->
+                        @if (session('message'))
+                            <x-alert-component :type="session('type')">
+                                {{ session('message') }}
+                            </x-alert-component>
+                        @endif
+                        <!--  Alert goes here  --->
+                    </div>
+                </div>
+            </div>
             @yield('content')
         </main>
 

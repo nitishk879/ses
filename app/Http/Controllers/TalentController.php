@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\WorkLocationEnum;
 use App\Models\Talent;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ class TalentController extends Controller
      */
     public function store(Request $request)
     {
+//        dd($request->all());
         $validated = $request->validate([
             'firstname' => 'required|max:255',
             'lastname' => 'required|max:255',
@@ -40,20 +42,24 @@ class TalentController extends Controller
             'nationality' => 'required|max:255',
             'gender' => 'required|max:255',
             'date_of_birth' => 'required',
+            'language' => 'required',
             'address' => 'required|max:255',
             'cover_letter' => 'required|min:64',
             'resume' => 'required|file|mimes:doc,docs,pdf|max:2048',
             'education' => 'required|min:3',
             'experience' => 'required|min:3',
+            'work_experience' => 'required',
+            'workLocations' => 'array',
+//            'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocation::options())),
             'subcategory' => 'required|array',
             'min_monthly_price' => 'required',
             'max_monthly_price' => 'required',
-            'nearest_station_prefecture' => 'required',
-            'nearest_station_line' => 'required',
-            'nearest_station_name' => 'required',
+            'nearest_station_prefecture' => 'nullable',
+            'nearest_station_line' => 'nullable',
+            'nearest_station_name' => 'nullable',
             'privacy' => 'required',
             'participation' => 'required',
-            'joining_date' => 'required_if:participation,FUTURE,FROM_DATE|date',
+            'joining_date' => 'required_if:participation,FUTURE|required_if:participation,FROM_DATE',
             'characteristics' => 'nullable|array'
         ]);
 
@@ -81,12 +87,13 @@ class TalentController extends Controller
             'nearest_station_prefecture' => $validated['nearest_station_prefecture'] ?? '',
             'nearest_station_line' => $validated['nearest_station_line'] ?? '',
             'nearest_station_name' => $validated['nearest_station_name'] ?? '',
+            'languages' => $validated['language'] == 3 ? [1,2] : [$validated['language']],
         ]);
 
 
         $talent = $user->talent()->create([
             'affiliation' => $validated['affiliation'],
-            'availability' => $validated['participation'] == 'IMMEDIATELY' ?? 0,
+            'availability' => $validated['participation'],
             'quasi_delegation_possible' => $validated['contract_type'] == 'quasi_delegation_possible',
             'available_for_contract' => $validated['contract_type'] == 'available_for_contract',
             'available_for_dispatch' => $validated['contract_type'] == 'available_for_dispatch',
@@ -97,12 +104,13 @@ class TalentController extends Controller
             'subcategory' => $validated['subcategory'],
             'min_monthly_price' => $validated['min_monthly_price'],
             'max_monthly_price' => $validated['max_monthly_price'],
-            'work_location_prefer' => $validated['preferred_location'] ?? '',
+            'work_location_prefer' => $validated['workLocations'] ?? '', //[1, 2] / [1,3]
             'other_desire_conditions' => $validated['other_desired_location'] ?? '',
             'privacy' => $validated['privacy'],
             'participation' => $validated['participation'],
+            'experience' => $validated['work_experience'] ?? '',
             'joining_date'  => $validated['joining_date'] ?? null,
-            'characteristics' => json_encode($validated['characteristics'] ?? []),
+            'characteristics' => $validated['characteristics'] ?? [],
         ]);
 
         $talent->subcategories()->attach($validated['subcategory']);

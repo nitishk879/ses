@@ -42,7 +42,7 @@
                                             <div class="col-md-6">
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/registration.affiliation") }}: </div>
-                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->affiliation->toName($talent->affiliation) }}</div>
+                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->affiliation }}</div>
                                                 </div>
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.type_of_contract") }}: </div>

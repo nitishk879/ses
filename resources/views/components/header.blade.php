@@ -16,24 +16,24 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ __("common/header.find_talent") }}
+                            {{ __("common/header.talents") }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route("talents.index") }}">{{ __("common/header.talents") }}</a></li>
+                            <li><a class="dropdown-item" href="{{ route("talents.index") }}">{{ __("common/header.find_talent") }}</a></li>
                             <li><a class="dropdown-item" href="{{ route("talents.create") }}">{{ __("common/header.add_new") }}</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            {{ __("common/header.find_work") }}
+                            {{ __("common/header.projects") }}
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route("project.index") }}">{{ __("common/header.projects") }}</a></li>
+                            <li><a class="dropdown-item" href="{{ route("project.index") }}">{{ __("common/header.find_work") }}</a></li>
                             <li><a class="dropdown-item" href="{{ route("project.create") }}">{{ __("common/header.add_new_project") }}</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
                     </li>
                     <li class="nav-item dropdown">

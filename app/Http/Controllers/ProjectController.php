@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TalentStatusEnum;
+use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
@@ -37,7 +39,7 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-//        dd($request->all());
+
         $validated = $request->validate([
             "title" => 'required|unique:projects',
             "minimum_price" => 'required|int',
@@ -53,6 +55,7 @@ class ProjectController extends Controller
             "project_finalized" => 'nullable',
             "trade_classification" => 'required',
             "contract_classification" => 'required',
+            "languages" => 'required',
             "workLocations" => 'nullable',
             "deadline" => 'nullable',
             "number_of_application" => 'nullable',
@@ -83,8 +86,9 @@ class ProjectController extends Controller
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
             "contract_classification" => $validated["contract_classification"] ?? '',
             "deadline" => $validated["deadline"] ?? '',
+            "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
             'work_location_prefer' => $validated["workLocations"] ?? '',
-            "affiliation" => json_encode($validated["eligibility"]) ?? '',
+            "affiliation" => $validated["eligibility"] ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
             "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
             "commercial_flow" => $validated["commercial_flow"] ?? '',
@@ -115,7 +119,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        return view('projects.edit', compact('project'));
     }
 
     /**
@@ -131,7 +135,31 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        $project->delete();
+        return redirect()->route('project.index')->with('success', 'Project deleted successfully.');
+    }
+
+    /**
+     * Invite talents' to Project
+    */
+
+    public function invite(Request $request, Project $project)
+    {
+        $project->talents()->detach($request->input('talents'));
+
+        $project->talents()->attach($request->input("talents"), [
+                'status' => TalentStatusEnum::invited,
+                'interview_count' => 0,
+                'remarks' => $request->input("invitation_letter")
+            ]
+        );
+
+        TalentInvitationEvent::dispatch($project);
+
+        return redirect()->back()->with([
+            'message' => 'Data saved successfully!',
+            'type' => 'success'
+        ]);
     }
 
     /**

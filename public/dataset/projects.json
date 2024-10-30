@@ -18,7 +18,8 @@
         "contract_classification": "quasi_delegation_possible",
         "deadline": "2025-03-20 06:41:13",
         "number_of_application": "20",
-        "number_of_interviewers": "3",
+        "number_of_interviewers": 3,
+        "work_location_prefer": [3],
         "commercial_flow": "2",
         "person_in_charge": " John Doe",
         "affiliation": [
@@ -55,7 +56,8 @@
         "contract_classification": "available_for_contract",
         "deadline": "2025-01-29 09:16:55",
         "number_of_application": "42",
-        "number_of_interviewers": "2",
+        "number_of_interviewers": 2,
+        "work_location_prefer": [2],
         "commercial_flow": "1",
         "person_in_charge": " Jane Smith",
         "affiliation": [
@@ -92,7 +94,8 @@
         "contract_classification": "available_for_dispatch",
         "deadline": "2024-11-19 05:20:30",
         "number_of_application": "15",
-        "number_of_interviewers": "1",
+        "number_of_interviewers": 1,
+        "work_location_prefer": [1],
         "commercial_flow": "2",
         "person_in_charge": " James Brown",
         "affiliation": [
@@ -129,7 +132,8 @@
         "contract_classification": "quasi_delegation_possible",
         "deadline": "2024-11-15 01:57:03",
         "number_of_application": "16",
-        "number_of_interviewers": "2",
+        "number_of_interviewers": 2,
+        "work_location_prefer": [2],
         "commercial_flow": "1",
         "person_in_charge": " John Doe",
         "affiliation": [
@@ -166,7 +170,8 @@
         "contract_classification": "available_for_contract",
         "deadline": "2024-12-26 15:56:42",
         "number_of_application": "10",
-        "number_of_interviewers": "4",
+        "number_of_interviewers": 3,
+        "work_location_prefer": [3],
         "commercial_flow": "2",
         "person_in_charge": " Jane Smith",
         "affiliation": [
@@ -202,8 +207,9 @@
         "trade_classification": 3,
         "contract_classification": "available_for_dispatch",
         "deadline": "2025-02-10 01:54:33",
-        "number_of_application": "25",
-        "number_of_interviewers": "3",
+        "number_of_application": 25,
+        "number_of_interviewers": 3,
+        "work_location_prefer": [3],
         "commercial_flow": "2",
         "person_in_charge": " James Brown",
         "affiliation": [

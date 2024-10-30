@@ -51,5 +51,29 @@ return array(
     // Talent registration validation
     "english" => "英語",
     "japanese" => "日本語",
-    "chinese"   => "中国語"
+    "chinese"   => "中国語",
+    "sample_input" => "サンプル入力",
+    "salary_min_placeholder" => "５００万円",
+    "salary_max_placeholder" => "８００万円",
+    "private" => "非公開",
+    "release" => "公開",
+    "nearest_station" => "最寄駅",
+    "prefectures" => "都道府県",
+    "route_name" => "路線名",
+    "station_name" => "駅名",
+    "date_of_birth" => "生年月日",
+    // Oct 10, 2024
+    "joining_date" => "入社日",
+    "experience_in_1" => "ユーザーサポートの経験",
+    "experience_in_2" => "価格は交渉可能",
+    "experience_in_3" => "フル常駐可能",
+    "experience_in_4" => "100名以上のPJ経験あり",
+    "experience_in_5" => "英語ビジネス利用経験あり",
+    "experience_in_6" => "コンサルファーム出身",
+    "experience_in_7" => "フルリモート希望",
+    "experience_in_8" => "長期希望",
+    "experience_in_9" => "リーダー経験あり",
+    "experience_in_10" => "地方案件対応可能",
+    "experience_in_11" => "一部常駐可能",
+    "experience_in_12" => "シフト勤務希望"
 );

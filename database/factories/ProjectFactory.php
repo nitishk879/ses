@@ -35,7 +35,10 @@ class ProjectFactory extends Factory
                 array_map(fn($lang) => $lang->value, LangEnum::cases()),
                 $this->faker->numberBetween(1, count(LangEnum::cases()))
             ),
-            'work_location_prefer' => $this->faker->numberBetween(1, count(WorkLocationEnum::cases())),
+            'work_location_prefer' => $this->faker->randomElements(
+                array_map(fn($workLocation) => $workLocation->value, WorkLocationEnum::cases()),
+                $this->faker->numberBetween(1, count(WorkLocationEnum::cases()))
+            ),
             'remote_operation_possible' => $this->faker->boolean(),
             'contract_start_date' => $this->faker->dateTime(),
             'contract_end_date' => $this->faker->dateTime(),

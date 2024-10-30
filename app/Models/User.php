@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Casts\LanguagesCast;
 use App\Enums\GenderEnum;
 use App\Enums\LangEnum;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -66,7 +67,7 @@ class User extends Authenticatable
             'date_of_birth' => 'datetime',
             'gender' => GenderEnum::class,
             'nationality' => 'string',
-            'languages' => LangEnum::class
+            'languages' => LanguagesCast::class
         ];
     }
 
@@ -190,4 +191,50 @@ class User extends Authenticatable
     {
         return $this->hasOne(Company::class);
     }
+
+    /**
+     * Let's encode/decode all languages for the projects.
+     *
+     * @return Attribute
+     */
+    public function languages(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                // Decode the JSON and map to enum names
+                $decoded = json_decode($value, true);
+                return array_map(fn($val) => LangEnum::toName($val), $decoded);
+            },
+            set: function ($value) {
+                // If setting from an array of enum values, encode it as JSON
+                return json_encode($value);
+            }
+        );
+    }
+
+    /**
+     * Let's fetch user's languages
+     *
+     * @return Attribute
+     */
+    public function preferredLanguages(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) =>
+            $this->languages ?
+                $this->languages->name : '',
+        );
+    }
+
+    /**
+     * Let's fetch user's languages
+     *
+     * @return Attribute
+     */
+//    public function gender(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => GenderEnum::toName($this->gender->value),
+//        );
+//    }
 }

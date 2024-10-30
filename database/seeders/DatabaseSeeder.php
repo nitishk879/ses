@@ -25,7 +25,8 @@ class DatabaseSeeder extends Seeder
             SubCategorySeeder::class,
             IndustrySeeder::class,
             FeatureSeeder::class,
-            SampleSeeder::class
+            SampleSeeder::class,
+            TestimonialSeeder::class,
         ]);
 
 //        User::factory()->create([

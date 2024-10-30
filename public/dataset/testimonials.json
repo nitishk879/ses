@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "content": "Absolutely fantastic experience! The platform is easy to navigate, and I quickly found several high-quality talents for my project. The filtering options made it simple to find exactly what I was looking for. Highly recommended!",
+    "user_id": 5,
+    "created_at": "2024-10-28 07:29:10",
+    "updated_at": "2024-10-28 07:29:10",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "content": "I was able to find a freelancer within days of posting my project. The communication features are great, and the support team was responsive when I needed help. Just wish there were more talents in my niche, but overall, a solid platform.",
+    "user_id": 3,
+    "created_at": "2024-10-28 07:29:10",
+    "updated_at": "2024-10-28 07:29:10",
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "content": "This website has been a game changer for our hiring process. We can easily track project status and manage applications, saving us so much time. The quality of freelancers here is top-notch!",
+    "user_id": 4,
+    "created_at": "2024-10-28 07:29:10",
+    "updated_at": "2024-10-28 07:29:10",
+    "deleted_at": null
+  },
+  {
+    "id": 1,
+    "content": "Good platform with useful features, but it could use some improvement in the user interface. Finding specific criteria for freelancers can sometimes be a bit challenging. Still, I’d recommend it for its solid talent pool.",
+    "user_id": 5,
+    "created_at": "2024-10-28 07:29:10",
+    "updated_at": "2024-10-28 07:29:10",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "content": "Exceptional service and a diverse range of qualified professionals. We found the perfect fit for our project in just a few days. The rating system is accurate, and profiles are detailed, which helped us make confident hiring decisions.",
+    "user_id": 3,
+    "created_at": "2024-10-28 07:29:10",
+    "updated_at": "2024-10-28 07:29:10",
+    "deleted_at": null
+  }
+]

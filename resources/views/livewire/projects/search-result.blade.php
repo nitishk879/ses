@@ -3,7 +3,7 @@
         <x-ui.card-layout :item="$project">
             <x-slot:header>
                 <div class="col-md-6 d-flex gap-2">
-                    @if($project->created_at >= today()->subDays(7))
+                    @if($project->created_at >= today()->subMonth())
                         <span class="job-status">{{ __("common/home.new") }}</span>
                     @endif
                     <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</span>

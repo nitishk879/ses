@@ -72,7 +72,7 @@
                                                 name="affiliation" id="affiliation" aria-label="affiliation" required>
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\AffiliationEnum::cases() as $case)
-                                                <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("talents/index.{$case->name}") ?? __('One') }}</option>
+                                                <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ \App\Enums\AffiliationEnum::toName($case->value) ?? __("talents/index.{$case->name}") ?? __('One') }}</option>
                                             @endforeach
                                         </select>
                                         @error('affiliation')
@@ -86,7 +86,7 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ContractClassificationEnum::cases() as $contract)
                                                 <option
-                                                    value="{{ $contract->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("talents/index.{$contract->toName($contract)}") }}</option>
+                                                    value="{{ $contract->value }}" {{ $loop->first ? 'selected' : '' }}>{{ \App\Enums\ContractClassificationEnum::toName($contract) ?? __("talents/index.{$contract->toName($contract)}") }}</option>
                                             @endforeach
                                         </select>
                                         @error('contract_type')
@@ -100,7 +100,7 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\GenderEnum::cases() as $gender)
                                                 <option value="{{ $gender->value }}"
-                                                    {{--                                            @selected($gender->name == $talent?->user?->gender)--}}
+                                                    @selected(old('gender') == $gender->value)
                                                 >{{ __("talents/registration.{$gender->name}") }}</option>
                                             @endforeach
                                         </select>
@@ -118,6 +118,20 @@
                                             <option value="other">{{ __("talents/registration.english") }}</option>
                                         </select>
                                         @error('nationality')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="language"
+                                               class="form-label">{{ __('talents/registration.language') }}</label>
+                                        <select class="form-select @error('nationality') is-invalid @enderror"
+                                                name="language" id="language" aria-label="language">
+                                            <option value="">{{ __("talents/registration.choose") }}</option>
+                                            @foreach(\App\Enums\LangEnum::cases() as $lang)
+                                                <option value="{{ $lang->value }}" @selected(old('language') == $lang->value) selected> {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('language')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
@@ -139,36 +153,36 @@
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="preferredLocation"
-                                               class="form-label required">{{ __('talents/registration.prefectures') }}</label>
+                                               class="form-label">{{ __('talents/registration.prefectures') }}</label>
                                         <input type="text" class="form-control @error('nearest_station_prefecture') is-invalid @enderror"
                                                name="nearest_station_prefecture" id="preferredLocation"
                                                placeholder="{{ __('talents/registration.prefectures') }}"
                                                value="{{ old("nearest_station_prefecture") ?? '' }}"
-                                               required>
+                                        >
                                         @error('nearest_station_prefecture')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="otherDesiredLocation"
-                                               class="form-label required">{{ __('talents/registration.route_name') }}</label>
+                                               class="form-label">{{ __('talents/registration.route_name') }}</label>
                                         <input type="text"
                                                class="form-control @error('nearest_station_line') is-invalid @enderror"
                                                name="nearest_station_line" id="otherDesiredLocation"
                                                value="{{ old("nearest_station_line") ?? "" }}"
-                                               placeholder="{{ __('talents/registration.route_name') }}" required>
+                                               placeholder="{{ __('talents/registration.route_name') }}">
                                         @error('nearest_station_line')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label for="otherDesiredLocation"
-                                               class="form-label required">{{ __('talents/registration.station_name') }}</label>
+                                               class="form-label">{{ __('talents/registration.station_name') }}</label>
                                         <input type="text"
                                                class="form-control @error('nearest_station_name') is-invalid @enderror"
                                                name="nearest_station_name" id="otherDesiredLocation"
                                                value="{{ old("nearest_station_name") ?? "" }}"
-                                               placeholder="{{ __('talents/registration.station_name') }}" required>
+                                               placeholder="{{ __('talents/registration.station_name') }}">
                                         @error('nearest_station_name')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
                                         @enderror
@@ -191,7 +205,7 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
-                                        <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                        <a href="" onclick="openDynamicModal(1)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -200,6 +214,7 @@
                                     <input class="form-control @error('resume') is-invalid @enderror"
                                            type="file"
                                            name="resume"
+                                           value="{{ old("resume") ?? '' }}"
                                            id="formFile">
                                     @error('resume')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -223,7 +238,7 @@
                                                 aria-label="Default select example">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ParticipationEnum::cases() as $participation)
-                                                <option value="{{ $participation->name }}" {{ $loop->first ? 'selected' : '' }}>{{ __("talents/index.{$participation->value}") }}</option>
+                                                <option value="{{ $participation->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("talents/index.{$participation->value}") }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -236,13 +251,24 @@
                                         />
                                         @error('joining_date')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                     </div>
+                                    <div class="col-md-6 mb-3" >
+                                        <label class="form-label" for="workExperience">{{ __("talents/registration.work_experience") }}</label>
+                                        <input type="number" class="form-control @error('work_experience') is-invalid @enderror"
+                                               name="work_experience"
+                                               id="workExperience"
+                                               min="0"
+                                               value="{{ old("work_experience") ?? '' }}"
+                                               placeholder="{{ __('talents/registration.work_experience_placeholder') }}"
+                                        />
+                                        @error('work_experience')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <!-- Cover Latter block --->
                         <div class="col-md-12 bg-light mb-4">
                             <div class="bg-light p-3">
-                                <h2>{{ __("talents/registration.experience_details") }}</h2>
+                                <h2>{{ __("talents/registration.characteristics") }}</h2>
                                 <div class="mb-3">
                                     @foreach(\App\Enums\TalentCharEnum::cases() as $case)
                                         <div class="form-check form-check-inline">
@@ -266,6 +292,7 @@
                                     <label for="expectedMinSalary" class="form-label required">{{ __('talents/registration.expected_salary') }}</label>
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
+                                            <label for="minSalary" class="form-label">{{ __("common/sidebar.min_salary") }}</label>
                                             <input type="text" class="form-control @error('min_monthly_price') is-invalid @enderror"
                                                    name="min_monthly_price"
                                                    id="expectedMinSalary"
@@ -275,6 +302,7 @@
                                             @error('min_monthly_price')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="col-md-6 mb-3">
+                                            <label for="maxSalary" class="form-label">{{ __("common/sidebar.max_salary") }}</label>
                                             <input type="text" class="form-control @error('max_monthly_price') is-invalid @enderror"
                                                    name="max_monthly_price"
                                                    id="expectedMaxSalary"
@@ -292,11 +320,25 @@
                                                 <input class="form-check-input" type="checkbox"
                                                        name="locations[]"
                                                        id="{{ $location->slug."_".$location->id }}"
-                                                       value="{{ $location->id }}">
+                                                       value="{{ $location->id }}"
+                                                    {{ in_array($location->id, old('locations', [])) ? 'checked' : '' }}
+                                                >
                                                 <label class="form-check-label"
                                                        for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
                                             </div>
                                         </div>
+                                    @endforeach
+                                    @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
+                                            <div class="mb-3 col-md-4">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           name="workLocations[]"
+                                                           id="{{ "work_location_".$workLocation->value }}"
+                                                           value="{{ $workLocation->value }}">
+                                                    <label class="form-check-label"
+                                                           for="{{ "work_location_".$workLocation->value }}">{{ \App\Enums\WorkLocationEnum::toName($workLocation->value) ?? '' }}</label>
+                                                </div>
+                                            </div>
                                     @endforeach
                                 </div>
                             </div>
@@ -317,7 +359,7 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
-                                        <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                        <a href="" onclick="openDynamicModal(2)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                     </div>
                                 </div>
                                 <div class="mb-3">
@@ -332,7 +374,9 @@
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
-                                        <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                        <a href="#" onclick="openDynamicModal(3)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.consult_sample_input") }}</a>
+                                        <a href="#" onclick="openDynamicModal(4)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.system_engineer_sample") }}</a>
+                                        <a href="#" onclick="openDynamicModal(5)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.infrastructure_engineer_sample") }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -341,8 +385,8 @@
                         <!-- Categories block --->
                         <div class="col-md-12 bg-light mb-4">
                             <div class="bg-light p-3">
-                                <h2>{{ __("talents/registration.experience_details") }}</h2>
-                                @foreach(\App\Models\Category::limit(2)->get() as $category)
+                                <h2>{{ __("talents/registration.experience_fields") }}</h2>
+                                @foreach(\App\Models\Category::whereHas('subcategories')->orderBy('title')->get() as $category)
                                     <div class="mb-3">
                                         <h4 class="category-heading">{{ $category->title ?? '' }}</h4>
                                     </div>
@@ -351,6 +395,7 @@
                                             <div class="form-check form-check-inline">
                                                 <input class="form-check-input" type="checkbox"
                                                        name="subcategory[]"
+                                                       @selected(old('subcategory[]') == $subcategory->id)
                                                        id="{{ $subcategory->slug."_".$subcategory->id }}"
                                                        value="{{ $subcategory->id }}"
                                                 >
@@ -393,10 +438,8 @@
                 </div>
                 <div class="modal-body">
                    <div class="cover-letter ">
-                       <h4>{{ __("Cover Letter") }}</h4>
-                       <div class="cover-letter-description border border-secondary-subtle p-4">
-
-                       </div>
+                       <h4 class="modalTitle">{{ __("Cover Letter") }}</h4>
+                       <div class="cover-letter-description border border-secondary-subtle p-4"></div>
                    </div>
                 </div>
                 <div class="modal-footer">
@@ -410,40 +453,28 @@
 
 @push('scripts')
     <!-- TinyMCE CDN -->
-    <script src="https://cdn.tiny.cloud/1/5rfctkmlgw069tt5rp30sjxqu32fzlox611u5kxk18tm9g0k/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-
+{{--    <script type="text/javascript" src="//code.jquery.com/jquery-3.6.0.min.js"></script>--}}
+    <!---- Summer note libraries -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
     <script>
-        tinymce.init({
-            selector: 'textarea.tinyEditor',  // change this value according to your HTML
-            license_key: '5rfctkmlgw069tt5rp30sjxqu32fzlox611u5kxk18tm9g0k',
-            height: 220
+        $('.tinyEditor').summernote({
+            placeholder: "{{ __("talents/registration.write_bio") }}",
+            tabsize: 2,
+            height: 120,
+            toolbar: [
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ]
         });
-        // Prevent Bootstrap dialog from blocking focusin
-        document.addEventListener('focusin', (e) => {
-            if (e.target.closest(".tox-tinymce, .tox-tinymce-aux, .moxman-window, .tam-assetmanager-root") !== null) {
-                e.stopImmediatePropagation();
-            }
-        });
-        // Example starter JavaScript for disabling form submissions if there are invalid fields
-        (() => {
-            'use strict'
-
-            // Fetch all the forms we want to apply custom Bootstrap validation styles to
-            const forms = document.querySelectorAll('.needs-validation')
-
-            // Loop over them and prevent submission
-            Array.from(forms).forEach(form => {
-                form.addEventListener('submit', event => {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-
-                    form.classList.add('was-validated')
-                }, false)
-            })
-        })()
     </script>
+    <!---- Summer note libraries -->
     <script>
         // Get the select element and the additional input field
         const selectBox = document.getElementById('possibleParticipation');
@@ -459,8 +490,32 @@
             }
         });
     </script>
+    <!-- Add Axios via CDN (optional if not already included) -->
+{{--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>--}}
+    <!-- Modal Popup call -->
+    <script>
+        function openDynamicModal(id) {
+            // Ensure elements exist
+            const modalLabel = document.getElementById('staticBackdropLabel');
+            const modalBody = document.querySelector('.cover-letter-description');
+            const modalElement = document.getElementById('staticBackdrop');
 
-
-    <script type="text/javascript" src="//code.jquery.com/jquery-3.6.0.min.js"></script>
-
+            if (!modalLabel || !modalBody || !modalElement) {
+                console.error('Modal elements are not found in the DOM.');
+                return;
+            }
+            axios.get('/sample/' + id)
+                .then(response => {
+                    const data = response.data;
+                    // Set the modal title and content dynamically
+                    modalLabel.textContent = data.title;
+                    modalBody.innerHTML = data.content;
+                })
+                .catch(error => {
+                    console.error('There was an error fetching the data!', error);
+                    alert('Failed to fetch data.');
+                });
+        }
+    </script>
+    <!-- Modal Popup call -->
 @endpush

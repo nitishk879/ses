@@ -57,4 +57,8 @@ return array(
     "ui_ux" => "UI/UX",
     "character" => "Character",
     "graphic" => "Graphic",
+    // Oct 25, 2024
+    "bridge" => "Bridge",
+    "erp_sap" => 'ERP (SAP)',
+    "project_management" => "Project Management",
 );

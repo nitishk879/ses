@@ -1,186 +1,416 @@
 [
-    {
-        "id": 2,
-        "title": "Aomori"
-    },
-    {
-        "id": 3,
-        "title": "Iwate"
-    },
-    {
-        "id": 4,
-        "title": "Miyagi"
-    },
-    {
-        "id": 5,
-        "title": "Akita"
-    },
-    {
-        "id": 6,
-        "title": "Yamagata"
-    },
-    {
-        "id": 7,
-        "title": "Fukushima"
-    },
-    {
-        "id": 8,
-        "title": "Ibaraki"
-    },
-    {
-        "id": 9,
-        "title": "Tochigi"
-    },
-    {
-        "id": 10,
-        "title": "Gunma"
-    },
-    {
-        "id": 11,
-        "title": "Saitama"
-    },
-    {
-        "id": 12,
-        "title": "Chiba"
-    },
-    {
-        "id": 13,
-        "title": "Tokyo"
-    },
-    {
-        "id": 14,
-        "title": "Kanagawa"
-    },
-    {
-        "id": 15,
-        "title": "Niigata"
-    },
-    {
-        "id": 16,
-        "title": "Toyama"
-    },
-    {
-        "id": 17,
-        "title": "Ishikawa"
-    },
-    {
-        "id": 18,
-        "title": "Fukui"
-    },
-    {
-        "id": 19,
-        "title": "Yamanashi"
-    },
-    {
-        "id": 20,
-        "title": "Nagano"
-    },
-    {
-        "id": 21,
-        "title": "Gifu"
-    },
-    {
-        "id": 22,
-        "title": "Shizuoka"
-    },
-    {
-        "id": 23,
-        "title": "Aichi"
-    },
-    {
-        "id": 24,
-        "title": "Mie"
-    },
-    {
-        "id": 25,
-        "title": "Shiga"
-    },
-    {
-        "id": 26,
-        "title": "Kyoto"
-    },
-    {
-        "id": 27,
-        "title": "Osaka"
-    },
-    {
-        "id": 28,
-        "title": "Hyogo"
-    },
-    {
-        "id": 29,
-        "title": "Nara"
-    },
-    {
-        "id": 30,
-        "title": "Wakayama"
-    },
-    {
-        "id": 31,
-        "title": "Tottori"
-    },
-    {
-        "id": 32,
-        "title": "Shimane"
-    },
-    {
-        "id": 33,
-        "title": "Okayama"
-    },
-    {
-        "id": 34,
-        "title": "Hiroshima"
-    },
-    {
-        "id": 35,
-        "title": "Yamaguchi"
-    },
-    {
-        "id": 36,
-        "title": "Tokushima"
-    },
-    {
-        "id": 37,
-        "title": "Kagawa"
-    },
-    {
-        "id": 38,
-        "title": "Ehime"
-    },
-    {
-        "id": 39,
-        "title": "Kochi"
-    },
-    {
-        "id": 40,
-        "title": "Fukuoka"
-    },
-    {
-        "id": 41,
-        "title": "Saga"
-    },
-    {
-        "id": 42,
-        "title": "Nagasaki"
-    },
-    {
-        "id": 43,
-        "title": "Kumamoto"
-    },
-    {
-        "id": 44,
-        "title": "Oita"
-    },
-    {
-        "id": 45,
-        "title": "Miyazaki"
-    },
-    {
-        "id": 46,
-        "title": "Kagoshima"
-    },
-    {
-        "id": 47,
-        "title": "Okinawa"
-    }
+  {
+    "id": 1,
+    "title": "Gunma",
+    "slug": "gunma",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 2,
+    "title": "Tochigi",
+    "slug": "tochigi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 3,
+    "title": "Ibaraki",
+    "slug": "ibaraki",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 4,
+    "title": "Saitama",
+    "slug": "saitama",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 5,
+    "title": "Tokyo",
+    "slug": "tokyo",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 6,
+    "title": "Chiba",
+    "slug": "chiba",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 7,
+    "title": "Kanagawa",
+    "slug": "kanagawa",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 8,
+    "title": "Osaka",
+    "slug": "osaka",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 9,
+    "title": "Aomori",
+    "slug": "aomori",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 10,
+    "title": "Akita",
+    "slug": "akita",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 11,
+    "title": "Fukushima",
+    "slug": "fukushima",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 12,
+    "title": "Yamagata",
+    "slug": "yamagata",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 13,
+    "title": "Iwate",
+    "slug": "iwate",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 14,
+    "title": "Niigata",
+    "slug": "niigata",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 15,
+    "title": "Toyama",
+    "slug": "toyama",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 16,
+    "title": "Ishikawa",
+    "slug": "ishikawa",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 17,
+    "title": "Fukui",
+    "slug": "fukui",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 18,
+    "title": "Yamanashi",
+    "slug": "yamanashi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 19,
+    "title": "Nagano",
+    "slug": "nagano",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 20,
+    "title": "Gifu",
+    "slug": "gifu",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 21,
+    "title": "Shizuoka",
+    "slug": "shizuoka",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 22,
+    "title": "Aichi",
+    "slug": "aichi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 23,
+    "title": "Mie",
+    "slug": "mie",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 24,
+    "title": "Shiga",
+    "slug": "shiga",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 25,
+    "title": "Miyagi",
+    "slug": "miyagi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 26,
+    "title": "Kyoto",
+    "slug": "kyoto",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 27,
+    "title": "Hyogo",
+    "slug": "hyogo",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 28,
+    "title": "Nara",
+    "slug": "nara",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 29,
+    "title": "Wakayama",
+    "slug": "wakayama",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 30,
+    "title": "Tottori",
+    "slug": "tottori",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 31,
+    "title": "Shimane",
+    "slug": "shimane",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 32,
+    "title": "Okayama",
+    "slug": "okayama",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 33,
+    "title": "Hiroshima",
+    "slug": "hiroshima",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 34,
+    "title": "Yamaguchi",
+    "slug": "yamaguchi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 35,
+    "title": "Tokushima",
+    "slug": "tokushima",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 36,
+    "title": "Kagawa",
+    "slug": "kagawa",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 37,
+    "title": "Ehime",
+    "slug": "ehime",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 38,
+    "title": "Kochi",
+    "slug": "kochi",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 39,
+    "title": "Fukuoka",
+    "slug": "fukuoka",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 40,
+    "title": "Saga",
+    "slug": "saga",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 41,
+    "title": "Nagasaki",
+    "slug": "nagasaki",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 42,
+    "title": "Kumamoto",
+    "slug": "kumamoto",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 43,
+    "title": "Oita",
+    "slug": "oita",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 44,
+    "title": "Miyazaki",
+    "slug": "miyazaki",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 45,
+    "title": "Kagoshima",
+    "slug": "kagoshima",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  },
+  {
+    "id": 46,
+    "title": "Okinawa",
+    "slug": "okinawa",
+    "country_id": 1,
+    "created_at": "2024-10-28 06:25:06",
+    "updated_at": "2024-10-28 06:25:06",
+    "deleted_at": null
+  }
 ]
