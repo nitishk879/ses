@@ -129,7 +129,7 @@
                         <h4>{{ __("projects/show.skill_requirements") }}</h4>
                         <div class="d-flex flex-wrap w-100 gap-3">
                             @foreach($project->subCategories as $subcategory)
-                                <a href="" class="skill">{{ $subcategory->title }}</a>
+                                <a href="#" class="skill">{{ $subcategory->title }}</a>
                             @endforeach
                         </div>
                     </div>
@@ -138,7 +138,7 @@
                             <h4>{{ __("projects/show.eligible_applicants") }}</h4>
                             <div class="d-flex flex-wrap w-100 gap-3">
                                 @foreach($project->affiliation as $eligibility)
-                                    <a href="" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
+                                    <a href="#" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
                                 @endforeach
                             </div>
                         </div>
@@ -153,7 +153,7 @@
             <div class="col-md-4">
                 <div class="job-right-sidebar">
                     <div class="d-grid gap-2">
-                        <a href="{{ route("project.edit", $project) }}" class="btn btn-primary">{{ __("projects/show.apply_to_project") }}</a>
+                        <a href="#applyToProject" class="btn btn-primary">{{ __("projects/show.apply_to_project") }}</a>
                     </div>
                     <div class="requirements">
                         <h4 class="requirement-heading">{{ __("projects/show.project_requirements") }}</h4>
@@ -268,6 +268,11 @@
                     </div>
                 @endif
             </div>
+            @if(Auth::user()->is_employer)
+                <div class="col-md-12 my-3" id="applyToProject">
+                    <livewire:projects.apply-for-project :project="$project"/>
+                </div>
+            @endif
         </div>
         <div class="row align-items-center similar-projects">
             <div class="col-md-12">

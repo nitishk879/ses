@@ -17,9 +17,9 @@ Route::get('/project-detail', function () {
 
 Auth::routes();
 
-Route::resource('project', ProjectController::class)->middleware(['auth', 'role:user']);
-Route::resource('talents', TalentController::class)->middleware(['auth', 'role:user']);
-Route::resource('companies', CompanyController::class)->middleware(['auth', 'role:user']);
+Route::resource('project', ProjectController::class)->middleware(['auth', 'role:admin,employer,user']);
+Route::resource('talents', TalentController::class)->middleware(['auth', 'role:admin,employer,user']);
+Route::resource('companies', CompanyController::class)->middleware(['auth', 'role:admin,employer,user']);
 Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');
 Route::post('invite-talent/{project}', [ProjectController::class, 'invite'])->name('talent.invite');
 

@@ -6,14 +6,14 @@ return array(
     'name' => 'Name',
     'description' => 'Description',
     'home'  => "Home",
-    'jobs'  => "Jobs",
-    'job' => 'Job',
+    'jobs'  => "Projects", //Nov 8th, 2024
+    'job' => 'Project', //Nov 8th, 2024
     'apply_to_project' => 'Apply to this project',
     'apply' => 'Apply',
     'project_requirements' => 'Project Requirements',
     'project_description' => 'Project Description',
     'skill_requirements' => 'Skill Requirements',
-    'share_project' => 'Share this job',
+    'share_project' => 'Share this project', //Nov 8th, 2024
     'project_category' => 'Project Category',
     'project_status' => 'Status of the project',
     'project_flow' => 'Project Flow',

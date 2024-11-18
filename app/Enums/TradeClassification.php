@@ -8,7 +8,7 @@ enum TradeClassification: int
     case End = 1;
     case Primary = 2;
     case Secondary = 3;
-    case Third = 4;
+//    case Third = 4;
 
 
     public static function toName($value): string
@@ -34,7 +34,7 @@ enum TradeClassification: int
             self::End => 'red',
             self::Primary => 'blue',
             self::Secondary => 'gray',
-            self::Third => 'danger',
+//            self::Third => 'danger',
         };
     }
 }

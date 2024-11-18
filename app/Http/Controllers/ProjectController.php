@@ -28,7 +28,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $categories = Category::get();
+        $categories = Category::whereHas('subcategories')->orderBy('title')->get();
         $features = Feature::all();
 
         return view('projects.create', compact('categories', 'features'));
@@ -53,11 +53,13 @@ class ProjectController extends Controller
             "project_description" => 'required',
             "personnel_requirement" => 'required',
             "project_finalized" => 'nullable',
-            "trade_classification" => 'required',
+            "trade_classification" => 'required|int',
             "contract_classification" => 'required',
             "languages" => 'required',
             "workLocations" => 'nullable',
             "deadline" => 'nullable',
+            "experience" => 'nullable|array',
+            "scoring" => 'nullable',
             "number_of_application" => 'nullable',
             "number_of_interviewers" => 'nullable',
             "commercial_flow" => 'nullable',
@@ -86,9 +88,12 @@ class ProjectController extends Controller
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
             "contract_classification" => $validated["contract_classification"] ?? '',
             "deadline" => $validated["deadline"] ?? '',
+            "scoring" => $validated["scoring"] ?? [50],
             "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
             'work_location_prefer' => $validated["workLocations"] ?? '',
             "affiliation" => $validated["eligibility"] ?? '',
+            "experience" => json_encode($validated["experience"]) ?? '',
+            "trade_classification" => (int) $validated["trade_classification"] ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
             "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
             "commercial_flow" => $validated["commercial_flow"] ?? '',

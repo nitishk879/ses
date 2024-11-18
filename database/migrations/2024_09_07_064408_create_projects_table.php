@@ -31,18 +31,19 @@ return new class extends Migration {
             $table->text('personnel_requirement')->nullable();
             $table->boolean('project_finalized')->default(false);
             $table->json('work_location_prefer')->nullable();
+            $table->json('scoring')->nullable();
             $table->enum('trade_classification',[
                 TradeClassification::End->value,
                 TradeClassification::Primary->value,
                 TradeClassification::Secondary->value,
-                TradeClassification::Third->value,
+//                TradeClassification::Third->value,
             ]);
             $table->enum('contract_classification',[
                 ContractClassificationEnum::OUTSOURCING_CONTRACT->value,
                 ContractClassificationEnum::OUTSOURCING->value,
                 ContractClassificationEnum::DISPATCH_CONTRACT->value,
             ]);
-            $table->enum('status', ['open', 'in_progress', 'completed', 'on_hold'])->default('open');
+            $table->enum('status', ['5', '6', '7', '8'])->default('5');
             $table->json('affiliation')->nullable();
             $table->string('deadline')->nullable();
             $table->string('number_of_application')->nullable();

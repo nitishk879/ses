@@ -86,11 +86,19 @@
                     </div>
                     <table class="table table-striped table-sm">
                         <thead>
-                        <tr>
-                            <th>Operation System</th>
-                            <th class="text-end">Users</th>
-                            <th class="text-end">Share</th>
-                        </tr>
+                        @foreach(\App\Models\Project::all() as $project)
+                            <tr>
+                                <th>{{ $project->title }}</th>
+                                @if($project->interview_schedules)
+                                    <th class="text-end">
+                                        @foreach($project->interview_schedules as $schedule)
+                                            {{ $schedules }}
+                                        @endforeach
+                                    </th>
+                                @endif
+                                <th class="text-end">Share</th>
+                            </tr>
+                        @endforeach
                         </thead>
                         <tbody>
                         <tr>

@@ -6,6 +6,7 @@ use App\Enums\TalentStatusEnum;
 use App\Http\Traits\ProjectTalentMatchingTrait;
 use App\Livewire\Forms\TalentInvitationForm;
 use App\Models\Project;
+use App\Models\Talent;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -22,7 +23,9 @@ class ApplyForProject extends Component
     {
         $this->project = $project;
 
-        $myTalents = Auth::user()->company->talents;
+        $auth = Auth::user();
+
+        $myTalents = $auth->hasRole('employer') ? $auth->company->talents : Talent::all();
 
         $talentsWithScores = $myTalents->map(function($talent) use ($project) {
             $match = $this->calculateMatch($project, $talent);

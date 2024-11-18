@@ -13,8 +13,8 @@
                 @if($company && $company->projects->count() >=1)
                     @foreach($company->projects as $project)
                         <div class="job-list mt-4">
-                            <a href="" class="add-to-favourite">
-                                <i class="fa-solid fa-star"></i>
+                            <a href="{{ route("project.edit", $project) }}" class="add-to-favourite">
+                                <i class="fa-solid fa-pencil"></i>
                             </a>
                             <div class="job-content">
                                 <div class="row justify-content-between">

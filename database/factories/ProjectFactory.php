@@ -4,7 +4,9 @@ namespace Database\Factories;
 
 use App\Enums\AffiliationEnum;
 use App\Enums\ContractClassificationEnum;
+use App\Enums\InterviewEnum;
 use App\Enums\LangEnum;
+use App\Enums\ScoringEnum;
 use App\Enums\TradeClassification;
 use App\Enums\WorkLocationEnum;
 use App\Models\Company;
@@ -47,6 +49,10 @@ class ProjectFactory extends Factory
             'personnel_requirement' => $this->faker->text(200),
             'project_finalized' => $this->faker->boolean(),
             'trade_classification' => $this->faker->randomElement(TradeClassification::cases())->value,
+            'scoring' => $this->faker->randomElements(
+                array_map(fn($scoring) => $scoring->value, ScoringEnum::cases()),
+                $this->faker->numberBetween(1, count(ScoringEnum::cases()))
+            ),
             'contract_classification' => $this->faker->randomElement(ContractClassificationEnum::cases())->value,
             'affiliation' =>$this->faker->randomElements(
                 array_map(fn($enum) => $enum->value, AffiliationEnum::cases()),
@@ -54,7 +60,7 @@ class ProjectFactory extends Factory
             ),
             'deadline' => $this->faker->dateTime(),
             'number_of_application' => $this->faker->numberBetween(1, 50),
-            'number_of_interviewers' => $this->faker->numberBetween(1, 4),
+            'number_of_interviewers' => $this->faker->numberBetween(1, count(InterviewEnum::cases())),
             "commercial_flow" => $this->faker->numberBetween(1, 2),
             "person_in_charge" => $this->faker->text(200),
             "is_public" => $this->faker->boolean(),

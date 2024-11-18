@@ -3,11 +3,13 @@
 namespace App\Models;
 
 use App\Casts\LanguagesCast;
+use App\Casts\ScoreCast;
 use App\Enums\CommercialFlow;
 use App\Enums\ContractClassificationEnum;
 use App\Enums\InterviewEnum;
 use App\Enums\LangEnum;
 use App\Enums\ProjectStatusEnum;
+use App\Enums\ScoringEnum;
 use App\Enums\TradeClassification;
 use App\Enums\WorkLocationEnum;
 use App\Http\Traits\FormatNumberTrait;
@@ -47,6 +49,7 @@ class Project extends Model
         "project_finalized",
         "trade_classification",
         "contract_classification",
+        "scoring",
         "deadline",
         "languages",
         "experience",
@@ -83,7 +86,8 @@ class Project extends Model
             'contract_classification' => ContractClassificationEnum::class,
             'languages' => LanguagesCast::class,
             'work_location_prefer' => 'array',
-            'project_status' => ProjectStatusEnum::class,
+            'status' => ProjectStatusEnum::class,
+            'scoring' => 'array', //ScoringEnum::class,
         ];
     }
 
@@ -146,6 +150,16 @@ class Project extends Model
     }
 
     /**
+     * Let's get all talent's interview Schedule
+     *
+     * @return BelongsToMany
+    */
+    public function interviewSchedules(): BelongsToMany
+    {
+        return $this->belongsToMany(Talent::class, 'interview_schedules', 'talent_id')->withPivot('interview_data')->withTimestamps();
+    }
+
+    /**
      * Project favorite by company can be Many
      *
      * @returns BelongsToMany
@@ -203,6 +217,43 @@ class Project extends Model
      *
      * @return Attribute
     */
+    public function projectStatus(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->status ? ProjectStatusEnum::toName($this->status->value): ProjectStatusEnum::open,
+        );
+    }
+
+    /**
+     * Let's set progress bar color as per status
+     *
+     * @return Attribute
+     */
+    public function progress(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, array $attributes) => $this->status ? ProjectStatusEnum::color($this->status->value): 'primary'
+        );
+    }
+
+    /**
+     * Let's set progress in int as per status
+     *
+     * @return Attribute
+     */
+    public function percentage(): Attribute
+    {
+        return Attribute::make(
+            get: fn(mixed $value, array $attributes) => $this->status ? ProjectStatusEnum::percentage($this->status->value): 0
+        );
+    }
+
+    /**
+     * Let's make project id based on
+     * company id, company Owner id and project id
+     *
+     * @return Attribute
+    */
     public function projectId(): Attribute
     {
         return Attribute::make(
@@ -237,7 +288,7 @@ class Project extends Model
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
-                return $value; //json_encode($value);
+                return json_encode($value); //json_encode($value);
             }
         );
     }
@@ -280,10 +331,10 @@ class Project extends Model
      *
      * @return Attribute
     */
-    public function projectStatus(): Attribute
+    public function commercialFlow(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => $this->commercial_flow ? $this->commercial_flow->name : '',
+            get: fn (mixed $value) => $value ? CommercialFlow::toName($value) : '',
         );
     }
 

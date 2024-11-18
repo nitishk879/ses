@@ -10,7 +10,7 @@
             </div>
             <div class="col-md-8 col-xl-9 my-5">
                 <div class="row align-items-center">
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-lg-3">
                         <h4 class="footer-link-heading">{{ __("common/footer.quick_links") }}</h4>
                         <div class="d-block">
                             <a href="" class="footer-link">{{ __("common/footer.about") }}</a>
@@ -19,7 +19,7 @@
                             <a href="" class="footer-link">{{ __("common/footer.blogs") }}</a>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-lg-3">
                         <h4 class="footer-link-heading">{{ __("common/footer.candidates") }}</h4>
                         <div class="d-block">
                             <a href="" class="footer-link">{{ __("common/footer.browse_jobs") }}</a>
@@ -28,7 +28,7 @@
                             <a href="" class="footer-link">{{ __("common/footer.save_jobs") }}</a>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-lg-3">
                         <h4 class="footer-link-heading">{{ __("common/footer.employers") }}</h4>
                         <div class="d-block">
                             <a href="" class="footer-link">{{ __("common/footer.post_a_job") }}</a>
@@ -37,7 +37,7 @@
                             <a href="" class="footer-link">{{ __("common/footer.applications") }}</a>
                         </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-6 col-lg-3">
                         <h4 class="footer-link-heading">{{ __("common/footer.support") }}</h4>
                         <div class="d-block">
                             <a href="" class="footer-link">{{ __("common/footer.faq") }}</a>

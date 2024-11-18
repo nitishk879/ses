@@ -10,14 +10,14 @@ enum CommercialFlow: int
     /**
      * Let's set name|title for the Enum
      *
-     * @param $value
+     * @param int $value
      * @return string
      */
-    public static function toName($value): string
+    public static function toName(int $value): string
     {
         return match ($value) {
-            self::Commercial => __("projects/form.Commercial") ?? __("Enter into the business flow"),
-            self::Intermediary => __("projects/form.Intermediary") ?? __("Intermediary only")
+            self::Commercial->value => __("projects/form.Commercial") ?? __("Enter into the business flow"),
+            self::Intermediary->value => __("projects/form.Intermediary") ?? __("Intermediary only")
         };
     }
 }

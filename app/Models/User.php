@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Casts\isAdminCast;
+use App\Casts\isEmployerCast;
 use App\Casts\LanguagesCast;
 use App\Enums\GenderEnum;
 use App\Enums\LangEnum;
@@ -67,7 +69,9 @@ class User extends Authenticatable
             'date_of_birth' => 'datetime',
             'gender' => GenderEnum::class,
             'nationality' => 'string',
-            'languages' => LanguagesCast::class
+            'languages' => LanguagesCast::class,
+            'is_admin' => isAdminCast::class,
+            'is_employer' => isEmployerCast::class,
         ];
     }
 
@@ -133,19 +137,6 @@ class User extends Authenticatable
     public function hasRole($role): bool
     {
         if ($this->roles()->where('title', '=', $role)->first()) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * Check if User is Admin
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        if ($this->roles()->where('title', '=', 'admin')->first()) {
             return true;
         }
 
@@ -225,16 +216,4 @@ class User extends Authenticatable
                 $this->languages->name : '',
         );
     }
-
-    /**
-     * Let's fetch user's languages
-     *
-     * @return Attribute
-     */
-//    public function gender(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn (mixed $value) => GenderEnum::toName($this->gender->value),
-//        );
-//    }
 }

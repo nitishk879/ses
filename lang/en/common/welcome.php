@@ -22,4 +22,19 @@ return array(
     'contract_base' => 'Contract Base',
     'apply_now' => 'Apply Now',
     'top_companies_and_employer' => 'Top <span>&nbsp; companies & employers</span>',
+    // Nov 14th, 2024
+    'how_it_work' =>[
+        'step_1_title'  => 'Post a Project or Profile',
+        'step_1_text'   => 'List your project needs or create a profile showcasing your skills and experience.',
+        'step_2_title'  => 'AI Matchmaking',
+        'step_2_text'   => 'Our AI matches projects with profiles based on compatibility scoring to ensure the best fit.',
+        'step_3_title'  => 'Receive Matched Alerts',
+        'step_3_text'   => 'Get an email with the project or profile matches, complete with scoring insights.',
+        'step_4_title'  => 'Schedule an Interview',
+        'step_4_text'   => 'Arrange interviews either manually or with AI assistance for a streamlined process.',
+        'step_5_title'  => 'AI-Powered Interview Scoring',
+        'step_5_text'   => 'AI conducts pre-set FAQ-based interviews and scores responses to assess alignment.',
+        'step_6_title'  => 'Secure the Contract',
+        'step_6_text'   => 'Seal the Contract Confirm and kickstart your collaboration with a simple contract process.'
+    ]
 );

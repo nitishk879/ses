@@ -23,7 +23,7 @@ class CategorySeeder extends Seeder
         foreach ($categories as $category) {
             Category::create([
                 'title' => $category->title,
-                'slug' => Str::slug($category->title, '_'),
+                'slug' => $category->slug ?? Str::slug($category->title, '_'),
                 'display_order' => $category->display_order,
             ]);
         }

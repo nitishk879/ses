@@ -65,6 +65,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('interview_schedules', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('talent_id'); //->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('project_id'); //->constrained()->onDelete('cascade');
+            $table->dateTime('interview_date');
+            $table->boolean('is_scheduled')->default(true); // Flag to check if the schedule is active
+            $table->timestamps();
+        });
+
     }
 
     /**

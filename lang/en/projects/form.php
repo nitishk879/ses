@@ -90,4 +90,18 @@ return array(
     "interview_4"   => "Three or More time",
     "commercial_flow" => "Commercial flow",
     "commercial_flow_placeholder" => "--",
+    // Nov 7, 2024
+    "experience" => "Experience",
+    "experience_x" => ":experience yrs",
+    "scoring" => "Scoring",
+    "scoring_placeholder" => "--",
+    "score_ninety" => "90%",
+    "score_eighty" => "80%",
+    "score_seventy" => "70%",
+    "score_sixty" => "60%",
+    "score_key_feature" => "Key Features only",
+    // Nov 15th, 2024
+    "locations" => "Locations",
+    "work_mode" => "Mode of Work",
+    'update_project' => 'Update project',
 );

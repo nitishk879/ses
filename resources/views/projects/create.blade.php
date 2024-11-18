@@ -174,6 +174,9 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label" for="maxBudget">{{ __("projects/form.locations") }}</label>
+                                    </div>
                                     @foreach(\App\Models\Location::orderBy('title')->get() as $location)
                                         <div class="mb-3 col-md-4">
                                             <div class="form-check form-check-inline">
@@ -188,6 +191,9 @@
                                     @endforeach
                                 </div>
                                 <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <label class="form-label" for="maxBudget">{{ __("projects/form.work_mode") }}</label>
+                                    </div>
                                     @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
                                         <div class="mb-3 col-md-6">
                                             <div class="form-check form-check-inline">
@@ -272,6 +278,20 @@
                                         @endforeach
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div class="col-md-12 mb-3">
+                                        <h4>{{ __("projects/form.scoring") }}</h4>
+                                        @foreach(\App\Enums\ScoringEnum::cases() as $score)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="scoring[]" value="{{$score->value}}" id="category_{{$score->value}}">
+                                                <label class="form-check-label" for="category_{{$score->value}}">
+                                                    {{ __("projects/form.score_{$score->name}") }}
+                                                </label>
+                                                @error('eligibility') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-12 mb-4">
@@ -340,28 +360,44 @@
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <h5>{{ __("projects/form.number_of_interview") }}</h5>
-                                    @for($i=1; $i <=4; $i++)
+                                    @foreach(\App\Enums\InterviewEnum::cases() as $i)
                                         <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i}}" id="interview_{{$i}}">
-                                            <label class="form-check-label" for="interview_{{$i}}">
-                                                {{ __("projects/form.interview_{$i}") }}
+                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i->value}}" id="interview_{{$i->value}}">
+                                            <label class="form-check-label" for="interview_{{$i->value}}">
+                                                {{ __("projects/form.interview_{$i->value}") }}
                                             </label>
                                             @error('number_of_interviewers') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
-                                    @endfor
+                                    @endforeach
                                 </div>
-                                <div class="mb-3">
-                                    <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
-                                    <select class="form-select @error('commercial_flow') is-invalid @enderror"
-                                            name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
-                                        <option value="">{{ __("talents/registration.choose") }}</option>
-                                        @foreach(\App\Enums\CommercialFlow::cases() as $case)
-                                            <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('commercial_flow')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
+                                <div class="row align-items-center">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
+                                            <select class="form-select @error('commercial_flow') is-invalid @enderror"
+                                                    name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
+                                                <option value="">{{ __("talents/registration.choose") }}</option>
+                                                @foreach(\App\Enums\CommercialFlow::cases() as $case)
+                                                    <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
+                                                @endforeach
+                                            </select>
+                                            @error('commercial_flow')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>{{ __("projects/form.experience") }}</h5>
+                                        @for($ex=1; $ex <= 3; $ex++)
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="experience[]" value="{{$ex}}" id="experience_{{$ex}}">
+                                                <label class="form-check-label" for="experience_{{$ex}}">
+                                                    {{ __("projects/form.experience_x", ["experience" => $ex]) }}
+                                                </label>
+                                                @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            </div>
+                                        @endfor
+                                    </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <h5>{{ __("talents/registration.language") }}</h5>

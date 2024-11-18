@@ -32,6 +32,6 @@ class LanguagesCast implements CastsAttributes
         if (! $value instanceof LangEnum) {
             throw new InvalidArgumentException("The given value is not a valid LangEnum instance.");
         }
-        return $value->value;
+        return json_encode($value->value);
     }
 }

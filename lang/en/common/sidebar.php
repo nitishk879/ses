@@ -29,8 +29,8 @@ return array(
     'future' => 'Possible to Participate in future',
     'from_date' => 'Inquire About Participation',
     'affiliation' => 'Affiliation',
-    'End' => 'End',
-    'Primary' => 'Prime Contractor',
+    'End' => 'End contract', //28th Oct, 2024
+    'Primary' => 'Primary Contractor', // Oct 28, 2024
     'Secondary' => 'Secondary Claim',
     'Third' => 'Third and Subsequent Clients',
     'interview_once' => 'Once',
