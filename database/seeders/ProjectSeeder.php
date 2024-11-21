@@ -36,7 +36,7 @@ class ProjectSeeder extends Seeder
                 "accept" => $project->accept,
                 "experience" => $project->experience ?? json_encode([1,2,3]),
                 "scoring" => $project->scoring,
-//                "languages" => $project->languages ?? LangEnum::toArray(LangEnum::en->value),
+                "languages" => $project->languages ?? LangEnum::toArray(LangEnum::en->value),
                 "remote_operation_possible" => $project->remote_operation_possible,
                 "contract_start_date" => $project->contract_start_date ?? today()->addDays(7),
                 "contract_end_date" => $project->contract_end_date ?? today()->addMonth(),
