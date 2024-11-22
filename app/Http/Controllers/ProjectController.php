@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -93,6 +94,7 @@ class ProjectController extends Controller
             'work_location_prefer' => $validated["workLocations"] ?? '',
             "affiliation" => $validated["eligibility"] ?? '',
             "experience" => json_encode($validated["experience"]) ?? '',
+            "project_finalized" => $validated["project_finalized"] ?? false,
             "trade_classification" => (int) $validated["trade_classification"] ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
             "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
@@ -132,7 +134,53 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        //
+        $project->title = $request["title"] ?? '';
+        $project->slug = Str::slug($request['title'], '-');
+        $project->minimum_price = $request["minimum_price"] ?? '';
+        $project->maximum_price = $request["maximum_price"] ?? '';
+        $project->skill_matching = $request["skill_matching"] ?? false;
+        $project->accept = $request["accept"] ?? false;
+        $project->remote_operation_possible = $request["remote_operation_possible"] ?? false;
+        $project->contract_start_date = $request["contract_start_date"] ?? '';
+        $project->contract_end_date = $request["contract_end_date"] ?? '';
+        $project->possible_to_continue = $request["possible_to_continue"] ?? false;
+        $project->project_description = $request["project_description"] ?? '';
+        $project->personnel_requirement = $request["personnel_requirement"] ?? '';
+        $project->person_in_charge = $request["person_in_charge"] ?? auth()->user()->name;
+        $project->is_public = $request->input("is_public");
+        $project->company_info_disclose = $request->input("company_info_disclose");
+        $project->contract_classification = $request["contract_classification"] ?? '';
+        $project->deadline = $request["deadline"] ?? '';
+        $project->scoring = $request["scoring"] ?? [50];
+        $project->languages = $request["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '';
+        $project->work_location_prefer = $request["workLocations"] ?? '';
+        $project->affiliation = $request["eligibility"] ?? '';
+        $project->experience = json_encode($request["experience"]) ?? '';
+        $project->project_finalized = $request["project_finalized"] ?? false;
+        $project->trade_classification = (int) $request["trade_classification"] ?? '';
+        $project->number_of_application = $request["number_of_application"] ?? '';
+        $project->number_of_interviewers = $request["number_of_interviewers"] ?? '';
+        $project->commercial_flow = $request["commercial_flow"] ?? '';
+        $project->company_id = auth()->user()->company->id ?? 0;
+        $project->user_id = auth()->user()->id ?? 0;
+        $project->save();
+
+        // Check if input has values
+        if ($request->input('category_id')) {
+            $project->subCategories()->sync($request->input('category_id') ?? []);
+        }
+
+        // Check if input has values
+        if ($request->input('project_features')) {
+            $project->features()->sync($request->input("project_features") ?? []);
+        }
+
+        // Check if input has values
+        if ($request->input('locations')) {
+            $project->locations()->sync($request->input("locations") ?? []);
+        }
+
+            return redirect()->route('project.index')->with('success', __("projects/show.project_updated"));
     }
 
     /**
@@ -140,8 +188,9 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        $project->update(['deleter_id' => Auth::user()->id]);
         $project->delete();
-        return redirect()->route('project.index')->with('success', 'Project deleted successfully.');
+        return redirect()->route('project.index')->with('success', __("projects/show.project_deleted"));
     }
 
     /**

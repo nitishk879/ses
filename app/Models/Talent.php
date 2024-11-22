@@ -31,6 +31,8 @@ class Talent extends Model
         'availability',
         'joining_date',
         'affiliation',
+        'cover_letter',
+        'address',
         'quasi_delegation_possible',
         'available_for_contract',
         'available_for_dispatch',
@@ -63,6 +65,7 @@ class Talent extends Model
             'characteristics' => 'array',
             'work_location_prefer' => 'array',
             'availability' => ParticipationEnum::class,
+            'joining_date' => 'datetime'
         ];
     }
 

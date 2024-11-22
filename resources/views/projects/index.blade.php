@@ -68,6 +68,10 @@
                                     </div>
                                 </div>
                             </div>
+                            <form method="POST" action="{{ route("project.destroy", $project) }}" x-data>
+                                @csrf @method('DELETE')
+                                <a class="remove-from-favourite" href="{{ route("project.destroy", $project) }}" x-on:click.prevent="$root.submit();"><i class="fa-solid fa-trash"></i></a>
+                            </form>
                         </div>
                     @endforeach
                 @else

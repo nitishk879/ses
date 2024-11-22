@@ -341,6 +341,26 @@ body{
                 color: $azure-100;
             }
         }
+        .remove-from-favourite{
+            display: block;
+            position: absolute;
+            top: -1rem;
+            right: -1rem;
+            height: 3.5rem;
+            width: 3.5rem;
+            background: rgba(255, 0, 0, 0.74);
+            border-radius: 50%;
+            z-index: -1;
+            i{
+                display: flex;
+                position: relative;
+                padding: 1.5rem 1rem .75rem .25rem;
+                font-size: 1.25rem;
+                justify-content: center;
+                align-items: center;
+                color: $white;
+            }
+        }
         .job-content{
             .job-status{
                 border-radius: 0.3125rem;

@@ -15,8 +15,9 @@
             <div class="col-12 col-xl-6">
                 <div class="card">
                     <div class="card-header">
-                        <h5 class="card-title">Basic Table</h5>
-                        <h6 class="card-subtitle text-muted">Using the most basic table markup, here’s how .table-based tables look in Bootstrap.
+                        <h5 class="card-title">List of Talents</h5>
+                        <h6 class="card-subtitle text-muted">
+                            Following is the list of talents we've registered with us.
                         </h6>
                     </div>
                     <table class="table">
@@ -29,13 +30,13 @@
                         </tr>
                         </thead>
                         <tbody>
-                        @foreach(\App\Models\User::skip(2)->limit(5)->get() as $applicant)
+                        @foreach(Auth::user()->company->talents as $talent)
                             <tr>
-                                <td>{{ $applicant->name ?? 'John Doe' }}</td>
-                                <td>{{ $applicant->phone ?? '864-348-0485' }}</td>
-                                <td class="d-none d-md-table-cell">{{ $applicant->date_of_birth->format('M d, Y') ?? 'June 21, 1961' }}</td>
+                                <td>{{ $talent->user->name ?? 'John Doe' }}</td>
+                                <td>{{ $talent->user->phone ?? '864-348-0485' }}</td>
+                                <td class="d-none d-md-table-cell">{{ $talent->user->date_of_birth->format('M d, Y') ?? 'June 21, 1961' }}</td>
                                 <td class="table-action">
-                                    <a href="#"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="{{ route("talents.edit", $talent) }}"><i class="fa-regular fa-pen-to-square"></i></a>
                                     <a href="#"><i class="fa-solid fa-trash-can"></i></a>
                                 </td>
                             </tr>

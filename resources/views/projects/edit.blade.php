@@ -98,7 +98,7 @@
                                                id="projectStarted"
                                                name="contract_start_date"
                                                placeholder="{{ __("projects/form.project_start_date") }}"
-                                               value="{{ $project->contract_start_date ?? old("contract_start_date") ?? '' }}"
+                                               value="{{ $project->contract_start_date->format('Y-m-d') ?? old("contract_start_date") ?? '' }}"
                                                aria-label="Start date"
                                                required
                                         >
@@ -109,7 +109,7 @@
                                                id="contractEndDate"
                                                name="contract_end_date"
                                                placeholder="{{ __("projects/form.project_end_date") }}"
-                                               value="{{ $project->contract_end_date ?? old("contract_end_date") ?? '' }}"
+                                               value="{{ $project->contract_end_date->format('Y-m-d') ?? old("contract_end_date") ?? '' }}"
                                                aria-label="contract end date"
                                                required
                                         >
@@ -127,7 +127,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.project_published") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="is_public" value="{{ $project->is_public ?? old("is_public" ?? 1) }}" id="projectStatus"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="is_public" value="1" id="projectVisibility"
                                                 @checked($project->is_public==1 ? 1: 0 ?? old('is_public', $project->is_public))
                                             >
                                             <label class="form-check-label" for="projectStatus">{{ __("projects/form.public") }}</label>
@@ -136,7 +136,7 @@
                                     <div class="col-md-12 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.company_information_disclosure_settings") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="company_info_disclose" value="{{ $project->company_info_disclose ?? old("company_info_disclose" ?? 1) }}" id="projectStatus"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="company_info_disclose" value="1" id="projectInfoDisclouser"
                                                 @checked($project->company_info_disclose ?? old('company_info_disclose', $project->company_info_disclose))
                                             >
                                             <label class="form-check-label" for="projectStatus">{{ __("projects/form.public") }}</label>
@@ -145,7 +145,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.skill_matching") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="skill_matching" value="{{ old("skill_matching" ?? 1) }}" id="projectSkill" aria-label="{{ __("projects/form.skill_matching") }}"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="skill_matching" value="1" id="projectSkill" aria-label="{{ __("projects/form.skill_matching") }}"
                                                 @checked($project->skill_matching ?? old('skill_matching', $project->skill_matching))
                                             >
                                         </div>
@@ -153,7 +153,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="projectStatus" class="col-form-label required">{{ __("projects/form.project_finalise") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="project_finalized" value="{{ old("project_finalized" ?? 1) }}" id="projectSkill" aria-label="{{ __("projects/form.project_finalise") }}"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="project_finalized" value="1" id="projectSkill" aria-label="{{ __("projects/form.project_finalise") }}"
                                                 @checked($project->project_finalized ?? old('project_finalized', $project->project_finalized))
                                             >
                                         </div>
@@ -161,7 +161,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="projectSustainability" class="col-form-label required">{{ __("projects/form.possible_to_continue") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="possible_to_continue" value="{{ old("possible_to_continue" ?? 1) }}" id="projectSustainability" aria-label="{{ __("projects/form.possible_to_continue") }}"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="possible_to_continue" value="1" id="projectSustainability" aria-label="{{ __("projects/form.possible_to_continue") }}"
                                                 @checked($project->possible_to_continue ?? old('possible_to_continue', $project->possible_to_continue))
                                             >
                                         </div>
@@ -169,7 +169,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="projectSustainability" class="col-form-label required">{{ __("projects/form.remote_operation_possible") }}</label>
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" role="switch" name="remote_operation_possible" value="{{ old("remote_operation_possible" ?? 1) }}" id="projectSustainability" aria-label="{{ __("projects/form.remote_operation_possible") }}"
+                                            <input class="form-check-input" type="checkbox" role="switch" name="remote_operation_possible" value="1" id="projectSustainability" aria-label="{{ __("projects/form.remote_operation_possible") }}"
                                                 @checked($project->remote_operation_possible ?? old('remote_operation_possible', $project->remote_operation_possible))
                                             >
                                         </div>
@@ -283,9 +283,9 @@
                                     <div class="col-md-12 mb-3">
                                         <h4>{{ __("projects/form.eligibility") }}</h4>
                                         @foreach(\App\Enums\AffiliationEnum::cases() as $eligible)
-                                            <div class="form-check form-check-inline">
+                                            <div class="form-check form-check-inline" data-bs-popper="{{ $eligible->value }}" data-bs-target="{{ $project->eligibility }}">
                                                 <input class="form-check-input" type="checkbox" name="eligibility[]" value="{{$eligible->value}}" id="category_{{$eligible->value}}"
-                                                       @checked(old('eligibility', $project->eligibility))
+                                                    @checked(in_array($eligible->value, old('eligibility', $project->affiliation ?? [])))
                                                 >
                                                 <label class="form-check-label" for="category_{{$eligible->value}}">
                                                     {{ __("projects/form.{$eligible->name}") }}

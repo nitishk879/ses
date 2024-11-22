@@ -52,5 +52,8 @@ return array(
     'in_progress'  =>'In progress',
     'completed'  =>'Completed',
     'on_hold'  =>'On Hold',
-    'unknown'   => 'Unknown'
+    'unknown'   => 'Unknown',
+    // Nov 21, 2024
+    'project_deleted' => 'Project deleted successfully.',
+    'project_updated' => 'Project updated successfully.'
 );

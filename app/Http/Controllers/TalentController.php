@@ -32,7 +32,6 @@ class TalentController extends Controller
      */
     public function store(Request $request)
     {
-//        dd($request->all());
         $validated = $request->validate([
             'firstname' => 'required|max:255',
             'lastname' => 'required|max:255',
@@ -47,7 +46,7 @@ class TalentController extends Controller
             'cover_letter' => 'required|min:64',
             'resume' => 'required|file|mimes:doc,docs,pdf|max:2048',
             'education' => 'required|min:3',
-            'experience' => 'required|min:3',
+//            'experience' => 'required|min:3',
             'work_experience' => 'required',
             'workLocations' => 'array',
 //            'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocation::options())),
@@ -64,12 +63,9 @@ class TalentController extends Controller
         ]);
 
         if ($request->hasFile('resume')){
-            $fileNameWithExt = $request->file('resume')->getClientOriginalName();
-            $fileName       = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
             $fileExt        = $request->file('resume')->getClientOriginalExtension();
             $fileNameToStore = "{$validated['firstname']}-{$validated['lastname']}.{$fileExt}";
             $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
-
         }else{
             $fileNameToStore = 'default-image.jpg';
         }
@@ -99,6 +95,7 @@ class TalentController extends Controller
             'available_for_dispatch' => $validated['contract_type'] == 'available_for_dispatch',
             'resume' => $fileNameToStore,
             'cover_letter' => $validated['cover_letter'],
+            'address'   => $validated['address'],
             'qualifications' => $validated['education'],
             'experience_pr' => $validated['experience'],
             'subcategory' => $validated['subcategory'],
@@ -108,7 +105,7 @@ class TalentController extends Controller
             'other_desire_conditions' => $validated['other_desired_location'] ?? '',
             'privacy' => $validated['privacy'],
             'participation' => $validated['participation'],
-            'experience' => $validated['work_experience'] ?? '',
+//            'experience' => $validated['work_experience'] ?? '',
             'joining_date'  => $validated['joining_date'] ?? null,
             'characteristics' => $validated['characteristics'] ?? [],
         ]);
@@ -130,9 +127,9 @@ class TalentController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(User $user)
+    public function edit(Talent $talent)
     {
-        //
+        return view('talents.edit', compact('talent'));
     }
 
     /**
@@ -140,14 +137,69 @@ class TalentController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        if ($request->hasFile('resume')){
+            $fileExt        = $request->file('resume')->getClientOriginalExtension();
+            $fileNameToStore = "{$user->firstname}-{$user->lastname}.{$fileExt}";
+            $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
+        }else{
+            $fileNameToStore = 'default-image.jpg';
+        }
+
+        $user = User::updateOrCreate([
+            'email' => $user->email,
+        ], [
+            'firstname' => $user->firstname,
+            'lastname' => $user->lastname,
+            'password' => 'password',
+            'username' => strstr($user->email, '@', true),
+            'date_of_birth' => $user->date_of_birth ?? today()->subYears(18),
+            'gender' => $user->gender,
+            'nationality' => $user->nationality,
+            'nearest_station_prefecture' => $user->nearest_station_prefecture ?? '',
+            'nearest_station_line' => $user->nearest_station_line ?? '',
+            'nearest_station_name' => $user->nearest_station_name ?? '',
+            'languages' => $user->language == 3 ? [1,2] : [$user->language],
+        ]);
+
+
+        $talent = $user->talent()->create([
+            'affiliation' => $request['affiliation'],
+            'availability' => $request['participation'],
+            'quasi_delegation_possible' => $request['contract_type'] == 'quasi_delegation_possible',
+            'available_for_contract' => $request['contract_type'] == 'available_for_contract',
+            'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
+            'resume' => $fileNameToStore,
+            'cover_letter' => $request['cover_letter'],
+            'address'   => $request['address'],
+            'qualifications' => $request['education'],
+            'experience_pr' => $request['experience'],
+            'subcategory' => $request['subcategory'],
+            'min_monthly_price' => $request['min_monthly_price'],
+            'max_monthly_price' => $request['max_monthly_price'],
+            'work_location_prefer' => $request['workLocations'] ?? '', //[1, 2] / [1,3]
+            'other_desire_conditions' => $request['other_desired_location'] ?? '',
+            'privacy' => $request['privacy'],
+            'participation' => $request['participation'],
+            'joining_date'  => $request['joining_date'] ?? null,
+            'characteristics' => $request['characteristics'] ?? [],
+        ]);
+
+        if ($request->input('subcategories')){
+            $talent->subcategories()->sync($request['subcategory']);
+        }
+        if ($request->input('locations')){
+            $talent->locations()->attach($request->input(['locations']));
+        }
+
+        return redirect()->route('talents.index')->with('success', __("talents/registration.talent_updated"));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(Talent $talent)
     {
-        //
+        $talent->delete();
+        return redirect()->route('talents.index')->with('success', __('talents/registration.talent_deleted'));
     }
 }

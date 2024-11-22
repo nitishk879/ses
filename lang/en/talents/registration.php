@@ -86,4 +86,7 @@ return array(
     'consult_sample_input'  => 'Consultant Sample',
     'system_engineer_sample' => 'System Engineer Sample',
     'infrastructure_engineer_sample' => 'Infrastructure Engineer Sample',
+    'talent_update' => 'Update talent',
+    'talent_updated' => 'Talent updated successfully',
+    'talent_deleted'    => 'Talent deleted successfully',
 );
