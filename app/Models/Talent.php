@@ -149,7 +149,7 @@ class Talent extends Model
     {
         return Attribute::get(function () {
             if ($this->available_for_dispatch) {
-                return ContractClassificationEnum::OUTSOURCING_CONTRACT->value;
+                return ContractClassificationEnum::DISPATCH_CONTRACT->value;
             }
 
             if ($this->available_for_contract) {

@@ -135,30 +135,31 @@ class TalentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, Talent $talent)
     {
         if ($request->hasFile('resume')){
             $fileExt        = $request->file('resume')->getClientOriginalExtension();
-            $fileNameToStore = "{$user->firstname}-{$user->lastname}.{$fileExt}";
+            $fileNameToStore = "{$talent->user->firstname}-{$talent->user->lastname}.{$fileExt}";
             $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
         }else{
             $fileNameToStore = 'default-image.jpg';
         }
 
         $user = User::updateOrCreate([
-            'email' => $user->email,
+            'email' => $talent->user->email,
         ], [
-            'firstname' => $user->firstname,
-            'lastname' => $user->lastname,
+            'firstname' => $talent->user->firstname,
+            'lastname' => $talent->user->lastname,
             'password' => 'password',
-            'username' => strstr($user->email, '@', true),
-            'date_of_birth' => $user->date_of_birth ?? today()->subYears(18),
-            'gender' => $user->gender,
-            'nationality' => $user->nationality,
-            'nearest_station_prefecture' => $user->nearest_station_prefecture ?? '',
-            'nearest_station_line' => $user->nearest_station_line ?? '',
-            'nearest_station_name' => $user->nearest_station_name ?? '',
-            'languages' => $user->language == 3 ? [1,2] : [$user->language],
+            'username' => strstr($talent->user->email, '@', true),
+            'date_of_birth' => $talent->user->date_of_birth ?? today()->subYears(18),
+            'gender' => $talent->user->gender,
+//            'address'   => $request['address'] ?? '',
+            'nationality' => $talent->user->nationality,
+            'nearest_station_prefecture' => $talent->user->nearest_station_prefecture ?? '',
+            'nearest_station_line' => $talent->user->nearest_station_line ?? '',
+            'nearest_station_name' => $talent->user->nearest_station_name ?? '',
+            'languages' => $talent->user->language == 3 ? [1,2] : [$talent->user->language],
         ]);
 
 
@@ -170,7 +171,7 @@ class TalentController extends Controller
             'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
             'resume' => $fileNameToStore,
             'cover_letter' => $request['cover_letter'],
-            'address'   => $request['address'],
+            'address'   => $request['address'] ?? '',
             'qualifications' => $request['education'],
             'experience_pr' => $request['experience'],
             'subcategory' => $request['subcategory'],
@@ -200,6 +201,6 @@ class TalentController extends Controller
     public function destroy(Talent $talent)
     {
         $talent->delete();
-        return redirect()->route('talents.index')->with('success', __('talents/registration.talent_deleted'));
+        return redirect()->route('job-applicants')->with('success', __('talents/registration.talent_deleted'));
     }
 }

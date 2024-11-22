@@ -147,7 +147,7 @@
                                 <div class="mb-3">
                                     <label for="talentAddress" class="form-label">{{ __('talents/registration.address') }}</label>
                                     <textarea class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" rows="1" placeholder="{{ __('talents/registration.type_your_address_here') }}">
-                                        {{ $talent->user->address ?? old("address") ?? '' }}
+                                        {{ $talent->address ?? old("address") ?? '' }}
                                     </textarea>
                                     @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 </div>

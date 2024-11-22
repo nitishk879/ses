@@ -36,8 +36,14 @@
                                 <td>{{ $talent->user->phone ?? '864-348-0485' }}</td>
                                 <td class="d-none d-md-table-cell">{{ $talent->user->date_of_birth->format('M d, Y') ?? 'June 21, 1961' }}</td>
                                 <td class="table-action">
-                                    <a href="{{ route("talents.edit", $talent) }}"><i class="fa-regular fa-pen-to-square"></i></a>
-                                    <a href="#"><i class="fa-solid fa-trash-can"></i></a>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-secondary btn-sm" href="{{ route("talents.edit", $talent) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                                        <form method="POST" action="{{ route("talents.destroy", $talent) }}" x-data>
+                                            @csrf @method('DELETE')
+{{--                                            <a href="{{ route("talents.destroy", $talent) }}" x-on:click.prevent="$root.submit();"><i class="fa-solid fa-trash-can"></i></a>--}}
+                                            <button class="btn btn-danger btn-sm" type="submit" ><i class="fa-solid fa-trash-can"></i></button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
