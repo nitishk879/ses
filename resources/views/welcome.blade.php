@@ -168,7 +168,7 @@
                 <section id="exploreByCategory">
                     <div class="container bg-slate-100 shadow-inner align-items-start">
                         <div class="row justify-content-between align-items-center mb-3">
-                            <div class="col-md-9 col-lg-8 col-xl-4 text-justify">
+                            <div class="col-md-9 col-lg-8 col-xl-6 text-justify">
                                 <h3 class="section-title">{{ __("common/welcome.explore_by") }} <span>&nbsp; {{ __("common/welcome.category") }}</span></h3>
                             </div>
                             <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">
@@ -196,7 +196,7 @@
                 <section id="exploreByLocation">
                     <div class="container">
                         <div class="row justify-content-between align-items-center">
-                            <div class="col-md-9 col-lg-8 col-xl-4 text-justify">
+                            <div class="col-md-9 col-lg-8 col-xl-6 text-justify">
                                 <h3 class="section-title">{{ __("common/welcome.explore_by") }} <span>&nbsp; {{ __("common/welcome.location") }}</span></h3>
                             </div>
                             <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">
@@ -419,7 +419,7 @@
                 <section id="featuredSection">
                     <div class="container mb-5">
                         <div class="row justify-content-between align-items-center">
-                            <div class="col-md-9 col-lg-8 col-xl-5">
+                            <div class="col-md-9 col-lg-8 col-xl-6">
                                 <h3 class="section-title">{!! __("common/welcome.featured_jobs_and_projects") !!}</h3>
                             </div>
                             <div class="col-md-3 col-lg-4 col-xl-4 text-end">
@@ -607,7 +607,7 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_project") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <div class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></div>
+                                        <a href="{{ route("register") }}" class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -616,7 +616,7 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_talent") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <div class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></div>
+                                        <a href="{{ route("register") }}" class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
                                     </div>
                                     <img class="search-card-img" src="{{ asset("images/talent-search-card.png") }}" alt=""/>
                                 </div>

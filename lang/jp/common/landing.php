@@ -13,7 +13,7 @@ return
         'digital_marketing' => 'Digital Marketing',
         'videos' => 'Videos',
         'animation' => 'Animation',
-        'search_keywords' => 'Job tittle, Projects or Keywords...',
+        'search_keywords' => 'Job title, Projects or Keywords...',
         'preferred_location' => 'Preferred Location',
         'post_paragraph' => 'Whether you’re looking to hire or get hired, simply create a profile, post a job/project, or search for opportunities that match your skills.',
         'perfect_match_paragraph' => 'Employers can browse talent profiles and talents can explore job listings. Our smart filters and advanced matching help you find the right fit effortlessly.',
