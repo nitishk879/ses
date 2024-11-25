@@ -36,7 +36,7 @@ return new class extends Migration
             $table->boolean('remote_work_preferred')->default(false);
             $table->json('work_location_prefer')->nullable();
             $table->text('cover_letter')->nullable();
-            $table->text('address')->nullable();
+            $table->boolean('privacy')->default(false);
             $table->text('experience_pr')->nullable();
             $table->text('qualifications')->nullable();
             $table->integer('min_monthly_price')->nullable();

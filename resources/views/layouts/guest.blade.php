@@ -7,17 +7,22 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mulish:ital,wght@0,200..1000;1,200..1000&display=swap" rel="stylesheet">
 
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <!-- Scripts --> <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}" defer></script>
-{{--    @vite(['resources/sass/app.scss', 'resources/js/app.js'])--}}
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+    <!---- Font Awesome ---->
+    <script src="https://kit.fontawesome.com/8c6f840b1c.js" crossorigin="anonymous"></script>
+
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="{{ asset("images/logo.png") }}">
+
+    @stack('stylesheets')
 </head>
 <body>
 <div id="app">

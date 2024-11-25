@@ -512,7 +512,7 @@
                     modalBody.innerHTML = data.content;
                 })
                 .catch(error => {
-                    console.error('There was an error fetching the data!', error);
+                    console.error('There was an errors fetching the data!', error);
                     alert('Failed to fetch data.');
                 });
         }

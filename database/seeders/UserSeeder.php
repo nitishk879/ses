@@ -35,6 +35,7 @@ class UserSeeder extends Seeder
                 'nearest_station_line' => $talent->nearest_station_line,
                 'station_name' => $talent->station_name,
                 'is_public' => $talent->is_public,
+                'address' => $talent->address ?? '',
                 'email_verified_at' => $talent->email_verified_at,
                 'password' => $talent->password ?? Hash::make('password')
             ])->roles()->sync([1, 2, 3]);

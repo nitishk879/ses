@@ -13,9 +13,11 @@
                 @if($company && $company->projects->count() >=1)
                     @foreach($company->projects as $project)
                         <div class="job-list mt-4">
-                            <a href="{{ route("project.edit", $project) }}" class="add-to-favourite">
-                                <i class="fa-solid fa-pencil"></i>
-                            </a>
+                            @can('update', \App\Models\Project::class)
+                                <a href="{{ route("project.edit", $project) }}" class="add-to-favourite">
+                                    <i class="fa-solid fa-pencil"></i>
+                                </a>
+                            @endcan
                             <div class="job-content">
                                 <div class="row justify-content-between">
                                     <div class="col-md-6 d-flex gap-2">
@@ -68,10 +70,12 @@
                                     </div>
                                 </div>
                             </div>
-                            <form method="POST" action="{{ route("project.destroy", $project) }}" x-data>
-                                @csrf @method('DELETE')
-                                <a class="remove-from-favourite" href="{{ route("project.destroy", $project) }}" x-on:click.prevent="$root.submit();"><i class="fa-solid fa-trash"></i></a>
-                            </form>
+                            @can('delete', \App\Models\Project::class)
+                                <form method="POST" action="{{ route("project.destroy", $project) }}" x-data>
+                                    @csrf @method('DELETE')
+                                    <a class="remove-from-favourite" href="{{ route("project.destroy", $project) }}" x-on:click.prevent="$root.submit();"><i class="fa-solid fa-trash"></i></a>
+                                </form>
+                            @endcan
                         </div>
                     @endforeach
                 @else

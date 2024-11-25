@@ -84,6 +84,7 @@ class TalentController extends Controller
             'nearest_station_line' => $validated['nearest_station_line'] ?? '',
             'nearest_station_name' => $validated['nearest_station_name'] ?? '',
             'languages' => $validated['language'] == 3 ? [1,2] : [$validated['language']],
+            'address' => $validated['address'] ?? ''
         ]);
 
 
@@ -154,7 +155,7 @@ class TalentController extends Controller
             'username' => strstr($talent->user->email, '@', true),
             'date_of_birth' => $talent->user->date_of_birth ?? today()->subYears(18),
             'gender' => $talent->user->gender,
-//            'address'   => $request['address'] ?? '',
+            'address'   => $request['address'] ?? '',
             'nationality' => $talent->user->nationality,
             'nearest_station_prefecture' => $talent->user->nearest_station_prefecture ?? '',
             'nearest_station_line' => $talent->user->nearest_station_line ?? '',
@@ -171,7 +172,6 @@ class TalentController extends Controller
             'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
             'resume' => $fileNameToStore,
             'cover_letter' => $request['cover_letter'],
-            'address'   => $request['address'] ?? '',
             'qualifications' => $request['education'],
             'experience_pr' => $request['experience'],
             'subcategory' => $request['subcategory'],

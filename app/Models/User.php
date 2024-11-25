@@ -43,7 +43,8 @@ class User extends Authenticatable
         'nearest_station_prefecture',
         'nearest_station_line',
         'station_name',
-        'is_public'
+        'is_public',
+        'address'
     ];
 
     /**

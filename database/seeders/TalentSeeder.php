@@ -36,7 +36,7 @@ class TalentSeeder extends Seeder
                 'work_location_prefer' => $talent->work_location_prefer,
                 'experience_pr' => $talent->experience_pr,
                 'cover_letter' => $talent->cover_letter ?? '',
-                'address' => $talent->address ?? '',
+                'privacy' => $talent->privacy ?? false,
                 "characteristics" => $talent->characteristics,
                 'qualifications' => $talent->qualifications,
 //                'experience' => $talent->experience ?? random_int(1,5),

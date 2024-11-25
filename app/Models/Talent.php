@@ -21,10 +21,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Talent extends Model
 {
-    use HasFactory, FormatNumberTrait, HasTalentDocumentTrait;
+    use HasFactory, SoftDeletes, FormatNumberTrait, HasTalentDocumentTrait;
 
     protected $fillable = [
         'resume',
@@ -32,7 +33,7 @@ class Talent extends Model
         'joining_date',
         'affiliation',
         'cover_letter',
-        'address',
+        'privacy',
         'quasi_delegation_possible',
         'available_for_contract',
         'available_for_dispatch',
@@ -65,7 +66,8 @@ class Talent extends Model
             'characteristics' => 'array',
             'work_location_prefer' => 'array',
             'availability' => ParticipationEnum::class,
-            'joining_date' => 'datetime'
+            'joining_date' => 'datetime',
+            'privacy' => 'boolean',
         ];
     }
 

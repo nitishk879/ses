@@ -210,12 +210,12 @@
 {{--                                <div class="mb-3">--}}
 {{--                                    <label for="preferredLocation"--}}
 {{--                                           class="form-label">{{ __('talents/registration.preferred_location') }}</label>--}}
-{{--                                    <input type="text" class="form-control @error('preferred_location') is-invalid @enderror"--}}
+{{--                                    <input type="text" class="form-control @errors('preferred_location') is-invalid @enderror"--}}
 {{--                                           name="preferred_location" id="preferredLocation"--}}
 {{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}"--}}
 {{--                                           value="{{ old("preferred_location") ?? '' }}"--}}
 {{--                                           >--}}
-{{--                                    @error('preferred_location')--}}
+{{--                                    @errors('preferred_location')--}}
 {{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
 {{--                                    @enderror--}}
 {{--                                </div>--}}
@@ -223,11 +223,11 @@
 {{--                                    <label for="otherDesiredLocation"--}}
 {{--                                           class="form-label">{{ __('talents/registration.other_desired_location') }}</label>--}}
 {{--                                    <input type="text"--}}
-{{--                                           class="form-control @error('other_desired_location') is-invalid @enderror"--}}
+{{--                                           class="form-control @errors('other_desired_location') is-invalid @enderror"--}}
 {{--                                           name="other_desired_location" id="otherDesiredLocation"--}}
 {{--                                           value="{{ old("other_desired_location") ?? "" }}"--}}
 {{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}">--}}
-{{--                                    @error('other_desired_location')--}}
+{{--                                    @errors('other_desired_location')--}}
 {{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
 {{--                                    @enderror--}}
 {{--                                </div>--}}
@@ -493,7 +493,7 @@
                         document.querySelector('.cover-letter-description').innerHTML = data.content;
                     })
                     .catch(error => {
-                        console.error('There was an error fetching the data!', error);
+                        console.error('There was an errors fetching the data!', error);
                         alert('Failed to fetch data.');
                     });
             }

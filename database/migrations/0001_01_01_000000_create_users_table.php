@@ -30,6 +30,7 @@ return new class extends Migration
             $table->boolean('is_public')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->text('address')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

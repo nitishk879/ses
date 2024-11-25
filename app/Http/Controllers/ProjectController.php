@@ -40,6 +40,9 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        if ($request->user()->cannot('create', Project::class)) {
+            abort(403);
+        }
 
         $validated = $request->validate([
             "title" => 'required|unique:projects',
@@ -134,6 +137,10 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        if ($request->user()->cannot('update', $project)) {
+            abort(403);
+        }
+
         $project->title = $request["title"] ?? '';
         $project->slug = Str::slug($request['title'], '-');
         $project->minimum_price = $request["minimum_price"] ?? '';
@@ -180,7 +187,7 @@ class ProjectController extends Controller
             $project->locations()->sync($request->input("locations") ?? []);
         }
 
-            return redirect()->route('project.index')->with('success', __("projects/show.project_updated"));
+        return redirect()->route('project.index')->with('success', __("projects/show.project_updated"));
     }
 
     /**

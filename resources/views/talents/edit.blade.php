@@ -147,7 +147,7 @@
                                 <div class="mb-3">
                                     <label for="talentAddress" class="form-label">{{ __('talents/registration.address') }}</label>
                                     <textarea class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" rows="1" placeholder="{{ __('talents/registration.type_your_address_here') }}">
-                                        {{ $talent->address ?? old("address") ?? '' }}
+                                        {{ $talent->user->address ?? old("address") ?? '' }}
                                     </textarea>
                                     @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 </div>
@@ -217,12 +217,21 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
+                                    <!-- Display Existing File -->
+{{--                                    @if($talent->resume)--}}
+{{--                                        <div class="mb-3">--}}
+{{--                                            <label for="existingFile" class="form-label">Existing File:</label>--}}
+{{--                                            <a href="{{ asset("storage/{$talent->resume}") }}" target="_blank" class="btn btn-link">--}}
+{{--                                                View File--}}
+{{--                                            </a>--}}
+{{--                                        </div>--}}
+{{--                                    @endif--}}
                                     <label for="formFile" class="form-label">{{ __("talents/registration.upload_resume") }}
                                         ({{ __('talents/registration.file_acceptance') }})</label>
                                     <input class="form-control @error('resume') is-invalid @enderror"
                                            type="file"
                                            name="resume"
-                                           value="{{ $talent->resume ?? old("resume") ?? '' }}"
+                                           value="{{ asset("storage/{$talent->resume}") ?? old("resume") ?? '' }}"
                                            id="formFile">
                                     @error('resume')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -264,14 +273,14 @@
                                     </div>
 {{--                                    <div class="col-md-6 mb-3" >--}}
 {{--                                        <label class="form-label" for="workExperience">{{ __("talents/registration.work_experience") }}</label>--}}
-{{--                                        <input type="number" class="form-control @error('work_experience') is-invalid @enderror"--}}
+{{--                                        <input type="number" class="form-control @errors('work_experience') is-invalid @enderror"--}}
 {{--                                               name="work_experience"--}}
 {{--                                               id="workExperience"--}}
 {{--                                               min="0"--}}
 {{--                                               value="{{ old("work_experience") ?? '' }}"--}}
 {{--                                               placeholder="{{ __('talents/registration.work_experience_placeholder') }}"--}}
 {{--                                        />--}}
-{{--                                        @error('work_experience')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror--}}
+{{--                                        @errors('work_experience')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror--}}
 {{--                                    </div>--}}
                                 </div>
                             </div>
@@ -529,7 +538,7 @@
                     modalBody.innerHTML = data.content;
                 })
                 .catch(error => {
-                    console.error('There was an error fetching the data!', error);
+                    console.error('There was an errors fetching the data!', error);
                     alert('Failed to fetch data.');
                 });
         }
