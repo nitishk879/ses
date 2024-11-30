@@ -13,7 +13,7 @@
                 @if($company && $company->projects->count() >=1)
                     @foreach($company->projects as $project)
                         <div class="job-list mt-4">
-                            @can('update', \App\Models\Project::class)
+                            @can('update', $project)
                                 <a href="{{ route("project.edit", $project) }}" class="add-to-favourite">
                                     <i class="fa-solid fa-pencil"></i>
                                 </a>
@@ -70,7 +70,7 @@
                                     </div>
                                 </div>
                             </div>
-                            @can('delete', \App\Models\Project::class)
+                            @can('delete', $project)
                                 <form method="POST" action="{{ route("project.destroy", $project) }}" x-data>
                                     @csrf @method('DELETE')
                                     <a class="remove-from-favourite" href="{{ route("project.destroy", $project) }}" x-on:click.prevent="$root.submit();"><i class="fa-solid fa-trash"></i></a>

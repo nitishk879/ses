@@ -6,6 +6,7 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\TalentController;
 use App\Http\Controllers\TalentRegistrationController;
+use App\Http\Middleware\EnsureUserHasRole;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -26,11 +27,9 @@ Auth::routes();
 // Guest routs
 Route::middleware(['auth', 'role:talent'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
-    Route::get('project/', [ProjectController::class, 'index'])->name('project.index');
-    Route::get('project/show/{project}', [ProjectController::class, 'show'])->name('project.show');
 });
 // Admin and user (employer)
-Route::middleware(['auth', 'role:user'])->group(function () {
+Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::resource('project', ProjectController::class)->except(['index', 'show']);
     Route::resource('talents', TalentController::class);
     Route::resource('companies', CompanyController::class);
@@ -40,7 +39,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
 });
 
-
+Route::get('project/', [ProjectController::class, 'index'])->name('project.index');
+Route::get('project/show/{project}', [ProjectController::class, 'show'])->name('project.show');
 
 Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
 

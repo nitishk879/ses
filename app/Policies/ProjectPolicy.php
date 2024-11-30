@@ -19,6 +19,7 @@ class ProjectPolicy
 
         return null;
     }
+
     /**
      * Determine whether the user can view any models.
      */
@@ -64,7 +65,7 @@ class ProjectPolicy
      */
     public function restore(User $user, Project $project): bool
     {
-        //
+        return false;
     }
 
     /**
@@ -72,12 +73,12 @@ class ProjectPolicy
      */
     public function forceDelete(User $user, Project $project): bool
     {
-        //
+        return false;
     }
 
     /**
      * Determine whether the user can apply for the project.
-    */
+     */
     public function apply(User $user): bool
     {
         return $user->hasRole('talent');
