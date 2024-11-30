@@ -413,17 +413,15 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-12">
                                         <h5>{{ __("projects/form.experience") }}</h5>
-                                        @for($ex=1; $ex <= 3; $ex++)
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox" name="experience[]" value="{{$ex}}" id="experience_{{$ex}}">
-                                                <label class="form-check-label" for="experience_{{$ex}}">
-                                                    {{ __("projects/form.experience_x", ["experience" => $ex]) }}
-                                                </label>
-                                                @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                            </div>
-                                        @endfor
+                                        <div class="form-group">
+                                            <label class="form-label" for="experience">
+                                                {{ __("projects/form.experience_x") }}
+                                            </label>
+                                            <textarea class="form-control" name="experience" id="experience">{{ $project->experience ?? old('experience' ?? '') }}</textarea>
+                                            @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">

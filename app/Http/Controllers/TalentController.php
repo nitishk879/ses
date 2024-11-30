@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\WorkLocationEnum;
+use App\Enums\LangEnum;
 use App\Models\Talent;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class TalentController extends Controller
 {
@@ -46,7 +47,7 @@ class TalentController extends Controller
             'cover_letter' => 'required|min:64',
             'resume' => 'required|file|mimes:doc,docs,pdf|max:2048',
             'education' => 'required|min:3',
-//            'experience' => 'required|min:3',
+            'experience' => 'required|min:3',
             'work_experience' => 'required',
             'workLocations' => 'array',
 //            'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocation::options())),
@@ -62,11 +63,11 @@ class TalentController extends Controller
             'characteristics' => 'nullable|array'
         ]);
 
-        if ($request->hasFile('resume')){
-            $fileExt        = $request->file('resume')->getClientOriginalExtension();
+        if ($request->hasFile('resume')) {
+            $fileExt = $request->file('resume')->getClientOriginalExtension();
             $fileNameToStore = "{$validated['firstname']}-{$validated['lastname']}.{$fileExt}";
             $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
-        }else{
+        } else {
             $fileNameToStore = 'default-image.jpg';
         }
 
@@ -83,33 +84,38 @@ class TalentController extends Controller
             'nearest_station_prefecture' => $validated['nearest_station_prefecture'] ?? '',
             'nearest_station_line' => $validated['nearest_station_line'] ?? '',
             'nearest_station_name' => $validated['nearest_station_name'] ?? '',
-            'languages' => $validated['language'] == 3 ? [1,2] : [$validated['language']],
+            'languages' => [$validated['language']],
             'address' => $validated['address'] ?? ''
         ]);
 
+        $user->roles()->attach(3);
 
-        $talent = $user->talent()->create([
-            'affiliation' => $validated['affiliation'],
-            'availability' => $validated['participation'],
-            'quasi_delegation_possible' => $validated['contract_type'] == 'quasi_delegation_possible',
-            'available_for_contract' => $validated['contract_type'] == 'available_for_contract',
-            'available_for_dispatch' => $validated['contract_type'] == 'available_for_dispatch',
-            'resume' => $fileNameToStore,
-            'cover_letter' => $validated['cover_letter'],
-            'address'   => $validated['address'],
-            'qualifications' => $validated['education'],
-            'experience_pr' => $validated['experience'],
-            'subcategory' => $validated['subcategory'],
-            'min_monthly_price' => $validated['min_monthly_price'],
-            'max_monthly_price' => $validated['max_monthly_price'],
-            'work_location_prefer' => $validated['workLocations'] ?? '', //[1, 2] / [1,3]
-            'other_desire_conditions' => $validated['other_desired_location'] ?? '',
-            'privacy' => $validated['privacy'],
-            'participation' => $validated['participation'],
+        $talent = $user->talent()->updateOrCreate([
+            'user_id' => $user->id,
+        ],
+            [
+                'affiliation' => $validated['affiliation'],
+                'availability' => $validated['participation'],
+                'quasi_delegation_possible' => $validated['contract_type'] == 'quasi_delegation_possible',
+                'available_for_contract' => $validated['contract_type'] == 'available_for_contract',
+                'available_for_dispatch' => $validated['contract_type'] == 'available_for_dispatch',
+                'resume' => $fileNameToStore,
+                'cover_letter' => $validated['cover_letter'],
+                'address' => $validated['address'],
+                'qualifications' => $validated['education'],
+                'experience_pr' => $validated['experience'],
+                'subcategory' => $validated['subcategory'],
+                'min_monthly_price' => $validated['min_monthly_price'],
+                'max_monthly_price' => $validated['max_monthly_price'],
+                'work_location_prefer' => $validated['workLocations'] ?? '', //[1, 2] / [1,3]
+                'other_desire_conditions' => $validated['other_desired_location'] ?? '',
+                'privacy' => $validated['privacy'],
+                'participation' => $validated['participation'],
 //            'experience' => $validated['work_experience'] ?? '',
-            'joining_date'  => $validated['joining_date'] ?? null,
-            'characteristics' => $validated['characteristics'] ?? [],
-        ]);
+                'joining_date' => $validated['joining_date'] ?? null,
+                'characteristics' => $validated['characteristics'] ?? [],
+                'company_id' => Auth::user()->company->id
+            ]);
 
         $talent->subcategories()->attach($validated['subcategory']);
         $talent->locations()->attach($request->input(['locations']));
@@ -138,12 +144,17 @@ class TalentController extends Controller
      */
     public function update(Request $request, Talent $talent)
     {
-        if ($request->hasFile('resume')){
-            $fileExt        = $request->file('resume')->getClientOriginalExtension();
+        $request->validate([
+            'languages' => 'required|array',
+            'languages.*' => 'integer|in:' . implode(',', array_keys(LangEnum::cases())),
+        ]);
+
+        if ($request->hasFile('resume')) {
+            $fileExt = $request->file('resume')->getClientOriginalExtension();
             $fileNameToStore = "{$talent->user->firstname}-{$talent->user->lastname}.{$fileExt}";
             $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
-        }else{
-            $fileNameToStore = 'default-image.jpg';
+        } else {
+            $fileNameToStore = $talent->resume ?? 'default-image.jpg';
         }
 
         $user = User::updateOrCreate([
@@ -155,41 +166,47 @@ class TalentController extends Controller
             'username' => strstr($talent->user->email, '@', true),
             'date_of_birth' => $talent->user->date_of_birth ?? today()->subYears(18),
             'gender' => $talent->user->gender,
-            'address'   => $request['address'] ?? '',
+            'address' => $request['address'] ?? '',
             'nationality' => $talent->user->nationality,
             'nearest_station_prefecture' => $talent->user->nearest_station_prefecture ?? '',
             'nearest_station_line' => $talent->user->nearest_station_line ?? '',
             'nearest_station_name' => $talent->user->nearest_station_name ?? '',
-            'languages' => $talent->user->language == 3 ? [1,2] : [$talent->user->language],
+            'languages' => [$request->language] ?? $talent->user->languages,
         ]);
 
+        $user->roles()->sync([3]);
 
-        $talent = $user->talent()->create([
-            'affiliation' => $request['affiliation'],
-            'availability' => $request['participation'],
-            'quasi_delegation_possible' => $request['contract_type'] == 'quasi_delegation_possible',
-            'available_for_contract' => $request['contract_type'] == 'available_for_contract',
-            'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
-            'resume' => $fileNameToStore,
-            'cover_letter' => $request['cover_letter'],
-            'qualifications' => $request['education'],
-            'experience_pr' => $request['experience'],
-            'subcategory' => $request['subcategory'],
-            'min_monthly_price' => $request['min_monthly_price'],
-            'max_monthly_price' => $request['max_monthly_price'],
-            'work_location_prefer' => $request['workLocations'] ?? '', //[1, 2] / [1,3]
-            'other_desire_conditions' => $request['other_desired_location'] ?? '',
-            'privacy' => $request['privacy'],
-            'participation' => $request['participation'],
-            'joining_date'  => $request['joining_date'] ?? null,
-            'characteristics' => $request['characteristics'] ?? [],
-        ]);
+        $talent = $user->talent->updateOrCreate([
+            'user_id' => $user->id,
+            'company_id' => Auth::user()->company->id
+        ],
+            [
+                'affiliation' => $request['affiliation'] ?? $talent->affiliation,
+                'availability' => $request['participation'] ?? $talent->availability,
+                'quasi_delegation_possible' => $request['contract_type'] == 'quasi_delegation_possible',
+                'available_for_contract' => $request['contract_type'] == 'available_for_contract',
+                'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
+                'resume' => $fileNameToStore,
+                'cover_letter' => $request['cover_letter'] ?? $talent->cover_letter,
+                'qualifications' => $request['education'] ?? $talent->qualifications,
+                'experience_pr' => $request['experience'] ?? $talent->experience_pr,
+                'subcategory' => $request['subcategory'] ?? $talent->subcategory,
+                'min_monthly_price' => $request['min_monthly_price'] ?? $talent->min_monthly_price,
+                'max_monthly_price' => $request['max_monthly_price'] ?? $talent->max_monthly_price,
+                'work_location_prefer' => $request['workLocations'] ?? $talent->work_location_prefer, //[1, 2] / [1,3]
+                'other_desire_conditions' => $request['other_desired_location'] ?? $talent->other_desire_conditions,
+                'privacy' => $request['privacy'] ?? $talent->privacy,
+                'participation' => $request['participation'] ?? $talent->participation,
+                'joining_date' => $request['joining_date'] ?? $talent->joining_date,
+                'characteristics' => $request['characteristics'] ?? $talent->characteristics,
+                'company_id' => $request['company_id'] ?? Auth::user()->company->id
+            ]);
 
-        if ($request->input('subcategories')){
+        if (!empty($request->input('subcategories'))) {
             $talent->subcategories()->sync($request['subcategory']);
         }
-        if ($request->input('locations')){
-            $talent->locations()->attach($request->input(['locations']));
+        if (!empty($request->input('locations'))) {
+            $talent->locations()->sync($request->input(['locations']));
         }
 
         return redirect()->route('talents.index')->with('success', __("talents/registration.talent_updated"));

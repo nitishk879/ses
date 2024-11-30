@@ -101,7 +101,7 @@
                                             @foreach(\App\Enums\GenderEnum::cases() as $gender)
                                                 <option value="{{ $gender->value }}"
                                                     @selected(old('gender') == $gender->value)
-                                                >{{ __("talents/registration.{$gender->name}") }}</option>
+                                                >{{ __("talents/registration.{$gender->value}") }}</option>
                                             @endforeach
                                         </select>
                                         @error('gender')
@@ -138,9 +138,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="talentAddress" class="form-label">{{ __('talents/registration.address') }}</label>
-                                    <textarea class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" rows="1" placeholder="{{ __('talents/registration.type_your_address_here') }}">
-                                        {{ old("address") ?? '' }}
-                                    </textarea>
+                                    <input class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" value="{{ old("address") ?? '' }}" placeholder="{{ __('talents/registration.type_your_address_here') }}">
                                     @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 </div>
                             </div>
@@ -314,6 +312,9 @@
                                     </div>
                                 </div>
                                 <div class="row justify-content-around">
+                                    <div class="col-md-12">
+                                        <label for="locations" class="form-label">{{ __("projects/form.locations") }}</label>
+                                    </div>
                                     @foreach(\App\Models\Location::orderBy('title')->get() as $location)
                                         <div class="mb-3 col-md-4">
                                             <div class="form-check form-check-inline">
@@ -328,6 +329,9 @@
                                             </div>
                                         </div>
                                     @endforeach
+                                    <div class="col-md-12">
+                                        <label for="locations" class="form-label">{{ __("projects/form.work_mode") }}</label>
+                                    </div>
                                     @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
                                             <div class="mb-3 col-md-4">
                                                 <div class="form-check form-check-inline">

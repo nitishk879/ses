@@ -5,17 +5,17 @@ namespace App\Casts;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 use Illuminate\Database\Eloquent\Model;
 
-class isEmployerCast implements CastsAttributes
+class isEmployeeCast implements CastsAttributes
 {
     /**
      * Cast the given value.
-     * User should be either projects or has a user role
+     * User should have at least talents or has role of talent
      *
      * @param  array<string, mixed>  $attributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): bool
     {
-        return $model?->company?->projects->count()  >=1 || $model->hasRole('user');
+        return $model?->company?->talents->count()  >=1 || $model->hasRole('talent');
     }
 
     /**

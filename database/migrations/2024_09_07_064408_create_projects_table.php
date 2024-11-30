@@ -24,7 +24,7 @@ return new class extends Migration {
             $table->boolean('remote_operation_possible')->default(false);
             $table->string('contract_start_date')->nullable();
             $table->string('contract_end_date')->nullable();
-            $table->json('experience')->nullable();
+            $table->text('experience')->nullable();
             $table->json('languages')->nullable();
             $table->boolean('possible_to_continue')->default(false);
             $table->text('project_description');

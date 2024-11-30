@@ -24,7 +24,7 @@ class ProjectPolicy
      */
     public function viewAny(User $user): bool
     {
-        //
+        return $user->roles->count() >=1;
     }
 
     /**
@@ -32,7 +32,7 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        //
+        return $user->hasRole('user') || $project->user_id === $user->id;
     }
 
     /**
@@ -73,5 +73,13 @@ class ProjectPolicy
     public function forceDelete(User $user, Project $project): bool
     {
         //
+    }
+
+    /**
+     * Determine whether the user can apply for the project.
+    */
+    public function apply(User $user): bool
+    {
+        return $user->hasRole('talent');
     }
 }

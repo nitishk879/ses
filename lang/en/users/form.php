@@ -1,0 +1,21 @@
+<?php
+return array(
+    "username" => "Username",
+    "password" => "Password",
+    "email" => "Email Address",
+    "role" => "Role",
+    "active" => "Active",
+    "phone" => "Phone Number",
+    "address" => "Address",
+    "city" => "City",
+    "country" => "Country",
+    "zip" => "Zip Code",
+    "address2" => "Address 2",
+    "address3" => "Address 3",
+    "submit"    => "Submit",
+    "cancel"    => "Cancel",
+    "update_profile" => "Update Profile",
+    "japan" => "Japan",
+    "other" => "Other",
+    "success_message" => "Your profile has been updated successfully.",
+);

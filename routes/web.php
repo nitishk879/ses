@@ -3,12 +3,17 @@
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\SampleController;
 use App\Http\Controllers\TalentController;
+use App\Http\Controllers\TalentRegistrationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
+// Guest routs
+Route::middleware('guest')->group(function () {
+    Route::get('/', function () {
+        return view('welcome');
+    });
 });
 
 Route::get('/project-detail', function () {
@@ -17,15 +22,35 @@ Route::get('/project-detail', function () {
 
 Auth::routes();
 
-Route::resource('project', ProjectController::class)->middleware(['auth', 'role:admin,employer,user']);
-Route::resource('talents', TalentController::class)->middleware(['auth', 'role:admin,employer,user']);
-Route::resource('companies', CompanyController::class)->middleware(['auth', 'role:admin,employer,user']);
-Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');
-Route::post('invite-talent/{project}', [ProjectController::class, 'invite'])->name('talent.invite');
+// Talent Middleware
+// Guest routs
+Route::middleware(['auth', 'role:talent'])->group(function () {
+    Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
+    Route::get('project/', [ProjectController::class, 'index'])->name('project.index');
+    Route::get('project/show/{project}', [ProjectController::class, 'show'])->name('project.show');
+});
+// Admin and user (employer)
+Route::middleware(['auth', 'role:user'])->group(function () {
+    Route::resource('project', ProjectController::class)->except(['index', 'show']);
+    Route::resource('talents', TalentController::class);
+    Route::resource('companies', CompanyController::class);
+    Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');
+    Route::post('invite-talent/{project}', [ProjectController::class, 'invite'])->name('talent.invite');
+    Route::get('project-chart/{term}', [ProjectController::class, 'chart'])->name('project.chart');
+    Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
+});
 
-Route::get('project-chart/{term}', [ProjectController::class, 'chart'])->name('project.chart');
+
+
 Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
-Route::get('/sample/{id}', [\App\Http\Controllers\SampleController::class, 'show'])->name('sample.show');
+
+Route::get('profile', [HomeController::class, 'profile'])->middleware('auth')->name('profile.show');
+Route::put('profile', [HomeController::class, 'update'])->middleware('auth')->name('profile.update');
+
+// Let's register yourself as talent
+Route::get('talent-registration', [TalentRegistrationController::class, 'create'])->name('talent.registration');
+Route::post('talent-registration', [TalentRegistrationController::class, 'store']);
+
 
 /**
  * Let's setup user-admin routes here

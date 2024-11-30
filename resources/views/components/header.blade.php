@@ -20,7 +20,9 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route("talents.index") }}">{{ __("common/header.find_talent") }}</a></li>
-                            <li><a class="dropdown-item" href="{{ route("talents.create") }}">{{ __("common/header.add_new") }}</a></li>
+                            @can('create', \App\Models\Talent::class)
+                                <li><a class="dropdown-item" href="{{ route("talents.create") }}">{{ __("common/header.add_new") }}</a></li>
+                            @endcan
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
@@ -31,7 +33,9 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route("project.index") }}">{{ __("common/header.find_work") }}</a></li>
-                            <li><a class="dropdown-item" href="{{ route("project.create") }}">{{ __("common/header.add_new_project") }}</a></li>
+                            @can('create', \App\Models\Project::class)
+                                <li><a class="dropdown-item" href="{{ route("project.create") }}">{{ __("common/header.add_new_project") }}</a></li>
+                            @endcan
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
@@ -42,9 +46,11 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{{ route("companies.index") }}">{{ __("common/header.members") }}</a></li>
-                            <li><a class="dropdown-item" href="{{ route("companies.create") }}">{{ __("common/header.add_new") }}</a></li>
+                            @can('create', \App\Models\Company::class)
+                                <li><a class="dropdown-item" href="{{ route("companies.create") }}">{{ __("common/header.add_new") }}</a></li>
+                            @endcan
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="#">Something else here</a></li>
+                            <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -90,6 +96,7 @@
                             </a>
 
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="{{ route("profile.show") }}">{{ __("common/header.profile") }}</a>
                                 <a class="dropdown-item" href="{{ route('logout') }}"
                                    onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">

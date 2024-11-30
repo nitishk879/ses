@@ -84,7 +84,7 @@ class Project extends Model
             'number_of_interviewers' => InterviewEnum::class,
             'trade_classification' => TradeClassification::class,
             'contract_classification' => ContractClassificationEnum::class,
-            'languages' => LanguagesCast::class,
+            'languages' => 'array', //LanguagesCast::class,
             'work_location_prefer' => 'array',
             'status' => ProjectStatusEnum::class,
             'scoring' => 'array', //ScoringEnum::class,

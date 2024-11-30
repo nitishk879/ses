@@ -7,7 +7,7 @@
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title') || {{ config('app.name', 'Laravel') }}</title>
+    <title>{{ $title ?? config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,28 +26,28 @@
     @livewireStyles
 </head>
 <body>
-    <div id="app">
-        <x-header/>
-        <main class="" style="background: #F1F1F1!important;">
-            <div class="container">
-                <div class="row align-items-center">
-                    <div class="col-md-12 mt-3">
-                        <!--  Alert goes here  --->
-                        @if (session('message'))
-                            <x-alert-component :type="session('type')">
-                                {{ session('message') }}
-                            </x-alert-component>
-                        @endif
-                        <!--  Alert goes here  --->
-                    </div>
+<div id="app">
+    <x-header/>
+    <main class="" style="background: #F1F1F1!important;">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-12 mt-3">
+                    <!--  Alert goes here  --->
+                    @if (session('message'))
+                        <x-alert-component :type="session('type')">
+                            {{ session('message') }}
+                        </x-alert-component>
+                    @endif
+                    <!--  Alert goes here  --->
                 </div>
             </div>
-            @yield('content') {{ $slot ?? '' }}
-        </main>
+        </div>
+        {{ $slot}}
+    </main>
 
-        <x-footer />
-    </div>
-    @livewireScripts
-    @stack('scripts')
+    <x-footer />
+</div>
+@livewireScripts
+@stack('scripts')
 </body>
 </html>

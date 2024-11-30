@@ -104,8 +104,8 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\GenderEnum::cases() as $gender)
                                                 <option value="{{ $gender->value }}"
-                                                    @selected(old('gender', $talent->user->gender) == $gender->value)
-                                                >{{ __("talents/registration.{$gender->name}") }}</option>
+                                                    @selected($talent->user->gender->value == $gender->value ?? old('gender', $talent->user->gender->value) == $gender->value)
+                                                >{{ __("talents/registration.{$gender->value}") }}</option>
                                             @endforeach
                                         </select>
                                         @error('gender')
@@ -136,7 +136,9 @@
                                                 name="language" id="language" aria-label="language">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\LangEnum::cases() as $lang)
-                                                <option value="{{ $lang->value }}" @selected(old('language', $talent->user->language) == $lang->value) selected> {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
+                                                <option value="{{ $lang->value }}"
+                                                    @selected(in_array($lang->value, old('language', $talent->user->languages ?? [])))
+                                                > {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
                                             @endforeach
                                         </select>
                                         @error('language')
@@ -146,9 +148,7 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="talentAddress" class="form-label">{{ __('talents/registration.address') }}</label>
-                                    <textarea class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" rows="1" placeholder="{{ __('talents/registration.type_your_address_here') }}">
-                                        {{ $talent->user->address ?? old("address") ?? '' }}
-                                    </textarea>
+                                    <input class="form-control @error('address') is-invalid @enderror" id="talentAddress" name="address" value="{{ $talent->user->address ?? old("address") ?? '' }}" placeholder="{{ __('talents/registration.type_your_address_here') }}">
                                     @error('address')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 </div>
                             </div>
@@ -256,7 +256,7 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ParticipationEnum::cases() as $participation)
                                                 <option value="{{ $participation->value }}"
-                                                    @selected(old('participation', $talent->participation) == $participation->value)
+                                                    @selected(old('participation', $talent->availability) == $participation->value)
                                                 >{{ __("talents/index.{$participation->value}") }}</option>
                                             @endforeach
                                         </select>

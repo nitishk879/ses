@@ -386,30 +386,28 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <h5>{{ __("projects/form.experience") }}</h5>
-                                        @for($ex=1; $ex <= 3; $ex++)
+                                    <div class="col-md-6 mb-3">
+                                        <h5>{{ __("talents/registration.language") }}</h5>
+                                        @foreach(\App\Enums\LangEnum::cases() as $lang)
                                             <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox" name="experience[]" value="{{$ex}}" id="experience_{{$ex}}">
-                                                <label class="form-check-label" for="experience_{{$ex}}">
-                                                    {{ __("projects/form.experience_x", ["experience" => $ex]) }}
+                                                <input class="form-check-input" type="radio" name="languages" value="{{$lang->value}}" id="language_{{$lang->value}}">
+                                                <label class="form-check-label" for="language_{{$lang->value}}">
+                                                    {{ __("common/sidebar.{$lang->name}") ?? __("projects/form.interview_{$lang->value}") }}
                                                 </label>
-                                                @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                @error('languages') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                             </div>
-                                        @endfor
+                                        @endforeach
                                     </div>
-                                </div>
-                                <div class="col-md-12 mb-3">
-                                    <h5>{{ __("talents/registration.language") }}</h5>
-                                    @foreach(\App\Enums\LangEnum::cases() as $lang)
-                                        <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="languages" value="{{$lang->value}}" id="language_{{$lang->value}}">
-                                            <label class="form-check-label" for="language_{{$lang->value}}">
-                                                {{ __("common/sidebar.{$lang->name}") ?? __("projects/form.interview_{$lang->value}") }}
+                                    <div class="col-md-12">
+                                        <h5>{{ __("projects/form.experience") }}</h5>
+                                        <div class="form-group">
+                                            <label class="form-label" for="experience">
+                                                {{ __("projects/form.experience_x") }}
                                             </label>
-                                            @error('languages') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            <textarea class="form-control" name="experience" id="experience">{{ old('experience' ?? '') }}</textarea>
+                                            @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
-                                    @endforeach
+                                    </div>
                                 </div>
                             </div>
                         </div>

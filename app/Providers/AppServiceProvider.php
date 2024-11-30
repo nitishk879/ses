@@ -6,8 +6,15 @@ use App\Events\SkillMatch;
 use App\Events\TalentInvitationEvent;
 use App\Listeners\SendSkillMatchNotification;
 use App\Listeners\SendTalentInvitationNotification;
+use App\Models\Company;
+use App\Models\Project;
+use App\Models\Talent;
+use App\Policies\CompanyPolicy;
+use App\Policies\ProjectPolicy;
+use App\Policies\TalentPolicy;
 use Event;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,5 +41,10 @@ class AppServiceProvider extends ServiceProvider
 //            SendSkillMatchNotification::class
 //        );
         Paginator::useBootstrapFive();
+
+        Gate::policy(Project::class, ProjectPolicy::class);
+        Gate::policy(Talent::class, TalentPolicy::class);
+        Gate::policy(Company::class, CompanyPolicy::class);
+
     }
 }

@@ -7,9 +7,9 @@ use Illuminate\Foundation\Application;
 
 enum GenderEnum: string
 {
-    case MALE = 'Male';
-    case FEMALE  = "Female";
-    case OTHER = "Other";
+    case MALE = 'male';
+    case FEMALE  = "female";
+    case OTHER = "other";
 
     /**
      * Gender title multilingual
@@ -20,9 +20,9 @@ enum GenderEnum: string
     public static function toName($value): Application|array|string|Translator|null
     {
         return match ($value){
-            self::MALE->value => __("talents/registration.MALE"),
-            self::FEMALE->value => __("talents/registration.FEMALE"),
-            self::OTHER->value => __("talents/registration.OTHER"),
+            self::MALE->value => __("talents/registration.male"),
+            self::FEMALE->value => __("talents/registration.female"),
+            self::OTHER->value => __("talents/registration.other"),
         };
     }
 }

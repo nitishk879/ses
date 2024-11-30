@@ -14,7 +14,7 @@
                                     <div class="col-md-12 mb-3">
                                         <h2 class="talent-name">{{ $talent->user->short_name }}</h2>
                                         <div class="d-flex w-100 gap-2 talent-data">
-                                            <div class="">{{ __("talents/index.gender") }}: <strong>{{ $talent->user->gender }}</strong></div>
+                                            <div class="">{{ __("talents/index.gender") }}: <strong>{{ \App\Enums\GenderEnum::toName($talent->user->gender->value) }}</strong></div>
                                             <div class="">{{ __("talents/index.age") }}: <strong>{{ $talent->user->age }}</strong></div>
                                         </div>
                                     </div>

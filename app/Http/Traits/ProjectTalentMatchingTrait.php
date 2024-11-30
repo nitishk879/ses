@@ -31,9 +31,9 @@ trait ProjectTalentMatchingTrait
         $matchScore['skills'] = $this->calculateSkillMatch($requiredSkills, $talentSkills, $weights['skills']);
 
         // Calculate experience match
-        if (isset($project->experience)) {
-            $matchScore['experience'] = $this->calculateExperienceMatch($project->experience, $talent->experience, $weights['experience']);
-        }
+//        if (isset($project->experience)) {
+//            $matchScore['experience'] = $this->calculateExperienceMatch($project->experience, $talent->experience, $weights['experience']);
+//        }
 
         // Calculate location match
         $requiredLocations = $project->locations->pluck('id')->toArray();

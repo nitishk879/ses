@@ -96,7 +96,7 @@
                                 @foreach(\App\Enums\GenderEnum::cases() as $gender)
                                     <option value="{{ $gender->value }}"
                                         {{--                                            @selected($gender->name == $talent?->user?->gender)--}}
-                                    >{{ __("talents/registration.{$gender->name}") }}</option>
+                                    >{{ __("talents/registration.{$gender->value}") }}</option>
                                 @endforeach
                             </select>
                         </div>

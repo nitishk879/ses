@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Casts\isAdminCast;
+use App\Casts\isEmployeeCast;
 use App\Casts\isEmployerCast;
 use App\Casts\LanguagesCast;
 use App\Enums\GenderEnum;
@@ -70,9 +71,11 @@ class User extends Authenticatable
             'date_of_birth' => 'datetime',
             'gender' => GenderEnum::class,
             'nationality' => 'string',
-            'languages' => LanguagesCast::class,
+            'languages' => 'array',
             'is_admin' => isAdminCast::class,
             'is_employer' => isEmployerCast::class,
+            'is_employee' => isEmployeeCast::class,
+            'is_talent' => 'bool'
         ];
     }
 
@@ -114,7 +117,7 @@ class User extends Authenticatable
     protected function shortName(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => mb_substr($this->firstname, 0, 1) ." ". mb_substr($this->lastname, 0, 1),
+            get: fn (mixed $value) => mb_substr($this->firstname, 0, 1) .". ". mb_substr($this->lastname, 0, 1) .".",
         );
     }
 
@@ -137,7 +140,7 @@ class User extends Authenticatable
      */
     public function hasRole($role): bool
     {
-        if ($this->roles()->where('title', '=', $role)->first()) {
+        if ($this->roles()->where('slug', '=', $role)->first()) {
             return true;
         }
 
@@ -189,32 +192,18 @@ class User extends Authenticatable
      *
      * @return Attribute
      */
-    public function languages(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => LangEnum::toName($val), $decoded);
-            },
-            set: function ($value) {
-                // If setting from an array of enum values, encode it as JSON
-                return json_encode($value);
-            }
-        );
-    }
-
-    /**
-     * Let's fetch user's languages
-     *
-     * @return Attribute
-     */
-    public function preferredLanguages(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) =>
-            $this->languages ?
-                $this->languages->name : '',
-        );
-    }
+//    public function languages(): Attribute
+//    {
+//        return Attribute::make(
+//            get: function ($value) {
+//                // Decode the JSON and map to enum names
+//                $decoded = json_decode($value, true);
+//                return !is_array($decoded) ? null: array_map(fn($val) => LangEnum::toName($val), $decoded);
+//            },
+//            set: function ($value) {
+//                // If setting from an array of enum values, encode it as JSON
+//                return json_encode($value);
+//            }
+//        );
+//    }
 }

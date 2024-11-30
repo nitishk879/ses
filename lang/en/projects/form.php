@@ -92,7 +92,7 @@ return array(
     "commercial_flow_placeholder" => "--",
     // Nov 7, 2024
     "experience" => "Experience",
-    "experience_x" => ":experience yrs",
+    "experience_x" => "Year of experience in specific field", // Nov 28, 2024
     "scoring" => "Scoring",
     "scoring_placeholder" => "--",
     "score_ninety" => "90%",

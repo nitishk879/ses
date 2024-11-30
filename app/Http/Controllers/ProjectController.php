@@ -62,7 +62,7 @@ class ProjectController extends Controller
             "languages" => 'required',
             "workLocations" => 'nullable',
             "deadline" => 'nullable',
-            "experience" => 'nullable|array',
+            "experience" => 'nullable',
             "scoring" => 'nullable',
             "number_of_application" => 'nullable',
             "number_of_interviewers" => 'nullable',
@@ -96,7 +96,7 @@ class ProjectController extends Controller
             "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
             'work_location_prefer' => $validated["workLocations"] ?? '',
             "affiliation" => $validated["eligibility"] ?? '',
-            "experience" => json_encode($validated["experience"]) ?? '',
+            "experience" => $validated["experience"] ?? '',
             "project_finalized" => $validated["project_finalized"] ?? false,
             "trade_classification" => (int) $validated["trade_classification"] ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
@@ -154,7 +154,7 @@ class ProjectController extends Controller
         $project->project_description = $request["project_description"] ?? '';
         $project->personnel_requirement = $request["personnel_requirement"] ?? '';
         $project->person_in_charge = $request["person_in_charge"] ?? auth()->user()->name;
-        $project->is_public = $request->input("is_public");
+        $project->is_public = $request->input("is_public") ?? false;
         $project->company_info_disclose = $request->input("company_info_disclose");
         $project->contract_classification = $request["contract_classification"] ?? '';
         $project->deadline = $request["deadline"] ?? '';
@@ -162,7 +162,7 @@ class ProjectController extends Controller
         $project->languages = $request["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '';
         $project->work_location_prefer = $request["workLocations"] ?? '';
         $project->affiliation = $request["eligibility"] ?? '';
-        $project->experience = json_encode($request["experience"]) ?? '';
+        $project->experience = $request["experience"] ?? '';
         $project->project_finalized = $request["project_finalized"] ?? false;
         $project->trade_classification = (int) $request["trade_classification"] ?? '';
         $project->number_of_application = $request["number_of_application"] ?? '';
@@ -170,6 +170,7 @@ class ProjectController extends Controller
         $project->commercial_flow = $request["commercial_flow"] ?? '';
         $project->company_id = auth()->user()->company->id ?? 0;
         $project->user_id = auth()->user()->id ?? 0;
+        $project->updater_id = auth()->user()->id ?? 0;
         $project->save();
 
         // Check if input has values
