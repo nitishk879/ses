@@ -116,7 +116,7 @@
                             @foreach($nationalities as $nation)
                                 <div class="form-check form-check-inline">
                                     <input class="form-check-input" wire:model.live="nationality" type="checkbox" id="inline{{$nation}}" value="{{ $nation }}">
-                                    <label class="form-check-label" for="inline{{$nation}}">{{ $nation =='other' ? __("talents/registration.OTHER") : __("common/header.japanese") }}</label>
+                                    <label class="form-check-label" for="inline{{$nation}}">{{ $nation =='other' ? __("talents/registration.other") : __("common/header.japanese") }}</label>
                                 </div>
                             @endforeach
                         </div>
