@@ -41,9 +41,9 @@
                             <div class="col-lg-6 mb-3">
                                 <form action="{{ route("project.index") }}" class="search-block input-group mb-3">
                                     <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
-                                    <input type="text" class="form-control" name="search" placeholder="{{ __("common/landing.search_keywords") }}" aria-label="Username">
+                                    <input type="text" class="form-control" name="search" placeholder="{{ __("common/landing.search_keywords") }}" aria-label="project title" required>
                                     <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                                    <input type="text" class="form-control" name="location" placeholder="{{ __("common/landing.preferred_location") }}" aria-label="Server">
+                                    <input type="text" class="form-control" name="location" placeholder="{{ __("common/landing.preferred_location") }}" aria-label="Server" required>
                                     <button class="btn btn-primary" type="submit" id="button-addon2">{{ __("common/home.search") }}</button>
                                 </form>
                                 <p class="suggestion">
@@ -607,7 +607,7 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_project") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <a href="{{ route("register") }}" class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        <a href="{{ route("talent.registration") }}" class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -616,7 +616,7 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_talent") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <a href="{{ route("register") }}" class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        <a href="{{ route("members.registration") }}" class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
                                     </div>
                                     <img class="search-card-img" src="{{ asset("images/talent-search-card.png") }}" alt=""/>
                                 </div>

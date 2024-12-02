@@ -17,10 +17,12 @@
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     <!-- Favicons -->
     <link rel="icon" href="{{ asset("images/logo.png") }}">
+    @stack('stylesheets')
 </head>
 <body>
 <div id="app">
     {{ $slot }}
 </div>
+@stack('scripts')
 </body>
 </html>

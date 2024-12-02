@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/sass/app.scss',
                 'resources/sass/dashboard.scss',
                 'resources/js/app.js',
+                'resources/js/main.js',
             ],
             refresh: false, // False for livewire
         }),

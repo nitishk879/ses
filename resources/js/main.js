@@ -28,3 +28,39 @@ document.addEventListener('focusin', (e) => {
         }, false)
     })
 })()
+function openDynamicModal(id) {
+    // Ensure elements exist
+    const modalLabel = document.getElementById('staticBackdropLabel');
+    const modalBody = document.querySelector('.cover-letter-description');
+    const modalElement = document.getElementById('staticBackdrop');
+
+    if (!modalLabel || !modalBody || !modalElement) {
+        console.error('Modal elements are not found in the DOM.');
+        return;
+    }
+    axios.get('/sample/' + id)
+        .then(response => {
+            const data = response.data;
+            // Set the modal title and content dynamically
+            modalLabel.textContent = data.title;
+            modalBody.innerHTML = data.content;
+        })
+        .catch(error => {
+            console.error('There was an errors fetching the data!', error);
+            alert('Failed to fetch data.');
+        });
+}
+
+// Get the select element and the additional input field
+const selectBox = document.getElementById('possibleParticipation');
+const additionalInput = document.getElementById('joiningDateField');
+
+// Listen for changes in the dropdown
+selectBox.addEventListener('change', function() {
+    // Check if the selected value is "other"
+    if (this.value !== 'IMMEDIATELY') {
+        additionalInput.style.display = 'block'; // Show the input field
+    } else {
+        additionalInput.style.display = 'none';  // Hide the input field
+    }
+});

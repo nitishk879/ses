@@ -216,15 +216,17 @@
                 </div>
             </div>
         </form>
-        <div class="row justify-content-center py-3">
-            <div class="col-md-6">
-                <ul class="list-group">
-                    Roles:
-                    @foreach(Auth::user()->roles as $role)
-                        <li class="list-group-item" itemprop="{{ $role->slug }}">{{ $role->title ?? $role->slug }}</li>
-                    @endforeach
-                </ul>
+{{--        @env(['development', 'localhost'])--}}
+            <div class="row justify-content-center py-3">
+                <div class="col-md-6">
+                    <ul class="list-group">
+                        Roles:
+                        @foreach(Auth::user()->roles as $role)
+                            <li class="list-group-item" itemprop="{{ $role->slug }}">{{ $role->title ?? $role->slug }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
-        </div>
+{{--        @endenv--}}
     </div>
 @endsection

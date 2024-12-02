@@ -17,4 +17,6 @@ return array(
     '500_error_title' => '500 error',
     '500_error_text' => 'Please make sure you\'ve enter correct url.',
     'back_to_home' => 'Back to home',
+    'talent_registration_title' => 'Register yourself as Talent',
+    'member_registration_title' => 'Register yourself as Project poster',
 );

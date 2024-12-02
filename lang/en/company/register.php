@@ -29,4 +29,5 @@ return array(
     'net_worth' => 'Net Worth',
     'dispatch_business' => 'Dispatch Business',
     'file_acceptance' => 'File accepted: png, jpeg , Max size: 150kb',
+    'dispatch_business_license' => 'Dispatch Business License No.',
 );

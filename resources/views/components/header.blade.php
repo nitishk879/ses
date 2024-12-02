@@ -40,6 +40,7 @@
                             <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
                     </li>
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ __("common/header.explore") }}

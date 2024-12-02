@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\TalentController;
@@ -11,12 +12,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 // Guest routs
-Route::middleware('guest')->group(function () {
-    Route::get('/', function () {
-        return view('welcome');
-    });
+Route::middleware(['guest', 'auth'])->group(function () {
+    //
 });
-
+Route::get('/', function () {
+    return view('welcome');
+});
 Route::get('/project-detail', function () {
     return view('project-detail');
 });
@@ -36,7 +37,6 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');
     Route::post('invite-talent/{project}', [ProjectController::class, 'invite'])->name('talent.invite');
     Route::get('project-chart/{term}', [ProjectController::class, 'chart'])->name('project.chart');
-    Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
 });
 
 Route::get('project/', [ProjectController::class, 'index'])->name('project.index');
@@ -50,6 +50,9 @@ Route::put('profile', [HomeController::class, 'update'])->middleware('auth')->na
 // Let's register yourself as talent
 Route::get('talent-registration', [TalentRegistrationController::class, 'create'])->name('talent.registration');
 Route::post('talent-registration', [TalentRegistrationController::class, 'store']);
+Route::get('members-registration', [MemberRegistration::class, 'create'])->name('members.registration');
+Route::post('members-registration', [MemberRegistration::class, 'store']);
+Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
 
 
 /**
