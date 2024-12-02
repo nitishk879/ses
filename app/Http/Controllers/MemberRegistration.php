@@ -105,7 +105,7 @@ class MemberRegistration extends Controller
             'company_information_disclose' => $request->company_information_disclose ?? false,
         ]);
 
-        return redirect(route('dashboard'))->with('success', 'Member Registration successful!');
+        return redirect(route('dashboard'))->with('success', "{$member->user->name} has Registered {$member->company_name} successful!");
     }
 
     /**
