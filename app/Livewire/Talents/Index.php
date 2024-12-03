@@ -46,6 +46,8 @@ class Index extends Component
     #[Url]
     public ?array $contract = array();
     #[Url]
+    public ?array $work_mode = array();
+    #[Url]
     public $min_salary = '';
     #[Url]
     public $max_salary = '';
@@ -86,6 +88,7 @@ class Index extends Component
         $this->min_salary = $filters['min_salary'];
         $this->max_salary = $filters['max_salary'];
         $this->category = $filters['category'];
+        $this->work_mode = $filters['work_mode'];
 
         $this->resetPage();
     }

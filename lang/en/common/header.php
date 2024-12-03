@@ -11,7 +11,7 @@ return array(
     'projects' => 'Projects',
     'add_new' => 'Add New',
     'add_new_project' => 'Add New Project',
-    'talents' => 'Talents',
+    'talents' => 'Talent',
     'add_talent' => 'Add Talent',
     'members' => 'Members',
     'add_member' => 'Add Member',

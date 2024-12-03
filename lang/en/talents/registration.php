@@ -32,7 +32,7 @@ return array(
     "experience_fields" => "Experience Fields",
     "option_1"  => "Experience in User Support",
     "option_2"  => "Web System",
-    "resume_privacy"    => "Resume Privacy",
+    "resume_privacy"    => "Profile Privacy",
     "possible_participation" => "Possible Participation",
     "submit" => "Submit Application",
     "male"  => "Male",

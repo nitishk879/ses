@@ -108,7 +108,7 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseNationality" aria-expanded="false" aria-controls="flush-collapseNationality">
-                            {{ __("talents/index.age") }}
+                            {{ __("talents/index.nationality") }}
                         </button>
                     </h2>
                     <div id="flush-collapseNationality" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
@@ -138,18 +138,15 @@
                                     <option value="{{$location->id}}">{{ $location->title ?? '' }}</option>
                                 @endforeach
                             </select>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="1" id="from_home">
-                                <label class="form-check-label" for="from_home">
-                                    {{ __('Work From Home') }}
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="2" id="from_home">
-                                <label class="form-check-label" for="from_home">
-                                    {{ __('Part time') }}
-                                </label>
-                            </div>
+                            <h4>{{ __("projects/form.work_mode") }}</h4>
+                            @foreach(\App\Enums\WorkLocationEnum::cases() as $case)
+                                <div class="form-check">
+                                    <input class="form-check-input" name="work_mode[]" type="checkbox" value="{{ $case->value }}" id="work_mode_{{$case->value}}">
+                                    <label class="form-check-label" for="work_mode_{{$case->value}}">
+                                        {{ __("common/sidebar.{$case->name}") }}
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>

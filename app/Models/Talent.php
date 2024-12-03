@@ -239,11 +239,9 @@ class Talent extends Model
     public function workLocation(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
+            get: function () {
                 // Decode the JSON and map to enum names
-                $decoded = json_decode($this->work_location_prefer, true);
-//                dd($this->work_location_prefer);
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
+                return array_map(fn($val) => WorkLocationEnum::toName($val), $this->work_location_prefer);
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
@@ -270,17 +268,17 @@ class Talent extends Model
         );
     }
 
-    /**
-     * Let's fetch salary range min-max
-     *
-     * @return Attribute
-     */
-    public function workLocationPreferred(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
-        );
-    }
+//    /**
+//     * Let's fetch salary range min-max
+//     *
+//     * @return Attribute
+//     */
+//    public function workLocationPreferred(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
+//        );
+//    }
 
     /**
      * Talent can Morph to Many industries

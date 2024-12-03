@@ -89,6 +89,12 @@
                                                     <li class="list-group-item">{{ $location->title }}</li>
                                                 @endforeach
                                             </ul>
+                                            <div class="p-head py-2"> {{ __("projects/form.work_mode") }}</div>
+                                            <ul class="list-group list-group-flush">
+                                                @foreach($talent->work_location as $wLocation)
+                                                    <li class="list-group-item">{{ $wLocation }}</li>
+                                                @endforeach
+                                            </ul>
                                         </div>
                                     </div>
                                 </div>

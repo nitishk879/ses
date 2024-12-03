@@ -56,10 +56,14 @@
                                 </p>
                             </div>
                             <div class="col-lg-6"></div>
-                            <div class="col-lg-5 get-started-block">
-                                <h4 class="text-zinc-700 text-2xl mb-3">{{ __("common/landing.search_for_talent") }}</h4>
-                                <a href="" class="btn btn-primary">{{ __("common/landing.get_started_now") }}</a>
-                            </div>
+                            @guest
+                                <div class="col-lg-5 get-started-block">
+                                    <h4 class="text-zinc-700 text-2xl mb-3">{{ __("common/landing.search_for_talent") }}</h4>
+                                    <a href="" class="btn btn-primary">{{ __("common/landing.get_started_now") }}</a>
+                                </div>
+                            @else
+                                <div class="col-lg-5" style="min-height: 8rem;"></div>
+                            @endguest
                         </div>
                         <img src="{{ asset("images/welcome-hero-image.png") }}" class="hero-image" alt="">
                     </div>

@@ -302,10 +302,8 @@ class Project extends Model
     public function workLocation(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
+            get: function () {
+                return array_map(fn($val) => WorkLocationEnum::toName($val), $this->work_location_prefer);
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
@@ -314,18 +312,35 @@ class Project extends Model
         );
     }
 
+    /**
+     * Let's get work location from array
+     *
+     * @return Attribute
+     */
+    public function work_location_prefer(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                $decoded = json_decode($value, true);
+                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
+            },
+            set: function ($value){
+                return json_encode($value);
+            }
+        );
+    }
 
     /**
      * Let's fetch salary range min-max
      *
      * @return Attribute
      */
-//    public function workLocationPreferred(): Attribute
-//    {
-//        return Attribute::make(
-//            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
-//        );
-//    }
+    public function workLocationPreferred(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
+        );
+    }
     /**
      * Let's fetch salary range min-max
      *

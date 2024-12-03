@@ -141,6 +141,14 @@
                                     <a href="#" class="skill">{{ __("projects/form.affiliation_{$eligibility}") }}</a>
                                 @endforeach
                             </div>
+                            @env('local')
+                                <h4 class="pt-3">{{ __("projects/form.work_mode") }}</h4>
+                                <div class="d-flex flex-wrap w-100 gap-3">
+                                    @foreach($project->work_location as $work_loc)
+                                        <a href="#" class="skill">{{ $work_loc ?? __("projects/form.affiliation_{$work_loc}") }}</a>
+                                    @endforeach
+                                </div>
+                            @endenv
                         </div>
                     @endif
                     <div class="d-flex gap-3 sharing-jobs">
