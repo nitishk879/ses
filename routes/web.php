@@ -39,8 +39,8 @@ Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::get('project-chart/{term}', [ProjectController::class, 'chart'])->name('project.chart');
 });
 
-Route::get('project/', [ProjectController::class, 'index'])->name('project.index');
-Route::get('project/show/{project}', [ProjectController::class, 'show'])->name('project.show');
+Route::get('project/', [ProjectController::class, 'index'])->middleware('auth')->name('project.index');
+Route::get('project/show/{project}', [ProjectController::class, 'show'])->middleware('auth')->name('project.show');
 
 Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name('home');
 

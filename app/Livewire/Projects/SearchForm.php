@@ -23,6 +23,7 @@ class SearchForm extends Component
     public ?array $contract_classification = [];
     public ?array $affiliation = [];
     public ?array $contract = [];
+    public ?array $work_mode = [];
     public ?array $interview = [];
     public $min_salary = '';
     public $max_salary = '';
@@ -56,6 +57,7 @@ class SearchForm extends Component
             'max_salary' => $this->max_salary,
             'category' => $this->category,
             'location' => $this->location,
+            'work_mode' => $this->work_mode,
         ]);
     }
 
@@ -82,6 +84,7 @@ class SearchForm extends Component
         $this->max_salary = '';
         $this->category = array();
         $this->location = '';
+        $this->work_mode = array();
 
         $this->updated();
     }

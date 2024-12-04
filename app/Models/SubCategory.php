@@ -44,4 +44,14 @@ class SubCategory extends Model
     {
         return $this->belongsToMany(Project::class);
     }
+
+    /**
+     * There can can be so many projects
+     *
+     * @return BelongsToMany
+     */
+    public function talents(): BelongsToMany
+    {
+        return $this->belongsToMany(Talent::class);
+    }
 }

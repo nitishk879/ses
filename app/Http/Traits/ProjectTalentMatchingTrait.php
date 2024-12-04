@@ -51,7 +51,10 @@ trait ProjectTalentMatchingTrait
 
         // Calculate hybrid work preference match
         if (isset($project->work_location_prefer)) {
-            $matchedWorking = array_intersect($project->work_location_prefer, $talent->work_location_prefer);
+            $matchedWorking = array_intersect(
+                $project->work_location_prefer,
+                $talent->work_location_prefer
+            );
             $matchScore['work_location'] = $this->safeDivide(count($matchedWorking), count($project->work_location_prefer)) * $weights['hybrid'];
         }
 

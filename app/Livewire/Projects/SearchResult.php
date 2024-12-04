@@ -5,6 +5,7 @@ namespace App\Livewire\Projects;
 use App\Enums\InterviewEnum;
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\SubCategory;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,6 +60,8 @@ class SearchResult extends Component
     #[Url]
     public ?array $category = [];
     #[Url]
+    public ?array $work_mode = [];
+    #[Url]
     public ?string $location = '';
     #[Url]
     public $sortBy = 'created_at';
@@ -103,6 +106,7 @@ class SearchResult extends Component
         $this->max_salary = $filters['max_salary'];
         $this->category = $filters['category'];
         $this->location = $filters['location'];
+        $this->work_mode = $filters['work_mode'];
 
         $this->resetPage();
     }
@@ -155,10 +159,14 @@ class SearchResult extends Component
         }
 
         if(!empty($this->category)){
-            $subCategories = Category::whereIn('id', $this->category)->pluck('id')->toArray();
+            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
             $query->whereHas('subCategories', function (Builder $query) use ($subCategories) {
                 $query->whereIn('sub_category_id', $subCategories);
             });
+        }
+
+        if (!empty($this->work_mode)){
+            $query->whereJsonContains('work_location_prefer', $this->work_mode);
         }
 
         // Filter by work location

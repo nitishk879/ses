@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\LangEnum;
+use App\Enums\WorkLocationEnum;
 use App\Models\Talent;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -50,7 +51,7 @@ class TalentController extends Controller
             'experience' => 'required|min:3',
             'work_experience' => 'required',
             'workLocations' => 'array',
-//            'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocation::options())),
+            'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocationEnum::cases())),
             'subcategory' => 'required|array',
             'min_monthly_price' => 'required',
             'max_monthly_price' => 'required',

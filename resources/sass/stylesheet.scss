@@ -256,7 +256,7 @@ body{
     }
     .input-group-text{
         background-color: transparent;
-        border-right: none !important;
+        border-left: none !important;
         color: $azure-500;
         background: var(--Gray-Scale-White, #FFF);
     }
@@ -274,7 +274,7 @@ body{
             box-shadow: none;
         }
         &.search-input{
-            border-left: 0;
+            border-right: 0;
         }
     }
 }

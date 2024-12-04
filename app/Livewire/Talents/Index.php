@@ -4,6 +4,7 @@ namespace App\Livewire\Talents;
 
 use App\Models\Category;
 use App\Models\Project;
+use App\Models\SubCategory;
 use App\Models\Talent;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -157,10 +158,14 @@ class Index extends Component
         }
 
         if(!empty($this->category)){
-            $subCategories = Category::whereIn('id', $this->category)->pluck('id')->toArray();
+            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
             $query->whereHas('subCategories', function (Builder $query) use ($subCategories) {
                 $query->whereIn('sub_category_id', $subCategories);
             });
+        }
+
+        if (!empty($this->work_mode)){
+            $query->whereJsonContains('work_location_prefer', $this->work_mode);
         }
 
         // Filter by nationality

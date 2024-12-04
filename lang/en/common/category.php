@@ -58,7 +58,7 @@ return array(
     "character" => "Character",
     "graphic" => "Graphic",
     // Oct 25, 2024
-    "bridge" => "Bridge",
+    "bridge" => "Bridge SE",
     "erp_sap" => 'ERP (SAP)',
     "project_management" => "Project Management",
 );

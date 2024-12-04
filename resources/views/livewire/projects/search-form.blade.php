@@ -5,8 +5,8 @@
             <span class="fs-4 mb-3">{{ __("talents/index.search") }}</span>
         </a>
         <div class="input-group mb-3">
-            <span class="input-group-text" id="search-keyword"><i class="fa-solid fa-magnifying-glass"></i></span>
             <input wire:model.live="search" type="text" class="form-control search-input" placeholder="{{ __("common/sidebar.search_with_keyword") }}" aria-label="search-input" aria-describedby="search-keyword">
+            <button type="submit" class="input-group-text" id="search-keyword"><i class="fa-solid fa-magnifying-glass"></i></button>
         </div>
         <div class="participation">
             <div class="accordion accordion-flush" id="accordionFlushExample">
@@ -23,7 +23,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" wire:model.live="category" type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">
                                     <label class="form-check-label" for="{{ $category->id }}">
-                                        {{ __("common/category.{$category->slug}") }}
+                                        {{ __("common/category.{$category->slug}") }} @env('local') ({{ $category->total_projects }}) @endenv
                                     </label>
                                 </div>
                             @endforeach
@@ -46,18 +46,15 @@
                                     <option value="{{$location->id}}">{{ $location->title ?? '' }}</option>
                                 @endforeach
                             </select>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="1" id="from_home">
-                                <label class="form-check-label" for="from_home">
-                                    {{ __('Work From Home') }}
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="2" id="from_home">
-                                <label class="form-check-label" for="from_home">
-                                    {{ __('Part time') }}
-                                </label>
-                            </div>
+                            <h4>{{ __("projects/form.work_mode") }}</h4>
+                            @foreach(\App\Enums\WorkLocationEnum::cases() as $case)
+                                <div class="form-check">
+                                    <input class="form-check-input" name="work_mode[]" wire:model.live="work_mode" type="checkbox" value="{{ $case->value }}" id="work_mode_{{$case->value}}">
+                                    <label class="form-check-label" for="work_mode_{{$case->value}}">
+                                        {{ __("common/sidebar.{$case->name}") }}
+                                    </label>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -72,12 +69,12 @@
                     </h2>
                     <div id="flush-collapseSalary" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body px-0">
-                            <div class="row g-0">
-                                <div class="col-md-6 px-0">
+                            <div class="row justify-content-between g-2 gap-2">
+                                <div class="col-md px-0">
                                     <label class="form-label" for="minSalary">{{ __("common/sidebar.min_salary") }}</label>
-                                    <input type="text" class="form-control" wire:model.live="min_salary" placeholder="{{ __("common/sidebar.min_salary_placeholder") }}" aria-label="First name">
+                                    <input type="text" class="form-control" wire:model.live="min_salary" placeholder="{{ __("common/sidebar.min_salary_placeholder") }}" aria-label="Min Salary">
                                 </div>
-                                <div class="col-md-6 px-0">
+                                <div class="col-md px-0">
                                     <label class="form-label" for="maxSalary">{{ __("common/sidebar.max_salary") }}</label>
                                     <input type="text" class="form-control" wire:model.live="max_salary" placeholder="{{ __("common/sidebar.max_salary_placeholder") }}" aria-label="Last name">
                                 </div>
@@ -160,7 +157,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" wire:model.live="contract_classification" value="{{ $contract->value }}" id="contract_{{$contract->value}}">
                                     <label class="form-check-label" for="contract_{{$contract->value}}">
-                                        {{ __("projects/form.{$contract->name}") }}
+                                        {{ __("talents/index.{$contract->value}") }}
                                     </label>
                                 </div>
                             @endforeach
