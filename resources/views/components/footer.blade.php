@@ -15,7 +15,7 @@
                         <div class="d-block">
                             <a href="" class="footer-link">{{ __("common/footer.about") }}</a>
                             <a href="" class="footer-link active">{{ __("common/footer.contact") }}</a>
-                            <a href="" class="footer-link">{{ __("common/footer.pricing") }}</a>
+                            <a href="/pricing" class="footer-link">{{ __("common/footer.pricing") }}</a>
                             <a href="" class="footer-link">{{ __("common/footer.blogs") }}</a>
                         </div>
                     </div>

@@ -55,7 +55,7 @@
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">{{ __("common/header.pricing_plan") }}</a>
+                        <a class="nav-link" href="/pricing">{{ __("common/header.pricing_plan") }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">{{ __("common/header.customer_support") }}</a>

@@ -75,6 +75,9 @@
                     @if($project->created_at >= today()->subMonth())
                         <span class="job-status">{{ __("common/home.new") }}</span>
                     @endif
+                    @if($project->deadline <= today()->addMonth())
+                            <span class="job-status">{{ __("Urgent") }}</span>
+                    @endif
                     <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</span>
                 </div>
                 <div class="col-md-6 text-end">

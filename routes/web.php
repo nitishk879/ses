@@ -21,6 +21,9 @@ Route::get('/', function () {
 Route::get('/project-detail', function () {
     return view('project-detail');
 });
+Route::get('/pricing', function () {
+    return view('pricing');
+});
 
 Auth::routes();
 
