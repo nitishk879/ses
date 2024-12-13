@@ -20,12 +20,33 @@
                     <div id="flush-collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
                             @foreach($categories as $category)
-                                <div class="form-check">
-                                    <input class="form-check-input" wire:model.live="category" type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">
-                                    <label class="form-check-label" for="{{ $category->id }}">
-                                        {{ __("common/category.{$category->slug}") }} @env('local') ({{ $category->total_projects }}) @endenv
-                                    </label>
+                                <div class="accordion" id="accordionPanelsStayOpenExample">
+                                    <div class="accordion-item border-0">
+                                        <h4 class="accordion-header">
+                                            <button class="accordion-button px-0 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{$category->id}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{$category->id}}">
+                                                {{ $category->title }} ({{ $category->subCategories->count() }})
+                                            </button>
+                                        </h4>
+                                        <div id="panelsStayOpen-collapse{{$category->id}}" class="accordion-collapse collapse show">
+                                            <div class="accordion-body px-0 py-0">
+                                                @foreach($category->subCategories as $subcategory)
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" wire:model.live="subcategories" @checked(in_array($subcategory->id, $this->subcategories)) type="checkbox" value="{{ $subcategory->id }}" id="{{ $subcategory->id }}">
+                                                        <label class="form-check-label" for="{{ $subcategory->id }}">
+                                                            {{ __("common/category.{$subcategory->slug}") }} @env('local') ({{ $subcategory->projects->count() }}) @endenv
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+{{--                                <div class="form-check">--}}
+{{--                                    <input class="form-check-input" wire:model.live="category" @checked(in_array($category->id, $this->category)) type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">--}}
+{{--                                    <label class="form-check-label" for="{{ $category->id }}">--}}
+{{--                                        {{ __("common/category.{$category->slug}") }} @env('local') ({{ $category->total_projects }}) @endenv--}}
+{{--                                    </label>--}}
+{{--                                </div>--}}
                             @endforeach
                         </div>
                     </div>
@@ -43,13 +64,13 @@
                         <div class="accordion-body">
                             <select class="form-control form-select mb-3" id="multiple-select-fieldx" wire:model.live="workLocation" data-placeholder="e.g. Tokyo" aria-describedby="search-location" multiple>
                                 @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                    <option value="{{$location->id}}">{{ $location->title ?? '' }}</option>
+                                    <option value="{{$location->id}}" @selected(in_array($location->id, $workLocation)) >{{ $location->title ?? '' }} ({{ $location->projects->count() }})</option>
                                 @endforeach
                             </select>
                             <h4>{{ __("projects/form.work_mode") }}</h4>
                             @foreach(\App\Enums\WorkLocationEnum::cases() as $case)
                                 <div class="form-check">
-                                    <input class="form-check-input" name="work_mode[]" wire:model.live="work_mode" type="checkbox" value="{{ $case->value }}" id="work_mode_{{$case->value}}">
+                                    <input class="form-check-input" name="work_mode[]" wire:model.live="work_mode" @checked(in_array($case->value, $work_mode)) type="checkbox" value="{{ $case->value }}" id="work_mode_{{$case->value}}">
                                     <label class="form-check-label" for="work_mode_{{$case->value}}">
                                         {{ __("common/sidebar.{$case->name}") }}
                                     </label>
@@ -68,7 +89,7 @@
                         </button>
                     </h2>
                     <div id="flush-collapseSalary" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
-                        <div class="accordion-body px-0">
+                        <div class="accordion-body">
                             <div class="row justify-content-between g-2 gap-2">
                                 <div class="col-md px-0">
                                     <label class="form-label" for="minSalary">{{ __("common/sidebar.min_salary") }}</label>
@@ -94,10 +115,10 @@
                     <div id="flush-collapsePossibleParticipation" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
                             <div class="input-group mb-3">
-                                <input type="date" class="form-control" wire:model.live="startingDate" placeholder="Starting Date" aria-label="budget" aria-describedby="search-starting">
+                                <input type="date" class="form-control" wire:model.live="startingDate" value="{{ $this->startingDate ?? '' }}" placeholder="Starting Date" aria-label="budget" aria-describedby="search-starting">
                             </div>
                             <div class="input-group mb-3">
-                                <input type="date" class="form-control" wire:model.live="endDate" placeholder="Ending Date" aria-label="budget" aria-describedby="search-ending">
+                                <input type="date" class="form-control" wire:model.live="endDate" value="{{ $this->endDate ?? '' }}" placeholder="Ending Date" aria-label="budget" aria-describedby="search-ending">
                             </div>
                         </div>
                     </div>
@@ -115,7 +136,7 @@
                         <div class="accordion-body">
                             @foreach(\App\Enums\CommercialFlow::cases() as $nation)
                                 <div class="form-check form-check-inline">
-                                    <input class="form-check-input" wire:model.live="nationality" type="checkbox" id="inline{{$nation}}" value="{{ $nation }}">
+                                    <input class="form-check-input" wire:model.live="commercial_flow" type="checkbox" id="inline{{$nation}}" value="{{ $nation }}">
                                     <label class="form-check-label" for="inline{{$nation}}">{{ $nation->value ==1 ? __("common/sidebar.confirmed") : __("common/sidebar.before_confirm") }}</label>
                                 </div>
                             @endforeach
@@ -157,7 +178,7 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" wire:model.live="contract_classification" value="{{ $contract->value }}" id="contract_{{$contract->value}}">
                                     <label class="form-check-label" for="contract_{{$contract->value}}">
-                                        {{ __("talents/index.{$contract->value}") }}
+                                        {{ __("projects/form.{$contract->name}") }}
                                     </label>
                                 </div>
                             @endforeach

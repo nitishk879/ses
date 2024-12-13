@@ -1,4 +1,73 @@
 <div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            @if($subcategories)
+                @foreach(\App\Models\Category::all() as $cat)
+                    @php
+                        $isOpen = $cat->subCategories->contains(function ($subCategory){
+                            return in_array($subCategory->id, $this->subcategories);
+                        });
+                    @endphp
+                    <span class="badge text-bg-primary text-white">{{ $isOpen ? $cat->title : '' }}</span>
+                    @foreach($cat->subCategories as $subCat)
+                        <span class="badge text-bg-secondary">{{ in_array($subCat->id, $this->subcategories) ? $subCat->title : '' }}</span>
+                    @endforeach
+                @endforeach
+            @endif
+
+            @if($this->search)
+                    <span class="badge text-bg-primary text-white">{{ __("common/sidebar.search_keyword") }}</span>
+                    <span class="badge text-bg-secondary">{{ $this->search }}</span>
+            @endif
+
+            @if($workLocation)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.locations") }} </span>
+                @foreach(\App\Models\Location::all() as $lok)
+                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->title : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($work_mode)
+                    <span class="badge text-bg-primary text-white">{{ __("projects/form.work_mode") }} </span>
+                @foreach(\App\Enums\WorkLocationEnum::cases() as $wmode)
+                    <span class="badge text-bg-secondary">{{ in_array($wmode->value, $this->work_mode) ? __("common/sidebar.{$wmode->name}") : '' }}</span>
+                @endforeach
+            @endif
+            @if($min_salary || $max_salary)
+                <span class="badge text-bg-primary text-white">{{ __("common/sidebar.monthly_salary_range") }}</span>
+                <span class="badge text-bg-secondary">{{ __("common/sidebar.min_salary") }}: {{ $this->min_salary ?? '' }}</span>
+                <span class="badge text-bg-secondary">{{ __("common/sidebar.max_salary") }}: {{ $this->max_salary ?? '' }}</span>
+            @endif
+
+            @if($commercial_flow)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.commercial_flow") }} </span>
+                @foreach(\App\Enums\CommercialFlow::cases() as $flow)
+                    <span class="badge text-bg-secondary">{{ in_array($flow->value, $this->commercial_flow) ? $flow->name : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($trade_classification)
+                <span class="badge text-bg-primary text-white">{{ __("common/sidebar.project_flow") }} </span>
+                @foreach(\App\Enums\TradeClassification::cases() as $trade)
+                    <span class="badge text-bg-secondary">{{ in_array($trade->value, $this->trade_classification) ? $trade->name : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($contract_classification)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.contract_type") }} </span>
+                @foreach(\App\Enums\ContractClassificationEnum::cases() as $contract)
+                    <span class="badge text-bg-secondary">{{ in_array($contract->value, $this->contract_classification) ? __("projects/form.{$contract->name}") : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($interview)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.no_of_interviews") }} </span>
+                @foreach(\App\Enums\InterviewEnum::cases() as $inter)
+                    <span class="badge text-bg-secondary">{{ in_array($inter->value, $this->interview) ? __("common/sidebar.interview_{$inter->name}") : '' }}</span>
+                @endforeach
+            @endif
+        </div>
+    </div>
     @foreach($projects as $project)
         <x-ui.card-layout :item="$project">
             <x-slot:header>
@@ -52,65 +121,6 @@
             </div>
             <!--- Card Body content ---->
         </x-ui.card-layout>
-{{--        <div class="job-list mt-4">--}}
-{{--            <a href="" class="add-to-favourite">--}}
-{{--                <i class="fa-solid fa-star"></i>--}}
-{{--            </a>--}}
-{{--            <div class="job-content">--}}
-{{--                <div class="row justify-content-between">--}}
-{{--                    <div class="col-md-6 d-flex gap-2">--}}
-{{--                        <span class="job-status">{{ __("common/home.new") }}</span>--}}
-{{--                        <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ __("common/home.japan_tokyo") }}</span>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-6 text-end">--}}
-{{--                        <a href="" class="add-to-wishlist"><i class="fa-solid fa-heart"></i> 54</a>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-12 text-end">--}}
-{{--                        <h4 class="job-budget"><i class="fa-solid fa-yen-sign"></i> {{ $project->minimum_price }}-{{ $project->maximum_price }}/{{ __("common/home.month") }}</h4>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--                <div class="row justify-content-between">--}}
-{{--                    <div class="col-md-12">--}}
-{{--                        <h3 class="job-title">{{ $project->title }}</h3>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-12 text-end">--}}
-{{--                        <h6 class="job-paid-type">{{ __("common/home.fixed_price") }}</h6>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-12 d-flex justify-content-between">--}}
-{{--                        <div class="row">--}}
-{{--                            <div class="col-md-6 mb-2 job-listing-date"><i class="fa-solid fa-calendar-days"></i>--}}
-{{--                                {{ __("common/home.registered_on") }}: {{ $project->created_at->format('M d, Y') }}</div>--}}
-{{--                            <div class="col-md-6 mb-2 job-updated"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: {{ $project->updated_at->format('M d, Y') }}</div>--}}
-{{--                            <div class="col job-duration"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: {{ $project->deadline->format('M d, Y') }}</div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-12 text-end">--}}
-{{--                        <a href="{{ route("project.show", $project) ?? __("/project/{$project->slug}") }}" class="btn job-btn-summary">{{ __("common/home.summary") }}</a>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-10">--}}
-{{--                        <p class="job-overview">--}}
-{{--                            {!! \Illuminate\Support\Str::limit($project->project_description, 200) !!}--}}
-{{--                        </p>--}}
-{{--                    </div>--}}
-{{--                    <div class="col-md-12 job-pills">--}}
-{{--                        <div class="row align-items-center">--}}
-{{--                            <div class="col-md-3 text-center">--}}
-{{--                                <div class="job-pill">{{ __('common/home.apply') }}: <span>{{ today()->format('d/m/y') }}</span></div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-3 text-center">--}}
-{{--                                <div class="job-pill">{{ __("common/home.contract_price") }}: <span>{{ __("common/home.fixed") }}</span></div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-3 text-center">--}}
-{{--                                <div class="job-pill">{{ __("common/home.no_of_interviews") }}: <span>{{ $project->number_of_interviewers ?? __('5') }}</span></div>--}}
-{{--                            </div>--}}
-{{--                            <div class="col-md-3 text-center">--}}
-{{--                                <div class="job-pill">{{ __("common/home.eligibility") }}: <span>{{ __('B.Tech') }}</span></div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
-{{--            </div>--}}
-{{--        </div>--}}
     @endforeach
     <div class="paginator">
         {{ $projects->links() }}

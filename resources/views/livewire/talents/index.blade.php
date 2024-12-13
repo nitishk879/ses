@@ -1,4 +1,87 @@
 <div>
+    <div class="row justify-content-center">
+        <div class="col-md-12">
+            @if($subcategories)
+                @foreach(\App\Models\Category::all() as $cat)
+                    @php
+                        $isOpen = $cat->subCategories->contains(function ($subCategory){
+                            return in_array($subCategory->id, $this->subcategories);
+                        });
+                    @endphp
+                    <span class="badge text-bg-primary text-white">{{ $isOpen ? $cat->title : '' }}</span>
+                    @foreach($cat->subCategories as $subCat)
+                        <span class="badge text-bg-secondary">{{ in_array($subCat->id, $this->subcategories) ? $subCat->title : '' }}</span>
+                    @endforeach
+                @endforeach
+            @endif
+
+            @if($this->search)
+                <span class="badge text-bg-primary text-white">{{ __("common/sidebar.search_keyword") }}</span>
+                <span class="badge text-bg-secondary">{{ $this->search }}</span>
+            @endif
+
+            @if($workLocation)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.locations") }} </span>
+                @foreach(\App\Models\Location::all() as $lok)
+                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->title : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($work_mode)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.work_mode") }} </span>
+                @foreach(\App\Enums\WorkLocationEnum::cases() as $wmode)
+                    <span class="badge text-bg-secondary">{{ in_array($wmode->value, $this->work_mode) ? __("common/sidebar.{$wmode->name}") : '' }}</span>
+                @endforeach
+            @endif
+            @if($min_salary || $max_salary)
+                <span class="badge text-bg-primary text-white">{{ __("common/sidebar.monthly_salary_range") }}</span>
+                <span class="badge text-bg-secondary">{{ __("common/sidebar.min_salary") }}: {{ $this->min_salary ?? '' }}</span>
+                <span class="badge text-bg-secondary">{{ __("common/sidebar.max_salary") }}: {{ $this->max_salary ?? '' }}</span>
+            @endif
+
+            @if($availability)
+                <span class="badge text-bg-primary text-white">{{ __("common/sidebar.possible_participation") }} </span>
+                @foreach(\App\Enums\ParticipationEnum::cases() as $flow)
+                    <span class="badge text-bg-secondary">{{ in_array($flow->value, $this->availability) ? __("common/sidebar.{$flow->value}") : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($age)
+                <span class="badge text-bg-primary text-white">{{ __("talents/index.age") }} </span>
+                @foreach($ages as $trade)
+                    <span class="badge text-bg-secondary">{{ in_array($trade, $this->age) ? $trade : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($gender)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.contract_type") }} </span>
+                @foreach(\App\Enums\GenderEnum::cases() as $contract)
+                    <span class="badge text-bg-secondary">{{ $contract->value == $this->gender ? __("talents/registration.{$contract->value}") : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($nationality)
+                <span class="badge text-bg-primary text-white">{{ __("talents/index.nationality") }} </span>
+                @foreach($nationalities as $nation)
+                    <span class="badge text-bg-secondary">{{ in_array($nation, $this->nationality) ? __("talents/registration.{$nation}") : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($affiliation)
+                <span class="badge text-bg-primary text-white">{{ __("talents/registration.affiliation") }} </span>
+                @foreach(\App\Enums\AffiliationEnum::cases() as $af)
+                    <span class="badge text-bg-secondary">{{ in_array($af->value, $this->affiliation) ? __("projects/form.{$af->name}") : '' }}</span>
+                @endforeach
+            @endif
+
+            @if($contract)
+                <span class="badge text-bg-primary text-white">{{ __("projects/form.contract_type") }} </span>
+                @foreach(\App\Enums\ContractClassificationEnum::cases() as $cont)
+                    <span class="badge text-bg-secondary">{{ in_array($cont->value, $this->contract) ? __("projects/form.{$cont->name}") : '' }}</span>
+                @endforeach
+            @endif
+        </div>
+    </div>
     <div class="d-flex w-100 justify-content-between my-3">
         <h2 class="search-keyword">
             @if($search)

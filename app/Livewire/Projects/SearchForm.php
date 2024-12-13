@@ -29,6 +29,7 @@ class SearchForm extends Component
     public $max_salary = '';
     public $category = [];
     public $categories = [];
+    public $subcategories = [];
     public ?string $location = '';
 
     protected $listeners = ['clearSearch' => 'clear'];
@@ -56,6 +57,7 @@ class SearchForm extends Component
             'min_salary' => $this->min_salary,
             'max_salary' => $this->max_salary,
             'category' => $this->category,
+            'subcategories' => $this->subcategories,
             'location' => $this->location,
             'work_mode' => $this->work_mode,
         ]);
@@ -83,6 +85,7 @@ class SearchForm extends Component
         $this->min_salary = '';
         $this->max_salary = '';
         $this->category = array();
+        $this->subcategories = array();
         $this->location = '';
         $this->work_mode = array();
 

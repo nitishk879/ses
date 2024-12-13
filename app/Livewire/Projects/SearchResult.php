@@ -60,6 +60,8 @@ class SearchResult extends Component
     #[Url]
     public ?array $category = [];
     #[Url]
+    public ?array $subcategories = [];
+    #[Url]
     public ?array $work_mode = [];
     #[Url]
     public ?string $location = '';
@@ -105,6 +107,7 @@ class SearchResult extends Component
         $this->min_salary = $filters['min_salary'];
         $this->max_salary = $filters['max_salary'];
         $this->category = $filters['category'];
+        $this->subcategories = $filters['subcategories'];
         $this->location = $filters['location'];
         $this->work_mode = $filters['work_mode'];
 
@@ -158,10 +161,16 @@ class SearchResult extends Component
             $query->whereIn('contract_classification', $this->contract_classification);
         }
 
-        if(!empty($this->category)){
-            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
-            $query->whereHas('subCategories', function (Builder $query) use ($subCategories) {
-                $query->whereIn('sub_category_id', $subCategories);
+//        if(!empty($this->category)){
+//            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
+//            $query->whereHas('subCategories', function (Builder $query) use ($subCategories) {
+//                $query->whereIn('sub_category_id', $subCategories);
+//            });
+//        }
+
+        if (!empty($this->subcategories)) {
+            $query->whereHas('subcategories', function (Builder $query) {
+                $query->whereIn('sub_category_id', $this->subcategories);
             });
         }
 

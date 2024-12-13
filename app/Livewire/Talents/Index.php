@@ -55,6 +55,8 @@ class Index extends Component
     #[Url]
     public ?array $category = [];
     #[Url]
+    public ?array $subcategories = [];
+    #[Url]
     public $sortBy = 'created_at';
     #[Url]
     public $sortDirection = 'asc';
@@ -89,6 +91,7 @@ class Index extends Component
         $this->min_salary = $filters['min_salary'];
         $this->max_salary = $filters['max_salary'];
         $this->category = $filters['category'];
+        $this->subcategories = $filters['subcategories'];
         $this->work_mode = $filters['work_mode'];
 
         $this->resetPage();
@@ -121,6 +124,10 @@ class Index extends Component
 
         $this->confirmingDisplayingResume = true;
     }
+
+    /** Let's define nationality for the user. */
+    public $nationalities = ['japanese', 'other'];
+
     public $ages = [
         '20-30',
         '30-40',
@@ -157,10 +164,10 @@ class Index extends Component
             $query->whereIn('availability', $this->availability);
         }
 
-        if(!empty($this->category)){
-            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
-            $query->whereHas('subCategories', function (Builder $query) use ($subCategories) {
-                $query->whereIn('sub_category_id', $subCategories);
+        if(!empty($this->subcategories)){
+//            $subCategories = SubCategory::whereIn('category_id', $this->category)->pluck('id')->toArray();
+            $query->whereHas('subCategories', function (Builder $query) {
+                $query->whereIn('sub_category_id', $this->subcategories);
             });
         }
 

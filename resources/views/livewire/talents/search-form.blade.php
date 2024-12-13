@@ -20,12 +20,33 @@
                     <div id="flush-collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
                             @foreach($categories as $category)
-                                <div class="form-check">
-                                    <input class="form-check-input" wire:model.live="category" type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">
-                                    <label class="form-check-label" for="{{ $category->id }}">
-                                        {{ __("common/category.{$category->slug}") }} @env('local') ({{ $category->total_talent }}) @endenv
-                                    </label>
+                                <div class="accordion" id="accordionPanelsStayOpenExample">
+                                    <div class="accordion-item border-0">
+                                        <h4 class="accordion-header">
+                                            <button class="accordion-button px-0 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{$category->id}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{$category->id}}">
+                                                {{ $category->title }} ({{ $category->subCategories->count() }})
+                                            </button>
+                                        </h4>
+                                        <div id="panelsStayOpen-collapse{{$category->id}}" class="accordion-collapse collapse show">
+                                            <div class="accordion-body px-0 py-0">
+                                                @foreach($category->subCategories as $subcategory)
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" wire:model.live="subcategories" @checked(in_array($subcategory->id, $this->subcategories)) type="checkbox" value="{{ $subcategory->id }}" id="{{ $subcategory->id }}">
+                                                        <label class="form-check-label" for="{{ $subcategory->id }}">
+                                                            {{ __("common/category.{$subcategory->slug}") }} @env('local') ({{ $subcategory->talents->count() }}) @endenv
+                                                        </label>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
+                                {{--                                <div class="form-check">--}}
+                                {{--                                    <input class="form-check-input" wire:model.live="category" @checked(in_array($category->id, $this->category)) type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">--}}
+                                {{--                                    <label class="form-check-label" for="{{ $category->id }}">--}}
+                                {{--                                        {{ __("common/category.{$category->slug}") }} @env('local') ({{ $category->total_projects }}) @endenv--}}
+                                {{--                                    </label>--}}
+                                {{--                                </div>--}}
                             @endforeach
                         </div>
                     </div>
@@ -219,6 +240,9 @@
                     </div>
                 </div>
                 <!-- Contract Type -->
+                <div class="col-md-12 text-center my-3">
+                    <button class="btn btn-outline-secondary" wire:click="clear">{{ __("common/sidebar.clear") }}</button>
+                </div>
             </div>
         </div>
     </div>
