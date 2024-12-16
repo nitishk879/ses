@@ -121,6 +121,8 @@
                                 {{ __("talents/index.registered_on") }}: {{ $talent->user->created_at->format('M d, Y') }}</div>
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-rotate"></i>
                                 {{ __("talents/index.updated_on") }}: {{ $talent->user->updated_at->format('M d, Y') }}</div>
+                            <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-lock"></i>
+                                {{ __("talents/index.last_logged_in") }}: {{ $talent->user->last_login?->last_activity?->format('M d, Y') }}</div>
                         </div>
                         <div class="col-md-4 text-end">
                             <a href="" class="talent-save"><i class="fas fa-heart"></i> {{ random_int(18, 50) }}</a>

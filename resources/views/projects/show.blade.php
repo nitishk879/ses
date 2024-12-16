@@ -52,13 +52,13 @@
                             <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->format('M d, Y') }}</span></div>
                             <div class="mb-2 job-timestamp"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: <span>{{ $project->deadline->format('M d, Y') }}</span></div>
                         </div>
-                        <div class="d-flex gap-2 user-data">
-                            <div class="avatar-view me-3">
-                                <img src="{{ $project->company->company_logo_url ?? 'https://picusm.photos/32/32' }}" alt="" class="img-fluid" height="32" width="32"/>
-                                <span class="online"></span>
-                            </div>
-                            <h6 class="mt-3">{{ $project->company->company_name ?? Auth::user()->name }}</h6>
-                        </div>
+{{--                        <div class="d-flex gap-2 user-data">--}}
+{{--                            <div class="avatar-view me-3">--}}
+{{--                                <img src="{{ $project->company->company_logo_url ?? 'https://picusm.photos/32/32' }}" alt="" class="img-fluid" height="32" width="32"/>--}}
+{{--                                <span class="online"></span>--}}
+{{--                            </div>--}}
+{{--                            <h6 class="mt-3">{{ $project->company->company_name ?? Auth::user()->name }}</h6>--}}
+{{--                        </div>--}}
                     </div>
                     <div class="col-md-4 pt-5">
                         <img src="{{ asset("images/project-detail-hero-image.png") }}" alt="" class="img-fluid">
@@ -320,7 +320,7 @@
                                 <div class="flex-grow-1 ms-3">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div class="avatar">
-                                            <span class="text-break">{{ $similar_project->company->company_name ?? __("pro") }}</span>
+                                            <span class="text-break">{{ __("projects/form.deadline") }}: {{ $similar_project->deadline->format('y-m-d') ?? __("projects/form.deadline") }}</span>
                                             <i class="fa-regular fa-circle-check"></i>
                                         </div>
                                         <a href="{{ route("project.show", $similar_project) }}" class="btn btn-theme">{{ __("projects/show.project_detail") }}</a>

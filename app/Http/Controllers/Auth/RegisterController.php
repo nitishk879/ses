@@ -52,7 +52,7 @@ class RegisterController extends Controller
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'date_of_birth' => ['required', 'max:10'],
+            'date_of_birth' => ['nullable', 'max:10'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
@@ -70,7 +70,7 @@ class RegisterController extends Controller
             'lastname' => $data['lastname'],
             'email' => $data['email'],
             'username' => $data['username'] ?? strstr($data['email'], '@', true),
-            'date_of_birth' => $data['date_of_birth'],
+            'date_of_birth' => $data['date_of_birth'] ?? today()->subYears(18),
             'password' => Hash::make($data['password']),
         ]);
     }

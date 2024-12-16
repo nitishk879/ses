@@ -7,6 +7,7 @@
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('users/form.update_profile') }}</h1>
+                <h4 class="pb-3">Last Logged in: {{ \Illuminate\Support\Carbon::createFromTimestamp($user->last_login->last_activity) }}</h4>
             </div>
         </div>
         <form action="{{ route("profile.update") }}" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
@@ -216,17 +217,33 @@
                 </div>
             </div>
         </form>
-{{--        @env(['development', 'localhost'])--}}
+        @env('local')
+            @php($roles = Auth::user()->roles)
             <div class="row justify-content-center py-3">
                 <div class="col-md-6">
-                    <ul class="list-group">
-                        Roles:
-                        @foreach(Auth::user()->roles as $role)
-                            <li class="list-group-item" itemprop="{{ $role->slug }}">{{ $role->title ?? $role->slug }}</li>
-                        @endforeach
-                    </ul>
+                    @if($roles->count() >=1)
+                        <ul class="list-group">
+                            Roles:
+                            @foreach($roles as $role)
+                                <li class="list-group-item" itemprop="{{ $role->slug }}">{{ $role->title ?? $role->slug }}</li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <form method="post" class="col-md-10 col-xl-8">
+                            @csrf
+                            <label for="roles" class="form-label">{{ __("users/roles.roles") }}</label>
+                            @foreach(\App\Models\Role::whereIn('id', [2,3,])->get() as $role)
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input @error('roles') is-invalid @enderror"
+                                           type="checkbox" id="roles_{{$role->id}}" name="roles[]" value="{{ $role->id }}">
+                                    <label class="form-check-label"
+                                           for="roles_{{$role->id}}">{{ __("users/roles.{$role->slug}") }}</label>
+                                </div>
+                            @endforeach
+                        </form>
+                    @endif
                 </div>
             </div>
-{{--        @endenv--}}
+        @endenv
     </div>
 @endsection

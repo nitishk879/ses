@@ -4,6 +4,7 @@ namespace App\Enums;
 
 enum ScoringEnum: int
 {
+    case hundred = 100;
     case ninety = 90;
     case eighty = 80;
     case seventy = 70;
@@ -14,6 +15,7 @@ enum ScoringEnum: int
     static function toName(int $value): string
     {
         return match ($value) {
+            self::hundred->value => __("projects/invitation.x_percent", ['percentage' => 100]),
             self::ninety->value => __("projects/invitation.x_percent", ['percentage' => 90]),
             self::eighty->value => __("projects/invitation.x_percent", ["percentage" => 80]),
             self::seventy->value => __("projects/invitation.x_percent", ["percentage" => 70]),
@@ -31,6 +33,7 @@ enum ScoringEnum: int
     public static function toArray(int $value): array
     {
         return match ($value){
+            self::hundred->value => [100],
             self::ninety->value => [90],
             self::eighty->value => [80],
             self::seventy->value => [70],

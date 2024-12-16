@@ -95,6 +95,7 @@ return array(
     "experience_x" => "Year of experience in specific field", // Nov 28, 2024
     "scoring" => "Scoring",
     "scoring_placeholder" => "--",
+    "score_hundred" => "100%", // Dec 16, 2024
     "score_ninety" => "90%",
     "score_eighty" => "80%",
     "score_seventy" => "70%",

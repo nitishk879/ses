@@ -57,4 +57,16 @@ class HomeController extends Controller
 
         return redirect('/profile')->with('success', __("users/form.success_message"));
     }
+
+
+    public function updateRole(Request $request)
+    {
+        $validated = $request->validate([
+            'roles' => 'required',
+        ]);
+
+        $user = Auth::user();
+
+        $user->roles()->attach($validated['roles']);
+    }
 }

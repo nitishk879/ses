@@ -44,4 +44,5 @@ return array(
     "view_profile" => "View profile",
     "application_deadline"  => "Application deadline",
     "favourite" => "Favourite",
+    "last_logged_in" => "Last logged in",
 );

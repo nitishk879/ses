@@ -153,7 +153,7 @@
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="minBudget">{{ __("common/sidebar.min_salary") }}</label>
-                                            <input type="text" class="form-control @error('minimum_price') is-invalid @enderror"
+                                            <input type="number" class="form-control @error('minimum_price') is-invalid @enderror"
                                                    name="minimum_price"
                                                    id="expectedMinSalary"
                                                    value="{{ old("minimum_price") ?? '' }}"
@@ -163,7 +163,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="maxBudget">{{ __("common/sidebar.max_salary") }}</label>
-                                            <input type="text" class="form-control @error('maximum_price') is-invalid @enderror"
+                                            <input type="number" class="form-control @error('maximum_price') is-invalid @enderror"
                                                    name="maximum_price"
                                                    id="expectedMaxSalary"
                                                    value="{{ old("maximum_price") ?? '' }}"
@@ -456,24 +456,24 @@
     @push('scripts')
         <!---- Summer note libraries -->
         <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
-        <script>
-            $('.tinyEditor').summernote({
-                placeholder: "{{ __("talents/registration.write_bio") }}",
-                tabsize: 2,
-                height: 120,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
-            });
-        </script>
+{{--        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">--}}
+{{--        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>--}}
+{{--        <script>--}}
+{{--            $('.tinyEditor').summernote({--}}
+{{--                placeholder: "{{ __("talents/registration.write_bio") }}",--}}
+{{--                tabsize: 2,--}}
+{{--                height: 120,--}}
+{{--                toolbar: [--}}
+{{--                    ['style', ['style']],--}}
+{{--                    ['font', ['bold', 'underline', 'clear']],--}}
+{{--                    ['color', ['color']],--}}
+{{--                    ['para', ['ul', 'ol', 'paragraph']],--}}
+{{--                    ['table', ['table']],--}}
+{{--                    ['insert', ['link', 'picture', 'video']],--}}
+{{--                    ['view', ['fullscreen', 'codeview', 'help']]--}}
+{{--                ]--}}
+{{--            });--}}
+{{--        </script>--}}
         <!---- Summer note libraries -->
         <!-- Add Axios via CDN (optional if not already included) -->
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>

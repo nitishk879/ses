@@ -49,6 +49,7 @@ Route::get('/home', [HomeController::class, 'index'])->middleware('auth')->name(
 
 Route::get('profile', [HomeController::class, 'profile'])->middleware('auth')->name('profile.show');
 Route::put('profile', [HomeController::class, 'update'])->middleware('auth')->name('profile.update');
+Route::post('add-role', [HomeController::class, 'updateRole'])->middleware('auth')->name('add.role');
 
 // Let's register yourself as talent
 Route::get('talent-registration', [TalentRegistrationController::class, 'create'])->name('talent.registration');

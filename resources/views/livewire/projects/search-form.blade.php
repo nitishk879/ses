@@ -5,8 +5,8 @@
             <span class="fs-4 mb-3">{{ __("talents/index.search") }}</span>
         </a>
         <div class="input-group mb-3">
-            <input wire:model.live="search" type="text" class="form-control search-input" placeholder="{{ __("common/sidebar.search_with_keyword") }}" aria-label="search-input" aria-describedby="search-keyword">
-            <button type="submit" class="input-group-text" id="search-keyword"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <input wire:model.live="search" type="text" class="form-control" placeholder="{{ __("common/sidebar.search_with_keyword") }}" aria-label="search-input" aria-describedby="search-keyword">
+{{--            <button type="submit" class="input-group-text" id="search-keyword"><i class="fa-solid fa-magnifying-glass"></i></button>--}}
         </div>
         <div class="participation">
             <div class="accordion accordion-flush" id="accordionFlushExample">

@@ -97,7 +97,7 @@ class User extends Authenticatable
     public function age(): Attribute
     {
         return Attribute::make(
-            get: fn() => Carbon::parse($this->date_of_birth)->age,
+            get: fn() => Carbon::parse($this->date_of_birth)->age ?? '',
         );
     }
 
@@ -206,4 +206,14 @@ class User extends Authenticatable
 //            }
 //        );
 //    }
+
+    /**
+     * Get the user's full name.
+     */
+    protected function lastLogin(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value) => \DB::table('sessions')->where('user_id', $this->id)->orderBy('last_activity', 'desc')->first(),
+        );
+    }
 }
