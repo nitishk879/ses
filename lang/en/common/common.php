@@ -19,4 +19,8 @@ return array(
     'back_to_home' => 'Back to home',
     'talent_registration_title' => 'Register yourself as Talent',
     'member_registration_title' => 'Register yourself as Project poster',
+    'use'   => 'Use',
+    'close' => 'Close',
+    'sample_data_title' => 'Sample data',
+    'modal_title' => 'Modal title',
 );

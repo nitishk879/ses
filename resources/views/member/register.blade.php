@@ -110,9 +110,9 @@
                                 <div class="col-md-12 mb-4">
                                     <div class="bg-light p-3">
                                         <div class="mb-3">
-                                            <label for="educationDetails" class="form-label">{{ __('company/register.company_area_of_expertise') }}</label>
+                                            <label for="targetTextarea1" class="form-label">{{ __('company/register.company_area_of_expertise') }}</label>
                                             <textarea class="form-control tinyEditor @error('expertise') is-invalid @enderror"
-                                                      id="educationDetails"
+                                                      id="targetTextarea1"
                                                       name="expertise"
                                                       rows="3"
                                                       placeholder="{{ __('talents/registration.write_bio') }}">{!! old("expertise") ?? '' !!}</textarea>
@@ -120,14 +120,14 @@
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                             <div class="ms-auto text-end mt-2">
-                                                <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                                <a href="" onclick="openDynamicModal(1)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                             </div>
                                         </div>
                                         <div class="mb-3">
-                                            <label for="experienceDetails"
+                                            <label for="targetTextarea2"
                                                    class="form-label">{{ __('company/register.specialization') }}</label>
                                             <textarea class="form-control tinyEditor @error('specialised') is-invalid @enderror"
-                                                      id="experienceDetails"
+                                                      id="targetTextarea2"
                                                       name="specialised"
                                                       rows="3"
                                                       placeholder="{{ __('talents/registration.write_bio') }}">{!! old("specialised") ?? '' !!}</textarea>
@@ -135,7 +135,7 @@
                                             <div class="invalid-feedback d-block">{{ $message }}</div>
                                             @enderror
                                             <div class="ms-auto text-end mt-2">
-                                                <a href="" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
+                                                <a href="" onclick="openDynamicModal(2)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                             </div>
                                         </div>
                                     </div>
@@ -331,90 +331,18 @@
         </div>
     </x-authentication-card>
 
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
-                </div>
-                <div class="modal-body">
-                    <div class="cover-letter ">
-                        <h4 class="modalTitle">{{ __("Cover Letter") }}</h4>
-                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
-                </div>
-            </div>
-        </div>
-    </div>
     @push('scripts')
-        {{-- Summer note library --}}
-        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
         <script>
-            $('.tinyEditor').summernote({
-                placeholder: "{{ __("talents/registration.write_bio") }}",
-                tabsize: 2,
-                height: 120,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
-            });
+            $( '#multiple-select-field' ).select2( {
+                theme: "bootstrap-5",
+                width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+                placeholder: $( this ).data( 'placeholder' ),
+                closeOnSelect: false,
+            } );
         </script>
-        <!---- Summer note libraries -->
-        <script>
-            // Get the select element and the additional input field
-            const selectBox = document.getElementById('possibleParticipation');
-            const additionalInput = document.getElementById('joiningDateField');
-
-            // Listen for changes in the dropdown
-            selectBox.addEventListener('change', function() {
-                // Check if the selected value is "other"
-                if (this.value !== 'IMMEDIATELY') {
-                    additionalInput.style.display = 'block'; // Show the input field
-                } else {
-                    additionalInput.style.display = 'none';  // Hide the input field
-                }
-            });
-        </script>
-        <!-- Add Axios via CDN (optional if not already included) -->
-        {{--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>--}}
-        <!-- Modal Popup call -->
-        <script>
-            function openDynamicModal(id) {
-                // Ensure elements exist
-                const modalLabel = document.getElementById('staticBackdropLabel');
-                const modalBody = document.querySelector('.cover-letter-description');
-                const modalElement = document.getElementById('staticBackdrop');
-
-                if (!modalLabel || !modalBody || !modalElement) {
-                    console.error('Modal elements are not found in the DOM.');
-                    return;
-                }
-                axios.get('/sample/' + id)
-                    .then(response => {
-                        const data = response.data;
-                        // Set the modal title and content dynamically
-                        modalLabel.textContent = data.title;
-                        modalBody.innerHTML = data.content;
-                    })
-                    .catch(error => {
-                        console.error('There was an errors fetching the data!', error);
-                        alert('Failed to fetch data.');
-                    });
-            }
-        </script>
-        <!-- Modal Popup call -->
+        @vite(['resources/js/main.js'])
     @endpush
+
+    @section('select2', true)
+    @section('modals', true)
 </x-guest>

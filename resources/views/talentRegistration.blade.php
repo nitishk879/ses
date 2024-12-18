@@ -12,7 +12,7 @@
                         {{--                                {{ __('Login') }}--}}
                     </div>
                     <div class="card-body text-start">
-                        <form action="{{ route("talent.registration") }}" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
+                        <form action="{{ route("talent.registration") }}" id="progressForm" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
                             @csrf
                             <div class="row justify-content-around">
                                 <div class="col-md-6">
@@ -197,8 +197,8 @@
                                             <div class="bg-light p-3">
                                                 <h2>{{ __('talents/registration.cover_letter_resume') }}</h2>
                                                 <div class="mb-3">
-                                                    <label for="coverLetter" class="form-label">{{ __('talents/registration.cover_letter') }}</label>
-                                                    <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="coverLetter"
+                                                    <label for="targetTextarea1" class="form-label">{{ __('talents/registration.cover_letter') }}</label>
+                                                    <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="targetTextarea1"
                                                               name="cover_letter" rows="3"
                                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! old("cover_letter") !!}</textarea>
                                                     @error('address')
@@ -242,6 +242,7 @@
                                                         </select>
                                                     </div>
                                                     <div class="col-md-6 mb-3" id="joiningDateField" style="display:none;">
+                                                        <label class="form-label" for="joiningDate">{{ __("talents/registration.joining_date") }}</label>
                                                         <input type="date" class="form-control @error('joining_date') is-invalid @enderror"
                                                                name="joining_date"
                                                                id="joiningDate"
@@ -316,20 +317,14 @@
                                                     <div class="col-md-12">
                                                         <label for="locations" class="form-label">{{ __("projects/form.locations") }}</label>
                                                     </div>
-                                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                                        <div class="mb-3 col-md-4">
-                                                            <div class="form-check form-check-inline">
-                                                                <input class="form-check-input" type="checkbox"
-                                                                       name="locations[]"
-                                                                       id="{{ $location->slug."_".$location->id }}"
-                                                                       value="{{ $location->id }}"
-                                                                    {{ in_array($location->id, old('locations', [])) ? 'checked' : '' }}
-                                                                >
-                                                                <label class="form-check-label"
-                                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
-                                                            </div>
-                                                        </div>
-                                                    @endforeach
+                                                    <div class="mb-3 col-md-12">
+                                                        <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
+                                                            <option value="">{{ __("talents/registration.choose") }}</option>
+                                                            @foreach(\App\Models\Location::orderBy('title')->get() as $location)
+                                                                <option value="{{ $location->id }}">{{ $location->title }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
                                                     <div class="col-md-12">
                                                         <label for="locations" class="form-label">{{ __("projects/form.work_mode") }}</label>
                                                     </div>
@@ -354,9 +349,9 @@
                                             <div class="bg-light p-3">
                                                 <h2>{{ __('talents/registration.qualification') }}</h2>
                                                 <div class="mb-3">
-                                                    <label for="educationDetails" class="form-label">{{ __('talents/registration.education_details') }}</label>
+                                                    <label for="targetTextarea2" class="form-label">{{ __('talents/registration.education_details') }}</label>
                                                     <textarea class="form-control tinyEditor @error('education') is-invalid @enderror"
-                                                              id="educationDetails"
+                                                              id="targetTextarea2"
                                                               name="education"
                                                               rows="3"
                                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! old("education") ?? '' !!}</textarea>
@@ -368,10 +363,10 @@
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
-                                                    <label for="experienceDetails"
+                                                    <label for="targetTextarea3"
                                                            class="form-label">{{ __('talents/registration.experience_details') }}</label>
                                                     <textarea class="form-control tinyEditor @error('experience') is-invalid @enderror"
-                                                              id="experienceDetails"
+                                                              id="targetTextarea3"
                                                               name="experience"
                                                               rows="3"
                                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! old("experience") ?? '' !!}</textarea>
@@ -426,6 +421,13 @@
                                         </div>
                                     @endif
                                 </div>
+
+                                <div class="col-md-12 py-3">
+                                    <!-- Progress Bar -->
+                                    <div class="progress mb-4">
+                                        <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-md-4 text-center d-grid gap-2 mb-3">
@@ -439,90 +441,18 @@
         </div>
     </x-authentication-card>
 
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
-                </div>
-                <div class="modal-body">
-                    <div class="cover-letter ">
-                        <h4 class="modalTitle">{{ __("Cover Letter") }}</h4>
-                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
-                </div>
-            </div>
-        </div>
-    </div>
     @push('scripts')
-        {{-- Summer note library --}}
-        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
-        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
         <script>
-            $('.tinyEditor').summernote({
-                placeholder: "{{ __("talents/registration.write_bio") }}",
-                tabsize: 2,
-                height: 120,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
-            });
+            $( '#multiple-select-field' ).select2( {
+                theme: "bootstrap-5",
+                width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+                placeholder: $( this ).data( 'placeholder' ),
+                closeOnSelect: false,
+            } );
         </script>
-        <!---- Summer note libraries -->
-        <script>
-            // Get the select element and the additional input field
-            const selectBox = document.getElementById('possibleParticipation');
-            const additionalInput = document.getElementById('joiningDateField');
-
-            // Listen for changes in the dropdown
-            selectBox.addEventListener('change', function() {
-                // Check if the selected value is "other"
-                if (this.value !== 'IMMEDIATELY') {
-                    additionalInput.style.display = 'block'; // Show the input field
-                } else {
-                    additionalInput.style.display = 'none';  // Hide the input field
-                }
-            });
-        </script>
-        <!-- Add Axios via CDN (optional if not already included) -->
-        {{--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>--}}
-        <!-- Modal Popup call -->
-        <script>
-            function openDynamicModal(id) {
-                // Ensure elements exist
-                const modalLabel = document.getElementById('staticBackdropLabel');
-                const modalBody = document.querySelector('.cover-letter-description');
-                const modalElement = document.getElementById('staticBackdrop');
-
-                if (!modalLabel || !modalBody || !modalElement) {
-                    console.error('Modal elements are not found in the DOM.');
-                    return;
-                }
-                axios.get('/sample/' + id)
-                    .then(response => {
-                        const data = response.data;
-                        // Set the modal title and content dynamically
-                        modalLabel.textContent = data.title;
-                        modalBody.innerHTML = data.content;
-                    })
-                    .catch(error => {
-                        console.error('There was an errors fetching the data!', error);
-                        alert('Failed to fetch data.');
-                    });
-            }
-        </script>
-        <!-- Modal Popup call -->
+        @vite(['resources/js/main.js'])
     @endpush
+
+    @section('select2', true)
+    @section('modals', true)
 </x-guest>

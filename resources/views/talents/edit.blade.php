@@ -9,7 +9,7 @@
                 <h1 class="page-heading">{{ __('talents/registration.talent_update') }}</h1>
             </div>
         </div>
-        <form action="{{ route("talents.update", $talent) }}" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
+        <form action="{{ route("talents.update", $talent) }}" method="post" id="progressForm" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
             @csrf @method('PUT')
             <div class="row">
                 <div class="col-md-6">
@@ -337,21 +337,29 @@
                                     </div>
                                 </div>
                                 <div class="row justify-content-around">
-                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                        <div class="mb-3 col-md-4">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox"
-                                                       name="locations[]"
-                                                       id="{{ $location->slug."_".$location->id }}"
-                                                       value="{{ $location->id }}"
-                                                    @checked($talent->locations->contains('id', $location->id) ?? old('locations', $location->id))
+                                    <div class="mb-3 col-md-12">
+                                        <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
+                                            <option value="">{{ __("talents/registration.choose") }}</option>
+                                            @foreach(\App\Models\Location::orderBy('title')->get() as $location)
+                                                <option value="{{ $location->id }}" @selected($talent->locations->contains('id', $location->id) ?? old('locations', $location->id))>{{ $location->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+{{--                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)--}}
+{{--                                        <div class="mb-3 col-md-4">--}}
+{{--                                            <div class="form-check form-check-inline">--}}
+{{--                                                <input class="form-check-input" type="checkbox"--}}
+{{--                                                       name="locations[]"--}}
+{{--                                                       id="{{ $location->slug."_".$location->id }}"--}}
+{{--                                                       value="{{ $location->id }}"--}}
+{{--                                                    @checked($talent->locations->contains('id', $location->id) ?? old('locations', $location->id))--}}
 {{--                                                    {{ in_array($location->id, old('locations', [])) ? 'checked' : '' }}--}}
-                                                >
-                                                <label class="form-check-label"
-                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
-                                            </div>
-                                        </div>
-                                    @endforeach
+{{--                                                >--}}
+{{--                                                <label class="form-check-label"--}}
+{{--                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    @endforeach--}}
                                     @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
                                         <div class="mb-3 col-md-4">
                                             <div class="form-check form-check-inline">
@@ -375,9 +383,9 @@
                             <div class="bg-light p-3">
                                 <h2>{{ __('talents/registration.qualification') }}</h2>
                                 <div class="mb-3">
-                                    <label for="educationDetails" class="form-label">{{ __('talents/registration.education_details') }}</label>
+                                    <label for="targetTextarea1" class="form-label">{{ __('talents/registration.education_details') }}</label>
                                     <textarea class="form-control tinyEditor @error('education') is-invalid @enderror"
-                                              id="educationDetails"
+                                              id="targetTextarea1"
                                               name="education"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->qualifications ?? old("education") ?? '' !!}</textarea>
@@ -389,10 +397,10 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="experienceDetails"
+                                    <label for="targetTextarea3"
                                            class="form-label">{{ __('talents/registration.experience_details') }}</label>
                                     <textarea class="form-control tinyEditor @error('experience') is-invalid @enderror"
-                                              id="experienceDetails"
+                                              id="targetTextarea3"
                                               name="experience"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->experience_pr ?? old("experience") ?? '' !!}</textarea>
@@ -449,58 +457,25 @@
                 </div>
             </div>
             <div class="row justify-content-center">
+                <div class="col-md-12 py-3">
+                    <!-- Progress Bar -->
+                    <div class="progress mb-4">
+                        <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
                 <div class="col-md-4 text-center d-grid gap-2 mb-3">
                     <button type="submit" class="g-col-4 btn btn-submit">{{ __("talents/registration.submit") }}</button>
                 </div>
             </div>
         </form>
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
-                </div>
-                <div class="modal-body">
-                    <div class="cover-letter ">
-                        <h4 class="modalTitle">{{ __("Cover Letter") }}</h4>
-                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
-                </div>
-            </div>
-        </div>
-    </div>
+
 @endsection
 
+@section('modals', true)
+@section('select2', true)
+
 @push('scripts')
-    <!-- TinyMCE CDN -->
-    {{--    <script type="text/javascript" src="//code.jquery.com/jquery-3.6.0.min.js"></script>--}}
-    <!---- Summer note libraries -->
-    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-{{--    <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">--}}
-{{--    <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>--}}
-{{--    <script>--}}
-{{--        $('.tinyEditor').summernote({--}}
-{{--            placeholder: "{{ __("talents/registration.write_bio") }}",--}}
-{{--            tabsize: 2,--}}
-{{--            height: 120,--}}
-{{--            toolbar: [--}}
-{{--                ['style', ['style']],--}}
-{{--                ['font', ['bold', 'underline', 'clear']],--}}
-{{--                ['color', ['color']],--}}
-{{--                ['para', ['ul', 'ol', 'paragraph']],--}}
-{{--                ['table', ['table']],--}}
-{{--                ['insert', ['link', 'picture', 'video']],--}}
-{{--                ['view', ['fullscreen', 'codeview', 'help']]--}}
-{{--            ]--}}
-{{--        });--}}
-{{--    </script>--}}
-    <!---- Summer note libraries -->
     <script>
         // Get the select element and the additional input field
         const selectBox = document.getElementById('possibleParticipation');
@@ -515,33 +490,13 @@
                 additionalInput.style.display = 'none';  // Hide the input field
             }
         });
-    </script>
-    <!-- Add Axios via CDN (optional if not already included) -->
-    {{--    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>--}}
-    <!-- Modal Popup call -->
-    <script>
-        function openDynamicModal(id) {
-            // Ensure elements exist
-            const modalLabel = document.getElementById('staticBackdropLabel');
-            const modalBody = document.querySelector('.cover-letter-description');
-            const modalElement = document.getElementById('staticBackdrop');
-
-            if (!modalLabel || !modalBody || !modalElement) {
-                console.error('Modal elements are not found in the DOM.');
-                return;
-            }
-            axios.get('/sample/' + id)
-                .then(response => {
-                    const data = response.data;
-                    // Set the modal title and content dynamically
-                    modalLabel.textContent = data.title;
-                    modalBody.innerHTML = data.content;
-                })
-                .catch(error => {
-                    console.error('There was an errors fetching the data!', error);
-                    alert('Failed to fetch data.');
-                });
-        }
+        $( '#multiple-select-field' ).select2( {
+            theme: "bootstrap-5",
+            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+            placeholder: $( this ).data( 'placeholder' ),
+            closeOnSelect: false,
+        } );
     </script>
     <!-- Modal Popup call -->
+    @vite(['resources/js/main.js'])
 @endpush

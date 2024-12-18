@@ -34,7 +34,7 @@
                 </div>
             </div>
             <div class="col-md-12">
-                <form class="row justify-content-center" action="{{ route("project.update", $project) }}" method="post">
+                <form class="row justify-content-center" id="progressForm" action="{{ route("project.update", $project) }}" method="post">
                     @csrf @method('PUT')
                     <div class="col-md-6">
                         <div class="col-md-12 mb-4">
@@ -49,9 +49,9 @@
                                     @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="projectDescription" class="form-label">{{ __('projects/form.project_description') }}</label>
+                                    <label for="targetTextarea1" class="form-label">{{ __('projects/form.project_description') }}</label>
                                     <textarea class="form-control tinyEditor @error('project_description') is-invalid @enderror"
-                                              id="projectDescription"
+                                              id="targetTextarea1"
                                               name="project_description"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $project->project_description ?? old("project_description") ?? '' !!}</textarea>
@@ -63,9 +63,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="projectRequirement" class="form-label">{{ __('projects/form.project_requirements') }}</label>
+                                    <label for="targetTextarea2" class="form-label">{{ __('projects/form.project_requirements') }}</label>
                                     <textarea class="form-control tinyEditor @error('personnel_requirement') is-invalid @enderror"
-                                              id="projectRequirement"
+                                              id="targetTextarea2"
                                               name="personnel_requirement"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $project->personnel_requirement ?? old("personnel_requirement") ?? '' !!}</textarea>
@@ -208,20 +208,28 @@
                                     <div class="col-md-12">
                                         <label class="form-label" for="locations">{{ __("projects/form.locations") }}</label>
                                     </div>
-                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                        <div class="mb-3 col-md-4">
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox"
-                                                       name="locations[]"
-                                                       id="{{ $location->slug."_".$location->id }}"
-                                                       value="{{ $location->id }}"
-                                                       @checked($project->locations->contains('id', $location->id) ?? old('locations', $location->id))
-                                                >
-                                                <label class="form-check-label"
-                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
-                                            </div>
-                                        </div>
-                                    @endforeach
+                                    <div class="mb-3 col-md-12">
+                                        <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
+                                            <option value="">{{ __("talents/registration.choose") }}</option>
+                                            @foreach(\App\Models\Location::orderBy('title')->get() as $location)
+                                                <option value="{{ $location->id }}" @selected($project->locations->contains('id', $location->id) ?? old('locations', $location->id))>{{ $location->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+{{--                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)--}}
+{{--                                        <div class="mb-3 col-md-4">--}}
+{{--                                            <div class="form-check form-check-inline">--}}
+{{--                                                <input class="form-check-input" type="checkbox"--}}
+{{--                                                       name="locations[]"--}}
+{{--                                                       id="{{ $location->slug."_".$location->id }}"--}}
+{{--                                                       value="{{ $location->id }}"--}}
+{{--                                                       @checked($project->locations->contains('id', $location->id) ?? old('locations', $location->id))--}}
+{{--                                                >--}}
+{{--                                                <label class="form-check-label"--}}
+{{--                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>--}}
+{{--                                            </div>--}}
+{{--                                        </div>--}}
+{{--                                    @endforeach--}}
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-md-12">
@@ -450,6 +458,12 @@
                             </ul>
                         </div>
                     @endif
+                    <div class="col-md-12 py-3">
+                        <!-- Progress Bar -->
+                        <div class="progress mb-4">
+                            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                        </div>
+                    </div>
                     <div class="col-md-12 mb-3 text-center">
                         @foreach($errors as $error)
                             <p>{{ $message }}</p>
@@ -459,120 +473,22 @@
                 </form>
             </div>
         </div>
-        <div class="row align-items-center similar-projects">
-            <div class="col-md-12">
-                <h4 class="you-may-like">{{ __("projects/show.project_you_may_like") }}</h4>
-            </div>
-            @foreach(\App\Models\Project::where('id', '!=', $project->id)->limit(3)->get() as $similar_project)
-                <div class="col-md-4 mb-5">
-                    <div class="project-card">
-                        <a href="" class="add-to-favourite"><i class="fas fa-star"></i> </a>
-                        <div class="project-card-body p-3">
-                            <div class="d-md-flex justify-content-between">
-                                <div class="d-inline-flex pe-2 project-payout-type">{{ __("common/home.fixed") }}</div>
-                                <span class="project-date">{{ $similar_project->created_at->format('M d, Y') }}</span>
-                            </div>
-                            <h2 class="project-title">{{ $similar_project->title }}</h2>
-                            <h6 class="project-budget">{{ __("projects/show.project_budget") }}: <span>{{ __("talents/index.currency_text") }}{{ $project->salary_range }}/{{ __("common/home.month") }}</span></h6>
-                            <p class="project-overview">{{ \Illuminate\Support\Str::limit($similar_project->project_description, 180) }}</p>
-                            <div class="d-flex gap-3">
-                                <h5 class="project-location"><i class="fas fa-location-dot"></i> {{ __("common/home.japan_tokyo") }}</h5>
-                                <h6 class="project-location">{{ __("projects/show.remote") }}</h6>
-                            </div>
-                            <div class="d-flex gap-2 my-2">
-                                @foreach($similar_project->subCategories as $subcategory)
-                                    <div class="project-skill">{{ $subcategory->title }}</div>
-                                    @break($loop->iteration >= 3)
-                                @endforeach
-                                @if($similar_project->subCategories->count() > 3)
-                                    <div class="project-skill more"> {{ $similar_project->subCategories->count() - 3 }}+</div>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="project-card-footer">
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0">
-                                    <img src="{{ $similar_project->company->company_logo_url }}" alt="..." class="img-avatar" height="32" width="32">
-                                </div>
-                                <div class="flex-grow-1 ms-3">
-                                    <div class="d-flex justify-content-between align-items-center w-100">
-                                        <div class="avatar">
-                                            <span class="text-break">{{ $similar_project->company->company_name ?? __("pro") }}</span>
-                                            <i class="fa-regular fa-circle-check"></i>
-                                        </div>
-                                        <a href="{{ route("project.show", $similar_project) }}" class="btn btn-theme">{{ __("projects/show.project_detail") }}</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
     </div>
-    <!-- Modal -->
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
-                </div>
-                <div class="modal-body">
-                    <div class="cover-letter ">
-                        <h4 id="modalTitle">{{ __("Cover Letter") }}</h4>
-                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    @push('scripts')
-        <!---- Summer note libraries -->
-        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-{{--        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">--}}
-{{--        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>--}}
-{{--        <script>--}}
-{{--            $('.tinyEditor').summernote({--}}
-{{--                placeholder: "{{ __("talents/registration.write_bio") }}",--}}
-{{--                tabsize: 2,--}}
-{{--                height: 120,--}}
-{{--                toolbar: [--}}
-{{--                    ['style', ['style']],--}}
-{{--                    ['font', ['bold', 'underline', 'clear']],--}}
-{{--                    ['color', ['color']],--}}
-{{--                    ['para', ['ul', 'ol', 'paragraph']],--}}
-{{--                    ['table', ['table']],--}}
-{{--                    ['insert', ['link', 'picture', 'video']],--}}
-{{--                    ['view', ['fullscreen', 'codeview', 'help']]--}}
-{{--                ]--}}
-{{--            });--}}
-{{--        </script>--}}
-        <!---- Summer note libraries -->
-        <!-- Add Axios via CDN (optional if not already included) -->
-        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-        <!-- Modal Popup call -->
-        <script>
-            function openDynamicModal(id) {
-                // Make an Axios request to fetch data for the modal
-                axios.get('/sample/' + id)
-                    .then(response => {
-                        const data = response.data;
-                        console.log(data);
-                        // Set the modal title and content dynamically
-                        document.getElementById('staticBackdropLabel').textContent = data.title;
-                        document.getElementById('modalTitle').textContent = data.title;
-                        document.querySelector('.cover-letter-description').innerHTML = data.content;
-                    })
-                    .catch(error => {
-                        console.error('There was an errors fetching the data!', error);
-                        alert('Failed to fetch data.');
-                    });
-            }
-        </script>
-        <!-- Modal Popup call -->
-    @endpush
+
 @endsection
+
+@section('modals', true)
+@section('select2', true)
+@push('scripts')
+    <!-- Modal Popup call -->
+    <script>
+        $( '#multiple-select-field' ).select2( {
+            theme: "bootstrap-5",
+            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
+            placeholder: $( this ).data( 'placeholder' ),
+            closeOnSelect: false,
+        } );
+    </script>
+    <!-- Modal Popup call -->
+    @vite(['resources/js/main.js'])
+@endpush
