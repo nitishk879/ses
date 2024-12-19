@@ -85,12 +85,13 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Calculate progress percentage
         const progress = Math.round((filledCount / totalElements) * 100);
-        const bgColor = progress >= 50 ? "success" : "warning";
+        const bgColor = progress >= 50 ? "bg-success" : "bg-warning";
 
         // Update progress bar
         progressBar.style.width = progress + "%";
         progressBar.setAttribute("aria-valuenow", progress);
-        progressBar.classList.add("bg-" + bgColor);
+        progressBar.classList.remove("bg-warning");
+        progressBar.classList.add(bgColor);
         progressBar.textContent = progress + "%";
     }
 

@@ -75,7 +75,8 @@ class User extends Authenticatable
             'is_admin' => isAdminCast::class,
             'is_employer' => isEmployerCast::class,
             'is_employee' => isEmployeeCast::class,
-            'is_talent' => 'bool'
+            'is_talent' => 'bool',
+            'last_login' => 'datetime'
         ];
     }
 
@@ -207,13 +208,19 @@ class User extends Authenticatable
 //        );
 //    }
 
+
     /**
      * Get the user's full name.
      */
     protected function lastLogin(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => \DB::table('sessions')->where('user_id', $this->id)->orderBy('last_activity', 'desc')->first(),
+            get: fn () => optional(
+                $session = \DB::table('sessions')
+                    ->where('user_id', $this->id)
+                    ->orderBy('last_activity', 'desc')
+                    ->first()
+            )->last_activity ? Carbon::createFromTimestamp(optional($session)->last_activity)->diffForHumans() : null
         );
     }
 }

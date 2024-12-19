@@ -1,6 +1,6 @@
 <x-guest>
     <x-slot name="title">
-        Login
+        {{ __("common/common.login") }}
     </x-slot>
 
     <x-authentication-card>

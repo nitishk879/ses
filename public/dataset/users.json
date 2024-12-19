@@ -60,7 +60,7 @@
     "station_name": "Shinjuku",
     "is_public": 1,
     "email_verified_at": "2023-09-10 08:30:00",
-    "password": "$2y$12$Z5lLAS8A.iGDpeuvuqGVY.WsH.ILJK3hbhPplVT4uSut8QYwZHtbq",
+    "password": "$2y$12$1IpMBX2CSrZt8B7HOzBc3eSEHXxPh1HER24mngvnMhaGrR8RZ8lqW",
     "remember_token": null,
     "created_at": "2024-10-23 06:11:15",
     "updated_at": "2024-10-23 06:11:15"
@@ -82,7 +82,7 @@
     "station_name": "Yokohama",
     "is_public": 1,
     "email_verified_at": "2023-09-11 09:00:00",
-    "password": "$2y$12$xy60/BgSlROOMrLH3l0Jpeh5EkWqyLVE.v69q3B4HF5kRJ8q6b9ZG",
+    "password": "$2y$12$1IpMBX2CSrZt8B7HOzBc3eSEHXxPh1HER24mngvnMhaGrR8RZ8lqW",
     "remember_token": null,
     "created_at": "2024-10-23 06:11:15",
     "updated_at": "2024-10-23 06:11:15"
@@ -104,7 +104,7 @@
     "station_name": "Umeda",
     "is_public": 1,
     "email_verified_at": "2023-09-10 07:45:00",
-    "password": "$2y$12$cyCQF5OAdxw4Wz1S0bz/qOv5Fkq2wTmED9qD37jmqW9OwjtYcYyIu",
+    "password": "$2y$12$1IpMBX2CSrZt8B7HOzBc3eSEHXxPh1HER24mngvnMhaGrR8RZ8lqW",
     "remember_token": null,
     "created_at": "2024-10-23 06:11:15",
     "updated_at": "2024-10-23 06:11:15"
@@ -126,7 +126,7 @@
     "station_name": "Kaihin-Makuhari",
     "is_public": 1,
     "email_verified_at": "2023-09-12 09:15:00",
-    "password": "$2y$12$4txg4j4qT98gF8VmP9jxcuS2xYIohh.tCfCZJUaR.HzY6BbUaL9q2",
+    "password": "$2y$12$1IpMBX2CSrZt8B7HOzBc3eSEHXxPh1HER24mngvnMhaGrR8RZ8lqW",
     "remember_token": null,
     "created_at": "2024-10-23 06:11:15",
     "updated_at": "2024-10-23 06:11:15"
@@ -148,7 +148,7 @@
     "station_name": "Omiya",
     "is_public": 1,
     "email_verified_at": "2023-09-12 08:00:00",
-    "password": "$2y$12$AHNc.iL.5wZAAu7lVZZmLuuc3HsN2NjvSWEgAxNQyiRlpQekvaZou",
+    "password": "$2y$12$1IpMBX2CSrZt8B7HOzBc3eSEHXxPh1HER24mngvnMhaGrR8RZ8lqW",
     "remember_token": null,
     "created_at": "2024-10-23 06:11:15",
     "updated_at": "2024-10-23 06:11:15"

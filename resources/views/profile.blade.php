@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('users/form.update_profile') }}</h1>
-                <h4 class="pb-3">Last Logged in: {{ \Illuminate\Support\Carbon::createFromTimestamp($user->last_login->last_activity) }}</h4>
+                <h4 class="pb-3">Last Logged in: {{ $user->last_login }}</h4>
             </div>
         </div>
         <form action="{{ route("profile.update") }}" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>

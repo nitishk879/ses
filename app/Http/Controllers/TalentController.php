@@ -145,10 +145,10 @@ class TalentController extends Controller
      */
     public function update(Request $request, Talent $talent)
     {
-        $request->validate([
-            'languages' => 'required|array',
-            'languages.*' => 'integer|in:' . implode(',', array_keys(LangEnum::cases())),
-        ]);
+//        $request->validate([
+//            'language' => 'required|array',
+//            'language.*' => 'integer|in:' . implode(',', array_keys(LangEnum::cases())),
+//        ]);
 
         if ($request->hasFile('resume')) {
             $fileExt = $request->file('resume')->getClientOriginalExtension();
