@@ -44,21 +44,32 @@ document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("progressForm");
     const progressBar = document.getElementById("progressBar");
 
-    // Select all input types, select, textarea in the form
-    const formElements = form?.querySelectorAll("input, select, textarea");
-    const totalElements = formElements?.length;
+    // Select all visible input types, select, textarea in the form
+    const formElements = Array.from(form?.querySelectorAll("input, select, textarea"));
+    const visibleElements = formElements.filter(el => el.type !== "hidden" && el.type !== "submit");
+
+    const totalElements = visibleElements.length;
 
     // Function to calculate progress
     function updateProgressBar() {
+        if (totalElements === 0) {
+            progressBar.style.width = "0%";
+            progressBar.setAttribute("aria-valuenow", "0");
+            progressBar.classList.remove("bg-success", "bg-warning");
+            progressBar.textContent = "0%";
+            return;
+        }
+
         let filledCount = 0;
 
-        formElements.forEach(element => {
+        visibleElements.forEach(element => {
             switch (element.type) {
                 case "checkbox":
                 case "radio":
-                    // Check if any checkbox or radio in its group is checked
-                    const isChecked = document.querySelectorAll(`[name="${element.name}"]:checked`).length > 0;
-                    if (isChecked) filledCount++;
+                    // Count a group as filled if at least one option is checked
+                    if (document.querySelectorAll(`[name="${element.name}"]:checked`).length > 0) {
+                        filledCount++;
+                    }
                     break;
 
                 case "file":
@@ -74,15 +85,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Calculate progress percentage
         const progress = Math.round((filledCount / totalElements) * 100);
+        const bgColor = progress >= 50 ? "success" : "warning";
 
         // Update progress bar
         progressBar.style.width = progress + "%";
         progressBar.setAttribute("aria-valuenow", progress);
+        progressBar.classList.add("bg-" + bgColor);
         progressBar.textContent = progress + "%";
     }
 
     // Attach the update function to all input events
-    formElements.forEach(element => {
+    visibleElements.forEach(element => {
         element.addEventListener("input", updateProgressBar);
         element.addEventListener("change", updateProgressBar); // For file, checkbox, and radio
     });
@@ -90,3 +103,4 @@ document.addEventListener("DOMContentLoaded", function () {
     // Run the function initially to account for pre-filled values
     updateProgressBar();
 });
+

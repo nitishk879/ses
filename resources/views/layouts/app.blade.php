@@ -55,57 +55,6 @@
 
         <x-footer />
     </div>
-    @hasSection('modals')
-        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="d-flex justify-content-center align-items-center w-100 p-3">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("common/common.sample_data_title") }}</h1>
-                    </div>
-                    <div class="modal-body">
-                        <div class="cover-letter ">
-                            <h4 id="modalTitle">{{ __("common/common.modal_title") }}</h4>
-                            <div class="cover-letter-description border border-secondary-subtle p-4"></div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __("common/common.close") }}</button>
-                        <button type="button" class="btn btn-primary" data-bs-dissmiss="modal" id="pasteButton">{{ __("common/common.use") }}</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <script>
-            function openDynamicModal(id) {
-                // Make an Axios request to fetch data for the modal
-                axios.get('/sample/' + id)
-                    .then(response => {
-                        const data = response.data;
-                        // console.log(data);
-                        // Set the modal title and content dynamically
-                        document.getElementById('staticBackdropLabel').textContent = data.title;
-                        document.getElementById('modalTitle').textContent = data.title;
-                        document.querySelector('.cover-letter-description').innerHTML = data.content;
-                        document.getElementById('pasteButton').addEventListener('click', function () {
-                            // Target the textarea and set its value
-                            let targetId = id > 3 ? 3 : id;
-                            const textarea = document.getElementById('targetTextarea'+targetId);
-                            textarea.value = data.content;
-                            // // Hide the modal
-                            const modal = new bootstrap.Modal('#staticBackdrop');
-                            modal.hide();
-                            // Optional: Bring focus to the textarea
-                            textarea.focus();
-                        });
-
-                    })
-                    .catch(error => {
-                        console.error('There was an errors fetching the data!', error);
-                        alert('Failed to fetch data.');
-                    });
-            }
-        </script>
-    @endif
     @hasSection('select2')
         <!-- Scripts -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.0/dist/jquery.slim.min.js"></script>
@@ -133,6 +82,55 @@
                 });
             </script>
         <!---- Summer note libraries -->
+    @endif
+    @hasSection('modals')
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="d-flex justify-content-center align-items-center w-100 p-3">
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("common/common.sample_data_title") }}</h1>
+                    </div>
+                    <div class="modal-body">
+                        <div class="cover-letter ">
+                            <h4 id="modalTitle">{{ __("common/common.modal_title") }}</h4>
+                            <div class="cover-letter-description border border-secondary-subtle p-4" id="modalContent"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __("common/common.close") }}</button>
+                        <button type="button" class="btn btn-primary" data-bs-dissmiss="modal" id="pasteButton">{{ __("common/common.use") }}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            function openDynamicModal(id) {
+                // Make an Axios request to fetch data for the modal
+                axios.get('/sample/' + id)
+                    .then(response => {
+                        const data = response.data;
+                        // console.log(data);
+                        // Set the modal title and content dynamically
+                        document.getElementById('staticBackdropLabel').textContent = data.title;
+                        document.getElementById('modalTitle').textContent = data.title;
+                        document.querySelector('.cover-letter-description').innerHTML = data.content.replace(/\n/g, "<br>");
+                        document.getElementById('pasteButton').addEventListener('click', function () {
+                            // Target the textarea and set its value
+                            let targetId = id > 3 ? 3 : id;
+                            const textarea = document.getElementById('targetTextarea'+targetId);
+                            textarea.value = data.content;
+                            // modal.hide();
+                            // Optional: Bring focus to the textarea
+                            textarea.focus();
+                        });
+
+                    })
+                    .catch(error => {
+                        console.error('There was an errors fetching the data!', error);
+                        alert('Failed to fetch data.');
+                    });
+            }
+        </script>
     @endif
     @livewireScripts
     @stack('scripts')

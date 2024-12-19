@@ -1,0 +1,80 @@
+[
+  {
+    "id": 1,
+    "data_category": 1,
+    "data_medium_section": 1,
+    "data_sub_section": 1,
+    "remarks": "Sample text of the project",
+    "text_data": "Work content \n\n We are looking for a backend engineer for a project to develop web services using Ruby on Rails. You will mainly be implementing new features and dealing with bugs after release.  \n\nDevelopment environment \n\nLanguage Framework: Ruby on Rails  \n\nOS: CentOS 7  \n\nDB: mysql  \n\nOperating environment: AWS  \n\nWork PC: mac  \n\nContract conditions \n\nWork location: Shinjuku + remote (minimum 3 days a week or more, can come to Shinjuku-ku, Tokyo) \n\n*Work in Shinjuku-ku for the first 2 weeks of the first month \n\nUtilization rate: 80% or more (100% is preferable)  \n\nPeriod: April ~ Long-term Working hours: 10:00-19:00 (flexible, so work hours can be discussed)  \n\nPayment conditions: 100% operation 140-180 hours/month (up and down) 80% operation 112-144 hours/month (up and down)  \n\nNotes \n\nRecommended for those who are eager to learn the latest system development in a team that actively adopts agile development. \n\nThe team consists of 8 people, including 1 PM, 1 PL, and 6 other members.  \n\nThere are several requirements for new features decided by the business side, and we will implement them. Because it is agile development, there may not be proper documentation, but one of our employees is currently involved, so we are able to receive support. ",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:45",
+    "updated_at": "2024-12-04 07:02:45"
+  },
+  {
+    "id": 2,
+    "data_category": 1,
+    "data_medium_section": 1,
+    "data_sub_section": 2,
+    "remarks": "Sample text of the personnel requirements for the projects",
+    "text_data": "Required skills \n\n Experience in design and development using Ruby on Rails (2 years or more is recommended) \n\nAble to proactively communicate with others when there is something you don't understand. \n\nPreferred skills \n\nExperience in agile development  \n\nFamiliar with natural language processing or currently studying it  \n\nOther information \n\nForeign nationalities are acceptable, but since there will be a lot of communication between engineers and with the business side, we would like to suggest someone with business-level Japanese language skills. (Japanese language ability will also be confirmed during the interview) \n\nThe site is mainly staffed by people in their 20s and 30s.",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:45",
+    "updated_at": "2024-12-04 07:02:45"
+  },
+  {
+    "id": 3,
+    "data_category": 1,
+    "data_medium_section": 2,
+    "data_sub_section": 1,
+    "remarks": "Sample text for PR experience (consultant)",
+    "text_data": "Career summary  \n\nExperience in a wide variety of projects, large and small, across many industries and business sectors, based on approximately 5 years of consulting experience at a foreign consulting firm   \n\nParticularly with ample experience participating in global projects. \n\nCapable of complex communication and project management . \n\nMost recently engaged in supporting the launch of new business and consulting for a certain Mothers-listed venture company  \n\nSpecialized experience, fields and skills \n\nSupport for global expansion  \n\nSupport for S/4HANA rollout (Japan, US, UK) - Support for CRM implementation for insurance companies (Japan, US) . \n\nProject management  \n\nFormation of system development plans  \n\nOrganization of project teams  \n\nVendor control \n\nProject promotion management - QCD review  \n\nSupport for new business launches - Strategy planning for new businesses and Research on entry markets and support for creating business plans",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:45",
+    "updated_at": "2024-12-04 07:02:45"
+  },
+  {
+    "id": 4,
+    "data_category": 1,
+    "data_medium_section": 2,
+    "data_sub_section": 2,
+    "remarks": "Sample text for personnel experience PR (Systems Engineer)",
+    "text_data": "Experienced Skills \n\nDevelopment languages: PHP, Java, C#, Python, VB.NET, Ruby, VBA \n\nFramework: Laravel, .NET Framework  \n\nOS: Linux, Windows  \n\nDB: Oracle, PostgreSQL, MySQL  \n\nExperience Phase \n\nBasic design, detailed design, production, unit testing, integration testing  \n\nPR  \n\nHas been involved in web service development in PHP for about three years and has experience from basic design to integration testing.  \n\nHas experience as a team leader in small-scale projects.  \n\nAble to communicate well, such as listening to the client's requests and understanding the intention of their comments before conveying his or her own opinion.",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:45",
+    "updated_at": "2024-12-04 07:02:45"
+  },
+  {
+    "id": 5,
+    "data_category": 1,
+    "data_medium_section": 2,
+    "data_sub_section": 3,
+    "remarks": "Sample text for PR experience (infrastructure engineer)",
+    "text_data": "Experienced Skills \n\nLinux, CentOS  \n\nWindows Server 2008/2012/2016  \n\nAWS \n\nExperienced Phases \n\nDetailed design, construction, operational design, operational maintenance  \n\nPR \n\nI have vast and varied experience in designing and constructing Linux and Windows Server.  \n\nI also have experience as a team leader in small-scale projects.  \n\nI can communicate well, such as listening to the client's requests and understanding the intention of their comments, and then conveying my own opinion.",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:46",
+    "updated_at": "2024-12-04 07:02:46"
+  },
+  {
+    "id": 6,
+    "data_category": 1,
+    "data_medium_section": 2,
+    "data_sub_section": 4,
+    "remarks": "Sample text for desired conditions when registering personnel",
+    "text_data": "Job Description \n\nI am looking for a project that allows me to be involved in system development in PHP from the basic design stage.  \n\nProjects that allow me to be involved in the front-end are even better.  \n\nUnit Price \n\nBasically 700,000 yen or more, but if you can also be involved in the front-end, we will consider a price below 700,000 yen.  \n\n*700,000 yen is the unit price when the operating rate is 100%.  \n\nOther \n\nNumber of days available to work: 4 days a week \n\nOperating rate: 80-100% ",
+    "numerical_data": null,
+    "date_data": null,
+    "deleted_at": null,
+    "created_at": "2024-12-04 07:02:46",
+    "updated_at": "2024-12-04 07:02:46"
+  }
+]

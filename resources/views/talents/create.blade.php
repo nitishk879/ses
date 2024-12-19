@@ -8,6 +8,12 @@
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('talents/registration.registration') }}</h1>
             </div>
+            <div class="col-md-12 py-3">
+                <!-- Progress Bar -->
+                <div class="progress mb-4">
+                    <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
         </div>
         <form action="{{ route("talents.store") }}" method="post" id="progressForm" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
             @csrf
@@ -72,7 +78,7 @@
                                                 name="affiliation" id="affiliation" aria-label="affiliation" required>
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\AffiliationEnum::cases() as $case)
-                                                <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ \App\Enums\AffiliationEnum::toName($case->value) ?? __("talents/index.{$case->name}") ?? __('One') }}</option>
+                                                <option value="{{ $case->value }}">{{ \App\Enums\AffiliationEnum::toName($case->value) ?? __("talents/index.{$case->name}") ?? __('One') }}</option>
                                             @endforeach
                                         </select>
                                         @error('affiliation')
@@ -86,7 +92,7 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ContractClassificationEnum::cases() as $contract)
                                                 <option
-                                                    value="{{ $contract->value }}" {{ $loop->first ? 'selected' : '' }}>{{ \App\Enums\ContractClassificationEnum::toName($contract) ?? __("talents/index.{$contract->toName($contract)}") }}</option>
+                                                    value="{{ $contract->value }}">{{ \App\Enums\ContractClassificationEnum::toName($contract) ?? __("talents/index.{$contract->toName($contract)}") }}</option>
                                             @endforeach
                                         </select>
                                         @error('contract_type')
@@ -114,7 +120,7 @@
                                         <select class="form-select @error('nationality') is-invalid @enderror"
                                                 name="nationality" id="nationality" aria-label="nationality">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
-                                            <option value="japanese" selected> {{ __("talents/registration.japanese") }}</option>
+                                            <option value="japanese"> {{ __("talents/registration.japanese") }}</option>
                                             <option value="other">{{ __("talents/registration.english") }}</option>
                                         </select>
                                         @error('nationality')
@@ -128,7 +134,7 @@
                                                 name="language" id="language" aria-label="language">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\LangEnum::cases() as $lang)
-                                                <option value="{{ $lang->value }}" @selected(old('language') == $lang->value) selected> {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
+                                                <option value="{{ $lang->value }}" @selected(old('language') == $lang->value)> {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
                                             @endforeach
                                         </select>
                                         @error('language')
@@ -225,7 +231,7 @@
                                         <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" aria-label="Default select example">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             <option value="1">{{ __("talents/registration.release") }}</option>
-                                            <option value="0" selected>{{ __("talents/registration.private") }}</option>
+                                            <option value="0">{{ __("talents/registration.private") }}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6 mb-3">
@@ -237,7 +243,7 @@
                                                 aria-label="Default select example">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ParticipationEnum::cases() as $participation)
-                                                <option value="{{ $participation->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("talents/index.{$participation->value}") }}</option>
+                                                <option value="{{ $participation->value }}">{{ __("talents/index.{$participation->value}") }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -435,12 +441,6 @@
                         </div>
                     @endif
                 </div>
-                <div class="col-md-12 py-3">
-                    <!-- Progress Bar -->
-                    <div class="progress mb-4">
-                        <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                    </div>
-                </div>
             </div>
             <div class="row justify-content-center">
                 <div class="col-md-4 text-center d-grid gap-2 mb-3">
@@ -455,22 +455,10 @@
 @section('modals', true)
 
 @section('select2', true)
+{{--@section('editor', true)--}}
 
 @push('scripts')
     <script>
-        // Get the select element and the additional input field
-        const selectBox = document.getElementById('possibleParticipation');
-        const additionalInput = document.getElementById('joiningDateField');
-
-        // Listen for changes in the dropdown
-        selectBox.addEventListener('change', function() {
-            // Check if the selected value is "other"
-            if (this.value !== 'IMMEDIATELY') {
-                additionalInput.style.display = 'block'; // Show the input field
-            } else {
-                additionalInput.style.display = 'none';  // Hide the input field
-            }
-        });
         $( '#multiple-select-field' ).select2( {
             theme: "bootstrap-5",
             width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',

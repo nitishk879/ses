@@ -8,6 +8,12 @@
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('talents/registration.talent_update') }}</h1>
             </div>
+            <div class="col-md-12 py-3">
+                <!-- Progress Bar -->
+                <div class="progress mb-4">
+                    <div id="progressBar" class="progress-bar " role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
         </div>
         <form action="{{ route("talents.update", $talent) }}" method="post" id="progressForm" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
             @csrf @method('PUT')
@@ -204,9 +210,9 @@
                             <div class="bg-light p-3">
                                 <h2>{{ __('talents/registration.cover_letter_resume') }}</h2>
                                 <div class="mb-3">
-                                    <label for="coverLetter"
+                                    <label for="targetTextarea1"
                                            class="form-label">{{ __('talents/registration.cover_letter') }}</label>
-                                    <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="coverLetter"
+                                    <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="targetTextarea1"
                                               name="cover_letter" rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->cover_letter ?? old("cover_letter") !!}</textarea>
                                     @error('address')
@@ -383,9 +389,9 @@
                             <div class="bg-light p-3">
                                 <h2>{{ __('talents/registration.qualification') }}</h2>
                                 <div class="mb-3">
-                                    <label for="targetTextarea1" class="form-label">{{ __('talents/registration.education_details') }}</label>
+                                    <label for="targetTextarea2" class="form-label">{{ __('talents/registration.education_details') }}</label>
                                     <textarea class="form-control tinyEditor @error('education') is-invalid @enderror"
-                                              id="targetTextarea1"
+                                              id="targetTextarea2"
                                               name="education"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->qualifications ?? old("education") ?? '' !!}</textarea>
@@ -457,12 +463,6 @@
                 </div>
             </div>
             <div class="row justify-content-center">
-                <div class="col-md-12 py-3">
-                    <!-- Progress Bar -->
-                    <div class="progress mb-4">
-                        <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                    </div>
-                </div>
                 <div class="col-md-4 text-center d-grid gap-2 mb-3">
                     <button type="submit" class="g-col-4 btn btn-submit">{{ __("talents/registration.submit") }}</button>
                 </div>
@@ -474,22 +474,10 @@
 
 @section('modals', true)
 @section('select2', true)
+{{--@section('editor', true)--}}
 
 @push('scripts')
     <script>
-        // Get the select element and the additional input field
-        const selectBox = document.getElementById('possibleParticipation');
-        const additionalInput = document.getElementById('joiningDateField');
-
-        // Listen for changes in the dropdown
-        selectBox.addEventListener('change', function() {
-            // Check if the selected value is "other"
-            if (this.value !== 'IMMEDIATELY') {
-                additionalInput.style.display = 'block'; // Show the input field
-            } else {
-                additionalInput.style.display = 'none';  // Hide the input field
-            }
-        });
         $( '#multiple-select-field' ).select2( {
             theme: "bootstrap-5",
             width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',

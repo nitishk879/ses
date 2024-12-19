@@ -8,6 +8,12 @@
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('projects/form.project_registration') }}</h1>
             </div>
+            <div class="col-md-12 py-3">
+                <!-- Progress Bar -->
+                <div class="progress mb-4">
+                    <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
         </div>
         <div class="row justify-content-center">
             <div class="col-md-12">
@@ -386,7 +392,7 @@
                                                     name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
                                                 <option value="">{{ __("talents/registration.choose") }}</option>
                                                 @foreach(\App\Enums\CommercialFlow::cases() as $case)
-                                                    <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
+                                                    <option value="{{ $case->value }}">{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
                                                 @endforeach
                                             </select>
                                             @error('commercial_flow')
@@ -418,21 +424,6 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul>
-                                @foreach($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-                    <div class="col-md-12 py-3">
-                        <!-- Progress Bar -->
-                        <div class="progress mb-4">
-                            <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                         </div>
                     </div>
                     <div class="col-md-12 mb-3 text-center">

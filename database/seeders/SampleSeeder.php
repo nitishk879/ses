@@ -15,7 +15,7 @@ class SampleSeeder extends Seeder
     public function run(): void
     {
         Sample::truncate();
-        $datafile = File::get(public_path('/dataset/sample-data.json'));
+        $datafile = File::get(public_path('/dataset/samples.json'));
         $samples = json_decode($datafile);
 
         foreach ($samples as $sample) {

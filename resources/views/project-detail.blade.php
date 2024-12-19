@@ -251,6 +251,34 @@
                     </ul>
                 </div>
             </div>
+            <div class="col-md-12">
+                <!-- Button to open the modal -->
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    Open Modal
+                </button>
+
+                <!-- Summernote Editor -->
+                <div class="mt-4">
+                    <textarea id="summernote" class="form-control" rows="12"></textarea>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Modal Content</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p id="modalContent">This is the content to copy to Summernote editor.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="copyToEditor" class="btn btn-success">Copy to Editor</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="row align-items-center similar-projects">
             <div class="col-md-12">
@@ -297,3 +325,34 @@
         </div>
     </div>
 @endsection
+@push('stylesheets')
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.css" rel="stylesheet">
+@endpush
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-lite.min.js"></script>
+    <script>
+        // Initialize Summernote
+        document.addEventListener("DOMContentLoaded", function () {
+            const summer =
+            $('#summernote').summernote({
+                height: 200,
+                placeholder: 'Write something here...',
+            });
+        });
+
+        // Copy content from modal to Summernote editor and close modal
+        document.getElementById('copyToEditor').addEventListener('click', function () {
+            const modalContent = document.getElementById('modalContent').textContent; // Get modal content
+            $('#summernote').summernote('code', modalContent); // Set content in Summernote editor
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+            modal.hide(); // Close the modal
+        });
+    </script>
+@endpush
+@section('editor', true)
+@section('modal', true)
+{{--@section('editor', true)--}}
+{{--@section('editor', true)--}}
