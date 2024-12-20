@@ -15,12 +15,14 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('firstname');
-            $table->string('lastname');
+            $table->string('lastname')->nullable();
             $table->string('email')->unique();
             $table->string('username')->unique();
             $table->string('phone')->unique()->nullable();
-            $table->string('date_of_birth');
-            $table->enum('gender', ['male', 'female', 'other']);
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable();
+            $table->string('date_of_birth')->nullable();
+            $table->enum('gender', ['male', 'female', 'other'])->default('other');
             $table->json('languages')->nullable();
             $table->string('nationality')->default('Japanese');
             $table->string('country')->default('Japan');
@@ -29,8 +31,9 @@ return new class extends Migration
             $table->string('station_name')->nullable();
             $table->boolean('is_public')->default(false);
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
+            $table->string('password')->nullable();
             $table->text('address')->nullable();
+            $table->text('avatar')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

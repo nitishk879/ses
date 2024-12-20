@@ -45,7 +45,10 @@ class User extends Authenticatable
         'nearest_station_line',
         'station_name',
         'is_public',
-        'address'
+        'address',
+        'avatar',
+        'provider',
+        'provider_id',
     ];
 
     /**

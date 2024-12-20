@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
                 'address' => $talent->address ?? '',
                 'email_verified_at' => $talent->email_verified_at,
                 'password' => $talent->password ?? Hash::make('password')
-            ])->roles()->sync([1, 2, 3]);
+            ])->roles()->sync([random_int(1, 3)]);
         }
     }
 }

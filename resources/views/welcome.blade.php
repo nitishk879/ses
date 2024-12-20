@@ -175,9 +175,9 @@
                             <div class="col-md-9 col-lg-8 col-xl-6 text-justify">
                                 <h3 class="section-title">{{ __("common/welcome.explore_by") }} <span>&nbsp; {{ __("common/welcome.category") }}</span></h3>
                             </div>
-                            <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">
-                                <div class="btn btn-outline-primary">{{ __("common/welcome.view_all") }} <i class="fa-solid fa-arrow-right"></i></div>
-                            </div>
+{{--                            <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">--}}
+{{--                                <div class="btn btn-outline-primary">{{ __("common/welcome.view_all") }} <i class="fa-solid fa-arrow-right"></i></div>--}}
+{{--                            </div>--}}
                         </div>
                         <div class="row justify-content-center align-items-center">
                             @foreach(\App\Models\Category::all() as $category)
@@ -203,9 +203,9 @@
                             <div class="col-md-9 col-lg-8 col-xl-6 text-justify">
                                 <h3 class="section-title">{{ __("common/welcome.explore_by") }} <span>&nbsp; {{ __("common/welcome.location") }}</span></h3>
                             </div>
-                            <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">
-                                <a href="" class="btn btn-outline-primary">{{ __("common/welcome.view_all") }} <i class="fa-solid fa-arrow-right"></i></a>
-                            </div>
+{{--                            <div class="col-md-3 col-lg-4 col-xl-3 px-6 py-3 rounded-sm text-end align-items-center">--}}
+{{--                                <a href="" class="btn btn-outline-primary">{{ __("common/welcome.view_all") }} <i class="fa-solid fa-arrow-right"></i></a>--}}
+{{--                            </div>--}}
                         </div>
                     </div>
                     <div class="container">
@@ -231,7 +231,11 @@
                                 <div class="StartPostingJobsAndProjectsToday w-100 h-60">
                                     <h1 class="main-heading mb-3">{!! __('common/welcome.start_posting_jobs_and_project') !!}</h1>
                                 </div>
-                                <a href="{{ route("register") }}" class="btn btn-lg btn-secondary">{{ __("common/welcome.sign_up_free") }}</a>
+                                @auth
+                                    <a href="{{ route("project.create") }}" class="btn btn-lg btn-secondary">{{ __("common/header.add_new_project") }}</a>
+                                @else
+                                    <a href="{{ route("register") }}" class="btn btn-lg btn-secondary">{{ __("common/welcome.sign_up_free") }}</a>
+                                @endauth
                             </div>
                             <div class="col-md-4 col-lg-6">
                                 <div class="my-circle">
@@ -611,7 +615,12 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_project") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <a href="{{ route("talent.registration") }}" class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        @auth
+                                            <a href="{{ route("project.index") }}" class="btn btn-primary">{{ __("common/header.find_work") }}</a>
+                                        @else
+                                            <a href="{{ route("talent.registration") }}" class="btn btn-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        @endauth
+
                                     </div>
                                 </div>
                             </div>
@@ -620,7 +629,11 @@
                                     <div class="search-card-title">{{ __("common/landing.search_for_a_talent") }}</div>
                                     <p class="w-50 mt-3">{{ __("common/landing.dummy_text") }}</p>
                                     <div class="">
-                                        <a href="{{ route("members.registration") }}" class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        @auth
+                                            <a href="{{ route("talents.index") }}" class="btn btn-light text-primary">{{ __("common/header.find_talent") }}</a>
+                                        @else
+                                            <a href="{{ route("members.registration") }}" class="btn btn-light text-primary">{{ __("common/landing.register_now") }} <i class="fa-solid fa-arrow-right"></i></a>
+                                        @endauth
                                     </div>
                                     <img class="search-card-img" src="{{ asset("images/talent-search-card.png") }}" alt=""/>
                                 </div>

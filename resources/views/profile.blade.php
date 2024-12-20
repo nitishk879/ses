@@ -7,7 +7,7 @@
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('users/form.update_profile') }}</h1>
-                <h4 class="pb-3">Last Logged in: {{ $user->last_login }}</h4>
+                <h4 class="pb-3">{{ __("talents/index.last_logged_in") }}: {{ $user->last_login }}</h4>
             </div>
         </div>
         <form action="{{ route("profile.update") }}" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
@@ -223,7 +223,7 @@
                 <div class="col-md-6">
                     @if($roles->count() >=1)
                         <ul class="list-group">
-                            Roles:
+                            {{ __("users/roles.roles") }}:
                             @foreach($roles as $role)
                                 <li class="list-group-item" itemprop="{{ $role->slug }}">{{ $role->title ?? $role->slug }}</li>
                             @endforeach

@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
+use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\TalentController;
 use App\Http\Controllers\TalentRegistrationController;
 use App\Http\Middleware\EnsureUserHasRole;
@@ -26,7 +27,9 @@ Route::get('/pricing', function () {
 });
 
 Auth::routes();
-
+// Login with Socialite
+Route::get('auth/{provider}', [SocialAuthController::class, 'redirectToProvider'])->name('auth.redirect');
+Route::get('auth/{provider}/callback', [SocialAuthController::class, 'handleProviderCallback'])->name('auth.callback');
 // Talent Middleware
 // Guest routs
 Route::middleware(['auth', 'role:talent'])->group(function () {

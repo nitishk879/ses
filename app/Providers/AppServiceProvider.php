@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
 
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(Talent::class, TalentPolicy::class);
-        Gate::policy(Company::class, CompanyPolicy::class);
+//        Gate::policy(Company::class, CompanyPolicy::class);
 
     }
 }
