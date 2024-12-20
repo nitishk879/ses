@@ -79,7 +79,7 @@
 
                         <a href="{{ route('auth.redirect', 'google') }}" class="btn btn-primary">Login with Google</a>
                         <a href="{{ route('auth.redirect', 'facebook') }}" class="btn btn-primary">Login with Facebook</a>
-{{--                        <a href="{{ route('auth.redirect', 'twitter') }}" class="btn btn-primary">Login with Twitter</a>--}}
+                        <a href="{{ route('auth.redirect', 'twitter') }}" class="btn btn-primary">Login with Twitter</a>
                     </div>
                 </div>
             </div>
