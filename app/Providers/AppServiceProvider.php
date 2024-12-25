@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\SavedProjectEvent;
 use App\Events\SkillMatch;
 use App\Events\TalentInvitationEvent;
+use App\Listeners\SendSavedProjectNotification;
 use App\Listeners\SendSkillMatchNotification;
 use App\Listeners\SendTalentInvitationNotification;
 use App\Models\Company;
@@ -35,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             TalentInvitationEvent::class,
             SendTalentInvitationNotification::class,
+        );
+        Event::listen(
+            SavedProjectEvent::class,
+            SendSavedProjectNotification::class,
         );
 //        Event::listen(
 //            SkillMatch::class,

@@ -77,9 +77,11 @@
                             </div>
                         </form>
 
-                        <a href="{{ route('auth.redirect', 'google') }}" class="btn btn-primary">Login with Google</a>
-                        <a href="{{ route('auth.redirect', 'facebook') }}" class="btn btn-primary">Login with Facebook</a>
-                        <a href="{{ route('auth.redirect', 'twitter') }}" class="btn btn-primary">Login with Twitter</a>
+                        <div class="my-3">
+                            <a href="{{ route('auth.redirect', 'google') }}" class="btn btn-outline-primary">Login with Google</a>
+                            <a href="{{ route('auth.redirect', 'facebook') }}" class="btn btn-outline-secondary">Login with Facebook</a>
+                            <a href="{{ route('auth.redirect', 'twitter') }}" class="btn btn-outline-info">Login with Twitter</a>
+                        </div>
                     </div>
                 </div>
             </div>

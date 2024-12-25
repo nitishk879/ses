@@ -117,6 +117,13 @@ body{
         font-weight: 400;
         line-height: 20px; /* 142.857% */
     }
+    .btn-secondary{
+        &:hover, &:focus{
+            color: $white;
+            background-color: $azure-800;
+            border-color: $azure-600;
+        }
+    }
 }
 
 #authenticationScreen{

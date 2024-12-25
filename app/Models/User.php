@@ -226,4 +226,15 @@ class User extends Authenticatable
             )->last_activity ? Carbon::createFromTimestamp(optional($session)->last_activity)->diffForHumans() : null
         );
     }
+
+    /**
+     * Let's get list of favourite project for the user.
+     *
+     * @returns
+    */
+
+    public function savedProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'project_save', 'user_id', 'project_id');
+    }
 }

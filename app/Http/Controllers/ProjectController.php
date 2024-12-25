@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TalentStatusEnum;
+use App\Events\SavedProjectEvent;
 use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -282,5 +284,21 @@ class ProjectController extends Controller
             default:
                 return ['labels' => [], 'data' => []];
         }
+    }
+
+    /**
+     * In case, user want to save project for later
+     *
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function saveForLater(Request $request)
+    {
+        $myProject = Project::find($request->input('project_id'));
+        $myProject->saves()->toggle(Auth::user()->id ?? []);
+
+        SavedProjectEvent::dispatch($myProject);
+
+        return redirect()->back()->with('success', __("Project Saved for later"));
     }
 }

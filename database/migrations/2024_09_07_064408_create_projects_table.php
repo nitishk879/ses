@@ -63,7 +63,12 @@ return new class extends Migration {
             $table->timestamps();
             $table->softDeletes();
         });
-
+        Schema::create('project_save', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('project_id');
+            $table->unsignedBigInteger('user_id');
+            $table->timestamps();
+        });
         Schema::create('project_sub_category', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('project_id');
@@ -78,6 +83,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::dropIfExists('projects');
+        Schema::dropIfExists('project_save');
         Schema::dropIfExists('project_sub_category');
     }
 };

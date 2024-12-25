@@ -101,7 +101,14 @@
             <div class="col-md-4 text-end">
                 <div class="d-grid d-md-block gap-2">
                     <a href="{{ route("project.show", $project) }}" class="btn btn-sm btn-primary">{{ __("common/index.apply_now") }}</a>
-                    <a href="" class="btn btn-sm btn-secondary">{{ __("common/index.apply_later") }}</a>
+{{--                    <a href="{{ route("project.save-for-later", $project) }}"--}}
+{{--                       onclick="event.preventDefault(); document.getElementById('save-for-later').submit();"--}}
+{{--                       class="btn btn-sm btn-secondary" @if($project->saves->contains($project->id)) disabled @endif>{{ __("common/index.apply_later") }}</a>--}}
+                    <form action="{{ route('project.save-for-later', $project) }}" method="post" id="save-for-later" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="project_id" value="{{ $project->id }}">
+                        <button type="submit" class="btn btn-sm btn-secondary" @if($project->saves->contains($project->id)) disabled @endif>{{ __("common/index.apply_later") }}</button>
+                    </form>
                 </div>
             </div>
             <div class="col-md-12 job-pills">

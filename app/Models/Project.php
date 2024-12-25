@@ -138,6 +138,17 @@ class Project extends Model
     }
 
     /**
+     * Save project for later for some actions
+     *
+     * @returns
+    */
+
+    public function saves()
+    {
+        return $this->belongsToMany(User::class, 'project_save')->withTimestamps();
+    }
+
+    /**
      * Let's get all talents related to project
      *
      * @return BelongsToMany
