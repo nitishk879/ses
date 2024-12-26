@@ -2,7 +2,7 @@
 return array(
     'dashboard' => 'Dashboard',
     'new_candidates_to_review' => 'New Profiles To Review', //Nov 8th, 2024
-    'message_received' => 'Message Received',
+    'message_received' => 'Messages Received',
     'profile_matching' => 'Profile Matching :profile',
     'job_statistics' => 'Project Statistics', //Nov 8th, 2024
     'showing_job_statistics' => 'Showing Project Statistics', //Nov 8th, 2024

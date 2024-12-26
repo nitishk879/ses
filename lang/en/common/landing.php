@@ -2,10 +2,10 @@
 return
     array(
         'page_title' => 'Landing Page',
-        'hero_title' => 'Find the Best <span> Talent, Projects</span>', //Nov 8th, 2024
+        'hero_title' => 'Find Top Talent & <span> Projects</span>', //Nov 8th, 2024 20dec2024
         'hero_subtitle' => '',
-        'hero_paragraph' => 'Search through our diverse talent pool, project & jobs listings to find the perfect fit for your project or career. From software developers to creative professionals, we’ve got you covered.',
-        'search_for_talent' => 'Are you a Employer or searching for a Talent?',
+        'hero_paragraph' => 'Browse our extensive talent pool and project listings to discover the perfect match for your needs. Whether you are looking for software developers, creative professionals, or other experts, we have the ideal solution for your project or career goals. Powered by AI, our platform enhances the matchmaking process, ensuring the best fit based on compatibility and skills.',
+        'search_for_talent' => 'Are you looking to hire or seeking new opportunities?',//20dec2024
         'get_started_now' => 'Get Started Now',
         'suggestions' => 'Suggestions',
         'designing' => 'Designing',
@@ -23,8 +23,8 @@ return
         'hear_from_our_client' => 'Hear from our <span>&nbsp; clients</span>',
         'search_for_a_project' => 'Search for a Project', //Nov 8th, 2024
         'search_for_a_talent' => 'Search for a Talent',
-        'register_now' => 'Register Now',
-        'dummy_text' => 'Cras in massa pellentesque, mollis ligula non, luctus dui. Morbi sed efficitur dolor. Pelque augue risus, aliqu.',
+        'register_now' => 'Sign Up now',//dec20 2024
+        'dummy_text' => 'Let our AI system help you find the perfect project. With intelligent matching, we connect your skills and preferences to opportunities that align with your goals, making your search effortless and efficient.',//dec202024 this is for project
         'previous' => 'Previous',
         'next' => 'Next',
     );

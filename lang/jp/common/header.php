@@ -25,4 +25,6 @@ return array(
     'customer_support' => 'カスタマーサポート',
     // Oct21, 2024
     'my_dashboard' => 'マイダッシュボード',
+    // Oct 25, 2024
+    'bookmarks' => '気に入り',
 );

@@ -19,15 +19,15 @@ return array(
     'copyright' => 'Copyright',
     'all_rights_reserved' => 'All Rights Reserved',
     'browse_jobs' => 'Browse Projects', //Nov 8th, 2024
-    'browse_employers' => 'Browse Employers',
+    'browse_employers' => 'Browse Projects',
     'employers' => 'Employers',
-    'browse_employees' => 'Browse Employees',
+    'browse_employees' => 'Browse Talents',
     'candidates' => 'Profiles', //Nov 8th, 2024
     'candidate_dashboard' => 'Profile Dashboard', //Nov 8th, 2024
     'post_a_job' => 'Post a Project', //Nov 8th, 2024
-    'browse_candidates' => 'Browse Profiles', //Nov 8th, 2024
-    'employer_dashboard' => 'Employer Dashboard',
+    'browse_candidates' => 'Browse Talents', //Nov 8th, 2024
+    'employer_dashboard' => 'Projects Dashboard',
     'applications' => 'Applications',
-    'address' => '6391 Elgin St. Celina, Delaware 10299, New York, United States of America',
-    'phone' => '(319) 555-0115'
+    'address' => '〒102-0085 Chiyoda-ku, Tokyo ,Rokubancho 15-2, 2nd floor',
+    'phone' => '03-6826-0312'
 );

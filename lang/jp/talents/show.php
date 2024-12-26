@@ -10,5 +10,7 @@ return array(
     'resume_details' => 'プロフィール詳細',
     'search_error' => "検索条件に一致する結果はありません。検索条件を変更し、フィルターを別の値に変更してください。",
     'japanese' => '日本人',
-    'other' => '他の'
+    'other' => '他の',
+    // Oct 25, 2024
+    'check' => '選択'
 );

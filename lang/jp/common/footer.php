@@ -27,7 +27,7 @@ return array(
     'post_a_job' => 'プロフィールを投稿する',
     'browse_candidates' => '求人情報を投稿する',
     'employer_dashboard' => 'プロジェクトダッシュボード ',
-    'applications' => 'Applications',
-    'address' => '東京都江東区豊洲',
+    'applications' => '申請件数',
+    'address' => '〒102-0085 Chiyoda-ku, Tokyo ,Rokubancho 15-2, 2nd floor',
     'phone' => '(319) 555-0115'
 );

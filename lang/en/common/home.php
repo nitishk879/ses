@@ -15,7 +15,7 @@ return array(
     'duration' => 'Duration',
     'deadline' => 'Deadline',
     'summary' => 'Summary',
-    'apply' => 'Apply within',
+    'apply' => 'Apply by',//20dec2024
     'cancel' => 'Cancel',
     'close' => 'Close',
     'contract_price' => 'Contract Price',

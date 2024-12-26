@@ -1,5 +1,4 @@
 <?php
-
 return array(
     "user_support" => "ユーザーサポートの経験がある方",
     "price_negotiable" => "価格交渉可能",

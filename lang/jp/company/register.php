@@ -29,4 +29,5 @@ return array(
     'net_worth' => '純資産',
     'dispatch_business' => '派遣事業',
     'file_acceptance' => '受け入れ可能なファイル: png、jpeg、最大サイズ: 150kb',
+    'dispatch_business_license' => '派遣事業許可番号',
 );

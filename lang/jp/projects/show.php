@@ -37,10 +37,23 @@ return array(
     'project_id' => '案件ID',
     // oct 23 2024
     'facebook' => 'Facebook',
-    'twitter' => 'Twitter',
+    'twitter' => 'X',
     'linkedin' => 'Linkedin',
     'google' => 'Google',
     'instagram' => 'Instagram',
     'youtube' => 'Youtube',
-    'pinterest' => 'Pinterest',  
+    'pinterest' => 'Pinterest',
+    // oct 25, 2024
+    'invited'   => '招待済み',
+    'hired'     => '採用済み',
+    'rejected'   => '拒否済み',
+    'in_review'  => '審査中',
+    'open'  =>'オープン',
+    'in_progress'  =>'進行中',
+    'completed'  =>'完了',
+    'on_hold'  =>'保留中',
+    'unknown'   => '不明',
+    // Nov 21, 2024
+    'project_deleted' => 'プロジェクトが削除されました。',
+    'project_updated' => 'プロジェクトが正常に更新されました。'  
 );

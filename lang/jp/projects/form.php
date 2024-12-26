@@ -90,4 +90,19 @@ return array(
     "interview_4"   => "3回以上",
     "commercial_flow" => "商流への関与",
     "commercial_flow_placeholder" => "--",
+     // Nov 7, 2024
+     "experience" => "経験",
+     "experience_x" => "特定の分野での経験年数", // Nov 28, 2024
+     "scoring" => "スコアリング",
+     "scoring_placeholder" => "--",
+     "score_hundred" => "100%", // Dec 16, 2024
+     "score_ninety" => "90%",
+     "score_eighty" => "80%",
+     "score_seventy" => "70%",
+     "score_sixty" => "60%",
+     "score_key_feature" => "主な特徴のみ",
+     // Nov 15th, 2024
+     "locations" => "場所",
+     "work_mode" => "作業モード",
+     'update_project' => 'プロジェクト更新',
 );

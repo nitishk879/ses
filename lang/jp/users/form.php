@@ -1,0 +1,21 @@
+<?php
+return array(
+    "username" => "ユーザー名",
+    "password" => "パスワード",
+    "email" => "メール",
+    "role" => "役割",
+    "active" => "アクティブ",
+    "phone" => "電話番号",
+    "address" => "住所",
+    "city" => "市",
+    "country" => "国",
+    "zip" => "郵便番号",
+    "address2" => "住所2",
+    "address3" => "住所3",
+    "submit"    => "送信",
+    "cancel"    => "キャンセル",
+    "update_profile" => "プロフィールを更新",
+    "japan" => "日本",
+    "other" => "その他",
+    "success_message" => "プロフィールが更新されました。",
+);

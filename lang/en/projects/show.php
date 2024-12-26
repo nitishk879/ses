@@ -1,4 +1,4 @@
-<?php
+ <?php
 
 return array(
     'project' => 'Project',
@@ -37,7 +37,7 @@ return array(
     'project_id' => 'Project ID',
     // oct 23 2024
     'facebook' => 'Facebook',
-    'twitter' => 'Twitter',
+    'twitter' => 'X',
     'linkedin' => 'Linkedin',
     'google' => 'Google',
     'instagram' => 'Instagram',

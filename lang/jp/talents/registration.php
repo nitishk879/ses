@@ -75,5 +75,18 @@ return array(
     "experience_in_9" => "リーダー経験あり",
     "experience_in_10" => "地方案件対応可能",
     "experience_in_11" => "一部常駐可能",
-    "experience_in_12" => "シフト勤務希望"
+    "experience_in_12" => "シフト勤務希望",
+    // Oct 26, 2024
+    'min' => 'Min',
+    'max' => 'Max',
+    'language' => '言語',
+    'characteristics' => '特徴',
+    'work_experience'    => '実務経験',
+    'work_experience_placeholder' => '年',
+    'consult_sample_input'  => 'コンサルタントサンプル',
+    'system_engineer_sample' => 'システムエンジニアサンプル',
+    'infrastructure_engineer_sample' => 'インフラストラクチャ エンジニア サンプル',
+    'talent_update' => 'Update talent',
+    'talent_updated' => 'タレントがに更新されました。',
+    'talent_deleted'    => 'タレントを削除されました。',
 );

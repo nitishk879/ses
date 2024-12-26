@@ -24,17 +24,17 @@ return array(
     'top_companies_and_employer' => 'Top <span>&nbsp; companies & employers</span>',
     // Nov 14th, 2024
     'how_it_work' =>[
-        'step_1_title'  => 'Post a Project or Profile',
-        'step_1_text'   => 'List your project needs or create a profile showcasing your skills and experience.',
-        'step_2_title'  => 'AI Matchmaking',
-        'step_2_text'   => 'Our AI matches projects with profiles based on compatibility scoring to ensure the best fit.',
-        'step_3_title'  => 'Receive Matched Alerts',
-        'step_3_text'   => 'Get an email with the project or profile matches, complete with scoring insights.',
-        'step_4_title'  => 'Schedule an Interview',
-        'step_4_text'   => 'Arrange interviews either manually or with AI assistance for a streamlined process.',
-        'step_5_title'  => 'AI-Powered Interview Scoring',
-        'step_5_text'   => 'AI conducts pre-set FAQ-based interviews and scores responses to assess alignment.',
-        'step_6_title'  => 'Secure the Contract',
-        'step_6_text'   => 'Seal the Contract Confirm and kickstart your collaboration with a simple contract process.'
+        'step_1_title'  => 'Post Your Project or Talent Profile',//20dec2024 for all step1 to 6 how it works, language is changed
+        'step_1_text'   => 'Submit your project requirements or create a professional profile to highlight your skills, expertise, and experience.',
+        'step_2_title'  => 'AI-Powered Matching System',
+        'step_2_text'   => 'Our advanced AI analyzes profiles and projects to deliver the most compatible matches, ensuring the best fit',
+        'step_3_title'  => 'Receive Personalized Match Alerts',
+        'step_3_text'   => 'Get notified via email with relevant project or talent matches, including a detailed compatibility score and insights.',
+        'step_4_title'  => 'Effortless Interview Scheduling',
+        'step_4_text'   => 'Easily schedule interviews manually or let our AI assist in finding the best time for both parties, streamlining the process.',
+        'step_5_title'  => 'AI-Driven Interview Evaluation',
+        'step_5_text'   => 'AI conducts interview sessions using frequently asked questions, scoring responses to gauge alignment and suitability.',
+        'step_6_title'  => 'Finalize and Secure the Agreement',
+        'step_6_text'   => 'Confirm the match and initiate the contract process, setting the foundation for a successful collaboration.'
     ]
 );

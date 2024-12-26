@@ -23,8 +23,8 @@ return array(
     'third_subsequent_client' => '三次請以降',
     'possible_participation' => '参画可能時期',
     'monthly_salary_range' => '希望月額単価',
-    'min_salary_placeholder' => '５００万円',
-    'max_salary_placeholder' => '７００万円',
+    'min_salary_placeholder' => '4000000',
+    'max_salary_placeholder' => '8000000',
     'immediately' => '即日稼働可能',
     'future' => '今後参画可能',
     'from_date' => '参画日要相談',
@@ -44,6 +44,9 @@ return array(
     'bl' => 'バイリンガル',
     // Oct 24, 2024
     'abroad' => '海外',
-    'consignment' => 'Consignment',
+    'consignment' => 'ハイブリッド',
     'remote'    => 'リモート'
+    //oct 25, 2024
+    'min_salary' => '最低賃金',
+    'max_salary' => '最高賃金',
 );

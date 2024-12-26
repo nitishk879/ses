@@ -40,4 +40,9 @@ return array(
     "IMMEDIATELY" => "即日可",
     "FUTURE" => "今後参画可能",
     "FROM_DATE" => "参画日要相談",
+    "view_resume" => "履歴書を見る",
+    "view_profile" => "プロフィールを見る",
+    "application_deadline"  => "応募締切",
+    "favourite" => "お気に入り",
+    "last_logged_in" => "最終ログイン",
 );

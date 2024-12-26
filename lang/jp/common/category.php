@@ -1,5 +1,4 @@
 <?php
-
 return array(
     "consulting" => "コンサルティング",
     "development" => "発達",
@@ -9,7 +8,7 @@ return array(
     "design" => "デザイン",
     "pmo" => "PMO",
     "pm_pl" => "PM/PL",
-    "strategy" => "Strategy",
+    "strategy" => "戦略",
     "business" => "企業",
     "it" => "IT",
     "rpa" => "RPA",
@@ -56,6 +55,11 @@ return array(
     "movie" => "映画",
     "web_system_2" => "ウェブシステム",
     "ui_ux" => "UI/UX",
-    "character" => "Character",
+    "character" => "キャラクター",
     "graphic" => "グラフィック",
+    // Oct 25, 2024
+    "bridge" => "ブリッジSE",
+    "erp_sap" => 'ERP (SAP)',
+    "project_management" => "プロジェクト管理",
 );
+
