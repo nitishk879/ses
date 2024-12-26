@@ -45,7 +45,7 @@ return array(
     // Oct 24, 2024
     'abroad' => '海外',
     'consignment' => 'ハイブリッド',
-    'remote'    => 'リモート'
+    'remote'    => 'リモート',
     //oct 25, 2024
     'min_salary' => '最低賃金',
     'max_salary' => '最高賃金',

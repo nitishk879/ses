@@ -40,7 +40,7 @@ return new class extends Migration {
             ]);
             $table->enum('contract_classification',[
                 ContractClassificationEnum::OUTSOURCING_CONTRACT->value,
-                ContractClassificationEnum::OUTSOURCING->value,
+//                ContractClassificationEnum::OUTSOURCING->value,
                 ContractClassificationEnum::DISPATCH_CONTRACT->value,
             ]);
             $table->enum('status', ['5', '6', '7', '8'])->default('5');

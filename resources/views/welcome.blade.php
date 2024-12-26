@@ -227,14 +227,14 @@
                     </div>
                     <div class="container start-posting my-5">
                         <div class="row align-items-center">
-                            <div class="col-md-8 col-lg-6">
+                            <div class="col-md-8 col-lg-6 text-center text-md-start">
                                 <div class="StartPostingJobsAndProjectsToday w-100 h-60">
                                     <h1 class="main-heading mb-3">{!! __('common/welcome.start_posting_jobs_and_project') !!}</h1>
                                 </div>
                                 @auth
-                                    <a href="{{ route("project.create") }}" class="btn btn-lg btn-secondary">{{ __("common/header.add_new_project") }}</a>
+                                    <a href="{{ route("project.create") }}" class="btn btn-lg btn-secondary my-3">{{ __("common/header.add_new_project") }}</a>
                                 @else
-                                    <a href="{{ route("register") }}" class="btn btn-lg btn-secondary">{{ __("common/welcome.sign_up_free") }}</a>
+                                    <a href="{{ route("register") }}" class="btn btn-lg btn-secondary my-3">{{ __("common/welcome.sign_up_free") }}</a>
                                 @endauth
                             </div>
                             <div class="col-md-4 col-lg-6">
@@ -442,14 +442,14 @@
                                     <div class="flex-shrink-0">
                                         <img src="{{ __("https://picsum.photos/42/42?random={$project->id}") }}" alt=""/>
                                     </div>
-                                    <div class="flex-grow-1 ms-3 flex-column justify-content-start align-items-start gap-3.5 d-inline-flex">
-                                        <div class="Heading justify-content-start align-items-center gap-2 d-inline-flex mb-2">
+                                    <div class="flex-grow-1 ms-3 flex-column justify-content-start align-items-start gap-3.5 d-md-inline-flex">
+                                        <div class="Heading justify-content-start align-items-center gap-2 d-md-inline-flex mb-2">
                                             <div class="main-heading">{{ $project->title ?? ''  }}</div>
                                             <div class="badge">
                                                 <div class="main-pill text-sky-500 text-sm font-medium leading-tight">{{ __("common/welcome.contract_base") }}</div>
                                             </div>
                                         </div>
-                                        <div class="Info justify-content-start align-items-center gap-4 d-inline-flex">
+                                        <div class="Info justify-content-start align-items-center gap-4 d-md-inline-flex">
                                             <div class="justify-content-start align-items-center gap-1 d-flex">
                                                 <i class="fa-solid fa-map-pin fs-6"></i>
                                                 <p class="mb-0 text-gray-500 text-sm font-medium leading-tight">{{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</p>
@@ -466,7 +466,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-3 col-lg-6 justify-content-end align-items-center gap-3 d-flex">
+                                <div class="col-md-3 col-lg-6 justify-content-center justify-content-md-end align-items-center gap-3 d-flex">
                                     <a href="" class="btn-save"><i class="fa-regular fa-bookmark"></i></a>
                                     <a href="{{ route("project.show", $project) }}" class="btn btn-apply">{{ __("common/welcome.apply_now") }} <i class="fa-solid fa-arrow-right"></i></a>
                                 </div>

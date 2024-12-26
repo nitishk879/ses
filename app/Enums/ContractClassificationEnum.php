@@ -9,7 +9,7 @@ enum ContractClassificationEnum: string
      *
      * example for Enum
     */
-    case OUTSOURCING = 'quasi_delegation_possible';  //    'Business outsourcing (quasi-entrustment)';
+//    case OUTSOURCING = 'quasi_delegation_possible';  //    'Business outsourcing (quasi-entrustment)';
     case OUTSOURCING_CONTRACT = 'available_for_contract'; //    'Business outsourcing (contract)';
     case DISPATCH_CONTRACT = 'available_for_dispatch'; //    'Dispatch contract';
 
@@ -22,7 +22,7 @@ enum ContractClassificationEnum: string
     public static function toName($value): string
     {
         return match ($value) {
-            self::OUTSOURCING => __("talents/index.quasi_delegation_possible"),
+//            self::OUTSOURCING => __("talents/index.quasi_delegation_possible"),
             self::OUTSOURCING_CONTRACT => __("talents/index.available_for_contract"),
             self::DISPATCH_CONTRACT => __("talents/index.available_for_dispatch"),
         };

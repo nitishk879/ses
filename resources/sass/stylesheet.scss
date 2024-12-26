@@ -2059,9 +2059,30 @@ footer{
 }
 @media screen and (max-width: 767px) {
     #heroSection{
+        &:before{
+            height: 460px!important;
+            width: 460px!important;
+        }
         .hero-image{
-            height: 380px!important;
-            width: 380px!important;
+            height: 206px!important;
+            width: 260px!important;
+            bottom: -.5rem!important;
+            right: 0;
+        }
+    }
+    #searchCardSection{
+        .search-card{
+            &:before{
+                height: 230px!important;
+                width: 230px!important;
+            }
+            .w-50{
+                min-width: 100%!important;
+                max-width: 100%!important;
+            }
+            .search-card-img{
+                height: 150px!important;
+            }
         }
     }
 }
