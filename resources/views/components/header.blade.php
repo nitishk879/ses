@@ -90,9 +90,9 @@
                     @else
                         <li class="nav-item dropdown">
                             <a id="navbarDropdown" class="nav-link dropdown-toggle d-inline-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                <div class="d-flex align-items-center w-100 gap-2">
-                                    <img src="{{ Auth::user()->profile_photo_url ?? 'https://picsum.photos/32/32' }}" alt="" class="rounded-5" height="32" width="32"/>
-                                    {{ Auth::user()->name }}
+                                <div class="d-flex align-items-center w-100 gap-2 text-wrap">
+                                    <img src="{{ Auth::user()->profile_photo_url ?? Auth::user()->avatar ?? 'https://picsum.photos/32/32' }}" alt="" class="rounded-5" height="32" width="32"/>
+                                    {{ \Illuminate\Support\Str::limit(Auth::user()->name, 14) }}
                                 </div>
                             </a>
 

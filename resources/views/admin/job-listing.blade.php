@@ -21,7 +21,7 @@
             <div class="row justify-content-center mb-3">
                 @foreach($projects as $project)
                     <div class="col-12 col-md-6 col-lg-3">
-                        <div class="card">
+                        <div class="card card-equal">
                             <div class="card-header px-4 pt-4">
                                 <div class="card-actions float-end">
                                     <div class="dropdown position-relative">
@@ -65,9 +65,11 @@
             @if($saved_projects)
                 <div class="row justify-content-center my-3">
                     <div class="col-md-12">{{ __("My saved projects") }}</div>
+                </div>
+                <div class="row justify-content-center row-equal-height my-3">
                     @foreach($saved_projects as $project)
                         <div class="col-12 col-md-6 col-lg-3 my-3">
-                            <div class="card">
+                            <div class="card card-equal">
                                 <div class="card-header px-4 pt-4">
                                     <div class="card-actions float-end">
                                         <div class="dropdown position-relative">

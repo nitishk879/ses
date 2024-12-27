@@ -53,36 +53,36 @@
                             <div class="row justify-content-evenly">
                                 <div class="col-md-5">
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.company_established") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $company->established ?? '' }}</div>
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.company_established") }}: </div>
+                                        <div class="col-lg-7 feature-text">{{ $company->established ?? '' }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.company_total_employees") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $company->number_of_employees ?? '' }}</div>
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.company_total_employees") }}: </div>
+                                        <div class="col-lg-7 feature-text">{{ $company->number_of_employees ?? '' }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.dispatch_license") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $company->dispatch_business_license ?? '' }}</div>
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.dispatch_license") }}: </div>
+                                        <div class="col-lg-7 feature-text">{{ $company->dispatch_business_license ?? '' }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __('company/index.specialization') }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $company->specialized_industries ?? '' }}</div>
+                                        <div class="col-lg-5 feature-head">{{ __('company/index.specialization') }}: </div>
+                                        <div class="col-lg-7 feature-text">{{ $company->specialized_industries ?? '' }}</div>
                                     </div>
                                 </div>
                                 <div class="col-md-5">
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.company_capital") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $company->capital }}</div>
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.company_capital") }}: </div>
+                                        <div class="col-lg-7 feature-text">{{ $company->capital }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.company_total_employees") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.company_total_employees") }}: </div>
+                                        <div class="col-lg-7 feature-text">
                                             {{ $company->number_of_employees ?? '' }}
                                         </div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("company/index.company_location") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">
+                                        <div class="col-lg-5 feature-head">{{ __("company/index.company_location") }}: </div>
+                                        <div class="col-lg-7 feature-text">
                                             {{ $company->company_location }}
                                         </div>
                                     </div>

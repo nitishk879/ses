@@ -113,18 +113,18 @@
             </div>
             <div class="col-md-12 job-pills">
                 <div class="row align-items-center">
-                    <div class="col-md text-center">
+                    <div class="col-md-6 col-lg text-center">
                         <div class="job-pill">{{ __('common/home.apply') }}: <span>{{ today()->format('d/m/y') }}</span></div>
                     </div>
-                    <div class="col-md text-center">
+                    <div class="col-md-6 col-lg text-center">
                         <div class="job-pill">{{ __("projects/form.remote_operation_possible") }}:
                             <span>{!! $project->remote_operation_possible ? '<i class="fa-regular fa-circle-check text-success"></i>' : '<i class="fa-regular fa-circle-xmark text-danger"></i>' !!}</span>
                         </div>
                     </div>
-                    <div class="col-md text-center">
+                    <div class="col-md-6 col-lg text-center">
                         <div class="job-pill">{{ __("common/home.no_of_interviews") }}: <span>{{ \App\Enums\InterviewEnum::toName($project->number_of_interviewers) ?? __('5') }}</span></div>
                     </div>
-                    <div class="col-md text-center">
+                    <div class="col-md-6 col-lg text-center">
                         <div class="job-pill">{{ __("common/home.eligibility") }}: <span>{{ __('B.Tech') }}</span></div>
                     </div>
                 </div>

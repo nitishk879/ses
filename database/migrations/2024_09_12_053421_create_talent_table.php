@@ -50,6 +50,13 @@ return new class extends Migration
             $table->softDeletes();
         });
 
+        Schema::create('favourite_talent', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('talent_id');
+            $table->unsignedBigInteger('user_id');
+            $table->timestamps();
+        });
+
         Schema::create('sub_category_talent', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('talent_id');
@@ -84,7 +91,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('talent');
+        Schema::dropIfExists('favourite_talent');
         Schema::dropIfExists('sub_category_talent');
         Schema::dropIfExists('project_talent');
+        Schema::dropIfExists('interview_schedules');
     }
 };

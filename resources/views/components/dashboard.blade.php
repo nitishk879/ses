@@ -23,6 +23,7 @@
 {{--    <link href="{{ asset("build/assets/dashboard-OdKPV8nK.css") }}" rel="stylesheet">--}}
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
+{{--    <link rel="stylesheet" href="{{ asset("static/css/app.css") }}" />--}}
     @vite(['resources/sass/dashboard.scss'])
     <!---- Font Awesome ---->
     <script src="https://kit.fontawesome.com/8c6f840b1c.js" crossorigin="anonymous"></script>
@@ -30,6 +31,7 @@
 
 <body>
 <div class="wrapper">
+    <!-- Main Sidebar -->
     <nav id="sidebar" class="sidebar js-sidebar">
         <div class="sidebar-content js-simplebar">
             <a class="sidebar-brand" href="/">
@@ -81,11 +83,13 @@
             </ul>
         </div>
     </nav>
-
+    <!-- Main Sidebar -->
+    <!-- Main content area -->
     <div class="main">
+        <!-- Navbar for Dashboard --->
         <nav class="navbar navbar-expand-lg navbar-light">
             <a class="sidebar-toggle js-sidebar-toggle">
-                <i class="hamburger align-self-center"></i>
+                <i class="fas fa-bars align-self-center"></i>
             </a>
             @if(Auth::user()->company)
                 <a href="" class="d-flex align-items-center gap-2 px-2 company-logo">
@@ -222,20 +226,22 @@
                 </ul>
             </div>
         </nav>
-
+        <!-- Navbar for Dashboard --->
+        <!-- Main content slot -->
         <main class="p-3">
             {{ $slot }}
         </main>
-
+        <!-- Main content slot -->
+        <!-- Footer -->
         <footer class="footer">
             <div class="container-fluid">
                 <div class="row text-muted">
-                    <div class="col-6 text-start">
+                    <div class="col-md-6 text-start">
                         <p class="mb-0">
                             <a class="text-muted" href="{{ config("app.url") }}" target="_blank"><strong>{{ config("app.name") }}</strong></a> - <a class="text-muted" href="{{ config("app.url") }}" target="_blank"><strong>{{ config("app.name") }}</strong></a>								&copy;
                         </p>
                     </div>
-                    <div class="col-6 text-end">
+                    <div class="col-md-6 text-end">
                         <ul class="list-inline">
                             <li class="list-inline-item">
                                 <a class="text-muted" href="https://adminkit.io/" target="_blank">Support</a>
@@ -254,7 +260,9 @@
                 </div>
             </div>
         </footer>
+        <!-- Footer -->
     </div>
+    <!-- Main content area -->
 </div>
 
 <script src="{{ asset("static/js/app.js") }}"></script>

@@ -8,10 +8,10 @@
 {{--                <li class="breadcrumb-item active" >Data</li>--}}
 {{--            </ol>--}}
 {{--        </nav>--}}
-        <h1 class="h3 my-3"><strong>Analytics</strong> Dashboard</h1>
+        <h1 class="h3 my-3"><strong>{{ __("Analytics") }}</strong> {{ __("Dashboard") }}</h1>
         <!---- Let's add some breadcrumb -->
         <div class="row justify-content-center mb-3">
-            <div class="col-md-4">
+            <div class="col-lg-4 mb-2">
                 <div class="d-flex align-items-center dash-card">
                     <div class="flex-shrink-0">
                         <svg class="dash-card-icon primary" width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4 mb-2">
                 <div class="d-flex align-items-center dash-card">
                     <div class="flex-shrink-0">
                         <svg class="dash-card-icon indigo" width="37" height="37" viewBox="0 0 37 37" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -54,7 +54,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4 mb-2">
                 <div class="d-flex align-items-center dash-card">
                     <div class="flex-shrink-0">
                         <svg class="dash-card-icon lime" width="42" height="42" viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -78,10 +78,10 @@
             </div>
         </div>
         <div class="row justify-content-center mb-3">
-            <div class="col-md-8">
+            <div class="col-lg-8">
                 <div class="card">
                     <div class="card-header">
-                        <div class="d-flex justify-content-between w-100">
+                        <div class="d-md-flex justify-content-between w-100">
                             <div class="d-flex flex-column">
                                 <h3 class="chart-title">{{ __("admin/dashboard.job_statistics") }}</h3>
                                 <h5 class="chart-sub-title">{{ __("admin/dashboard.showing_job_statistics") }}</h5>
@@ -103,7 +103,7 @@
                     <div class="card-body">
                         <div class="tab-content mt-4">
                             <!-- Chart Container -->
-                            <canvas id="chartCanvas" style="height: 272px!important;"></canvas>
+                            <canvas id="chartCanvas" style="height: 232px!important;"></canvas>
                         </div>
 {{--                        <div class="align-self-center">--}}
 {{--                            <h4>My project chart</h4>--}}
@@ -112,7 +112,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-4">
                 <div class="card">
                     <div class="card-header">
                         <h3 class="">{{ __("admin/dashboard.job_openings") }}</h3>
@@ -139,7 +139,6 @@
                 $projects = \App\Models\Project::selectRaw('COUNT(id) as count, MONTH(created_at) as month')
                 ->groupBy('month')
                 ->pluck('count', 'month');
-
                 $labels = $projects->keys()->map(function($month) {
                     return date('F', mktime(0, 0, 0, $month, 1));
                 });

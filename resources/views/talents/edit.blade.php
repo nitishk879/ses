@@ -3,7 +3,7 @@
 @section('title', __("talents/registration.talent_update"))
 
 @section('content')
-    <div class="container" id="dashboard">
+    <div class="container-fluid container-lg" id="dashboard">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('talents/registration.talent_update') }}</h1>
@@ -214,7 +214,7 @@
                                            class="form-label">{{ __('talents/registration.cover_letter') }}</label>
                                     <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="targetTextarea1"
                                               name="cover_letter" rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->cover_letter ?? old("cover_letter") !!}</textarea>
+                                              placeholder="{{ __('talents/registration.cover_letter_placeholder') }}">{!! $talent->cover_letter ?? old("cover_letter") !!}</textarea>
                                     @error('address')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -394,7 +394,7 @@
                                               id="targetTextarea2"
                                               name="education"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->qualifications ?? old("education") ?? '' !!}</textarea>
+                                              placeholder="{{ __('talents/registration.education_details_placeholder') }}">{!! $talent->qualifications ?? old("education") ?? '' !!}</textarea>
                                     @error('education')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -409,7 +409,7 @@
                                               id="targetTextarea3"
                                               name="experience"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! $talent->experience_pr ?? old("experience") ?? '' !!}</textarea>
+                                              placeholder="{{ __('talents/registration.experience_details_placeholder') }}">{!! $talent->experience_pr ?? old("experience") ?? '' !!}</textarea>
                                     @error('experience')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror

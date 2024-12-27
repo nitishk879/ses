@@ -104,4 +104,3 @@ document.addEventListener("DOMContentLoaded", function () {
     // Run the function initially to account for pre-filled values
     updateProgressBar();
 });
-

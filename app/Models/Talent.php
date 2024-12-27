@@ -158,10 +158,6 @@ class Talent extends Model
                 return ContractClassificationEnum::OUTSOURCING_CONTRACT->value;
             }
 
-            if ($this->quasi_delegation_possible) {
-                return ContractClassificationEnum::OUTSOURCING->value;
-            }
-
             return null;
         });
     }
@@ -288,5 +284,15 @@ class Talent extends Model
     public function industries(): MorphToMany
     {
         return $this->morphToMany(Industry::class, 'industriable');
+    }
+
+    /**
+     * Let's get list of user's Fav talent
+     *
+     * @return BelongsToMany
+     */
+    public function favourite(): BelongsToMany
+    {
+        return $this->morphToMany(User::class, 'favourite_talent');
     }
 }

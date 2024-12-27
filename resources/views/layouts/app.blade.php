@@ -37,7 +37,7 @@
     <div id="app">
         <x-header/>
         <main class="" style="background: #F1F1F1!important;">
-            <div class="container">
+            <div class="container-fluid container-lg">
                 <div class="row align-items-center">
                     <div class="col-md-12 mt-3">
                         <!--  Alert goes here  --->
@@ -52,7 +52,7 @@
             </div>
             @yield('content') {{ $slot ?? '' }}
         </main>
-
+        <button id="backToTop" title="Back to Top">↑</button>
         <x-footer />
     </div>
     @hasSection('select2')

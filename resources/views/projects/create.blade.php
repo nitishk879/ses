@@ -3,7 +3,7 @@
 @section('title', 'Projects')
 
 @section('content')
-    <div class="container" id="dashboard">
+    <div class="container-fluid container-lg" id="dashboard">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('projects/form.project_registration') }}</h1>
@@ -11,7 +11,7 @@
             <div class="col-md-12 py-3">
                 <!-- Progress Bar -->
                 <div class="progress mb-4">
-                    <div id="progressBar" class="progress-bar " role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 @section('title', $project->title)
 
 @section('content')
-    <div class="container" id="dashboard">
+    <div class="container-fluid container-lg" id="dashboard">
         <div class="row">
             <div class="col-md-12 px-4 d-flex justify-content-between align-items-center">
                 <nav aria-label="breadcrumb">
@@ -54,7 +54,7 @@
                                               id="targetTextarea1"
                                               name="project_description"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! $project->project_description ?? old("project_description") ?? '' !!}</textarea>
+                                              placeholder="{{ __('talents/registration.project_description_placeholder') }}">{!! $project->project_description ?? old("project_description") ?? '' !!}</textarea>
                                     @error('project_description')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -68,7 +68,7 @@
                                               id="targetTextarea2"
                                               name="personnel_requirement"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! $project->personnel_requirement ?? old("personnel_requirement") ?? '' !!}</textarea>
+                                              placeholder="{{ __('talents/registration.project_requirements_placeholder') }}">{!! $project->personnel_requirement ?? old("personnel_requirement") ?? '' !!}</textarea>
                                     @error('personnel_requirement')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror

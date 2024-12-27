@@ -237,4 +237,15 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(Project::class, 'project_save', 'user_id', 'project_id');
     }
+
+    /**
+     * Let's get list of favourite project for the user.
+     *
+     * @returns
+    */
+
+    public function favouriteTalent(): BelongsToMany
+    {
+        return $this->belongsToMany(Talent::class, 'favourite_talent', 'user_id', 'talent_id');
+    }
 }

@@ -89,4 +89,10 @@ return array(
     'talent_update' => 'Update talent',
     'talent_updated' => 'Talent updated successfully',
     'talent_deleted'    => 'Talent deleted successfully',
+    // Dec 26, 2024
+    'cover_letter_placeholder' => '',
+    'education_details_placeholder' => '',
+    'experience_details_placeholder' => '',
+    'project_description_placeholder' => '',
+    'project_requirements_placeholder' => '',
 );

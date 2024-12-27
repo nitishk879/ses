@@ -1,5 +1,5 @@
 <div>
-    <div class="d-flex flex-column flex-shrink-0 p-3 bg-light text-muted">
+    <div class="d-flex flex-column flex-shrink-0 p-md-3 bg-light text-muted">
         <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-muted text-decoration-none">
             <svg class="bi pe-none me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
             <span class="fs-4 mb-3">{{ __("talents/index.search") }}</span>
@@ -62,7 +62,7 @@
                     </h2>
                     <div id="flush-collapseWorkLocation" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
-                            <select class="form-control form-select mb-3" id="multiple-select-fieldx" wire:model.live="workLocation" data-placeholder="e.g. Tokyo" aria-describedby="search-location" multiple>
+                            <select class="form-control form-select mb-3" id="multiple-select-field" wire:model.live="workLocation" data-placeholder="e.g. Tokyo" aria-describedby="search-location" multiple>
                                 @foreach(\App\Models\Location::orderBy('title')->get() as $location)
                                     <option value="{{$location->id}}" @selected(in_array($location->id, $workLocation)) >{{ $location->title ?? '' }} ({{ $location->projects->count() }})</option>
                                 @endforeach

@@ -4,17 +4,23 @@
 
 @section('content')
     @php($auth = Auth::user())
-    <div class="container" id="dashboard">
+    <div class="container-fluid container-lg" id="dashboard">
         @if($auth->hasRole('admin'))
             <div class="row">
                 <x-sidebar>
                     <form wire:submit.prevent="search" class="input-group mb-3">
-                        <button type="submit" class="input-group-text" id="search-keyword"><i class="fa-solid fa-magnifying-glass"></i></button>
-                        <input type="text" class="form-control search-input" wire:model.live="search" placeholder="{{ __("common/sidebar.search_with_keyword") }}" aria-label="Username" aria-describedby="search-keyword">
+                        <input wire:model.live="search" type="text" class="form-control" placeholder="{{ __("common/sidebar.search_with_keyword") }}" aria-label="search-input" aria-describedby="search-keyword">
                     </form>
                 </x-sidebar>
-                <div class="col-md-9 col-xl-9">
-                    <div class="d-flex w-100 justify-content-between my-3">
+                <div class="col-md-8 col-lg-9 col-xl-9">
+                    <!-- Top Nav -->
+                    <div class="my-2">
+                        <button class="btn btn-primary d-md-none offCanvasBtn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+                            <i class="fa-solid fa-bars-staggered"></i>
+                        </button>
+                    </div>
+                    <!--End Top Nav -->
+                    <div class="d-md-flex w-100 justify-content-between my-3">
                         <h2 class="search-keyword">{{ __("talents/index.showing_results_for") }}: <span>"{{ __("talents/index.search_keyword") }}"</span></h2>
                         <div class="search-sort">
                             <div class="input-group mb-3">

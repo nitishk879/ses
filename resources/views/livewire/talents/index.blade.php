@@ -109,14 +109,14 @@
                 </a>
                 <div class="talent-card-header">
                     <div class="row justify-content-between">
-                        <div class="col-md-4 ps-md-3">
+                        <div class="col-md-6 col-lg-5 ps-md-3">
                             <span class="talent-name">{{ $talent->user->short_name }}</span>
                             <div class="d-flex gap-2">
                                 <span class="talent-age">{{ __("talents/index.gender") }} : <b>{{ \App\Enums\GenderEnum::toName($talent->user->gender->value) }}</b></span>
                                 <span class="talent-age">{{ __("talents/index.age") }} : <b>{{ $talent->user->age }}</b></span>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6 col-lg-5">
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-calendar-days"></i>
                                 {{ __("talents/index.registered_on") }}: {{ $talent->user->created_at->format('M d, Y') }}</div>
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-rotate"></i>
@@ -127,9 +127,9 @@
                                 </div>
                             @endif
                         </div>
-                        <div class="col-md-4 text-end">
-                            <a href="" class="talent-save"><i class="fas fa-heart"></i> {{ random_int(18, 50) }}</a>
-                        </div>
+{{--                        <div class="col-md-6 col-lg-2 text-end">--}}
+{{--                            <a href="" class="talent-save"><i class="fas fa-heart"></i> {{ random_int(18, 50) }}</a>--}}
+{{--                        </div>--}}
                     </div>
                 </div>
                 <div class="talent-card-body">
@@ -157,46 +157,46 @@
                         </div>
                         <div class="talent-featured-section">
                             <div class="row justify-content-evenly">
-                                <div class="col-md-5">
+                                <div class="col-md-6 col-lg-5">
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/index.monthly_income") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->salary_range ?? '' }} {{ __('talents/index.currency_text') }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.monthly_income") }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->salary_range ?? '' }} {{ __('talents/index.currency_text') }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/index.nationality") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->user->nationality ?? '' }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.nationality") }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->user->nationality ?? '' }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/index.nearest_station") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->user->nearest_station_prefecture ?? 'Maihama Station on the Keiyo Line (Chiba Prefecture)' }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.nearest_station") }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->user->nearest_station_prefecture ?? 'Maihama Station on the Keiyo Line (Chiba Prefecture)' }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __('talents/index.operations') }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) ?? __("talents/index.{$talent->availability}") }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __('talents/index.operations') }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) ?? __("talents/index.{$talent->availability}") }}</div>
                                     </div>
                                 </div>
-                                <div class="col-md-5">
+                                <div class="col-md-6 col-lg-5">
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/registration.affiliation") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">{{ $talent->affiliation }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/registration.affiliation") }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->affiliation }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/index.type_of_contract") }}</div>
-                                        <div class="col-6 col-md-7 feature-text">
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.type_of_contract") }}</div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">
                                             {{ $talent->myContract!==null ? __("talents/index.{$talent->myContract}"): '' }}
                                         </div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-6 col-md-5 feature-head">{{ __("talents/index.preferred_location") }}: </div>
-                                        <div class="col-6 col-md-7 feature-text">
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.preferred_location") }}: </div>
+                                        <div class="col-lg-6 col-xl-7 feature-text">
                                             @foreach($talent->locations as $location)
                                                 {{ $location->title ?? '' }} @if(!$loop->last), @endif
                                             @endforeach
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="d-grid gap-2">
+                                <div class="col-lg-2">
+                                    <div class="d-grid gap-2 my-3">
                                         <button type="button"
                                                 wire:click="$dispatch('confirmingOenModal', { id:{{ $talent->id }} })"
                                                 id="openTalentModal"
