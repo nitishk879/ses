@@ -19,7 +19,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -128,6 +130,26 @@ class Talent extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    /**
+     * The structured form of this candidate's resume.
+     *
+     * @return HasOne
+     */
+    public function aiResumeParse(): HasOne
+    {
+        return $this->hasOne(AiResumeParse::class);
+    }
+
+    /**
+     * Match scores for this candidate across projects.
+     *
+     * @return HasMany
+     */
+    public function aiMatches(): HasMany
+    {
+        return $this->hasMany(AiMatch::class);
     }
 
     /**

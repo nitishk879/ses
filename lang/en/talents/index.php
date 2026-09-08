@@ -45,4 +45,10 @@ return array(
     "application_deadline"  => "Application deadline",
     "favourite" => "Favourite",
     "last_logged_in" => "Last logged in",
+
+    // JD/candidate match scoring
+    "match_against_project" => "Show match score for project",
+    "no_project_selected" => "— no project selected —",
+    "ranked_by_match" => "Ranked by match score",
+    "not_scored_yet" => "Not scored yet",
 );

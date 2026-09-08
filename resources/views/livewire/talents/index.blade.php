@@ -101,12 +101,66 @@
             </div>
         </div>
     </div>
+    {{-- Rank candidates against one of this company's projects.
+         A match score belongs to a (project, candidate) pair, so nothing can
+         be scored until the recruiter says which project they are hiring for. --}}
+    @if($matchableProjects->isNotEmpty())
+        <div class="row align-items-center mb-3">
+            <div class="col-md-6">
+                <label for="matchProject" class="form-label mb-1">
+                    {{ __("talents/index.match_against_project") }}
+                </label>
+                <select id="matchProject" class="form-select" wire:model.live="matchProject">
+                    <option value="">{{ __("talents/index.no_project_selected") }}</option>
+                    @foreach($matchableProjects as $matchable)
+                        <option value="{{ $matchable->id }}">{{ $matchable->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+            @if($matchProject)
+                <div class="col-md-6 text-md-end">
+                    <small class="text-muted">{{ __("talents/index.ranked_by_match") }}</small>
+                </div>
+            @endif
+        </div>
+    @endif
+
     @if($talents->count() >=1)
         @foreach($talents as $talent)
+            @php($match = $matchProject ? $talent->aiMatches->first() : null)
             <div class="talent-card" wire:key="{{ $talent->id }}">
                 <a href="" class="add-to-favourite">
                     <i class="fa-solid fa-star"></i>
                 </a>
+
+                @if($matchProject)
+                    <div class="talent-match p-2 mb-2 border rounded">
+                        @if($match)
+                            {{-- Colour is a reading aid only; the reasons below are
+                                 what a recruiter should actually act on. --}}
+                            @php($tone = $match->score >= 75 ? 'success' : ($match->score >= 50 ? 'warning' : 'secondary'))
+                            <span class="badge bg-{{ $tone }}">{{ $match->score }}/100</span>
+                            <ul class="list-unstyled small mb-0 mt-2">
+                                @foreach($match->reasons() as $reason)
+                                    <li>{{ $reason }}</li>
+                                @endforeach
+                                @foreach($match->blockers() as $blocker)
+                                    <li class="text-danger">&#33; {{ $blocker }}</li>
+                                @endforeach
+                                @foreach($match->unverified() as $unverified)
+                                    <li class="text-muted">? {{ $unverified }}</li>
+                                @endforeach
+                            </ul>
+                        @else
+                            {{-- Absent score is not a zero: this candidate has
+                                 simply not been parsed/scored yet. --}}
+                            <span class="badge bg-light text-dark">
+                                {{ __("talents/index.not_scored_yet") }}
+                            </span>
+                        @endif
+                    </div>
+                @endif
+
                 <div class="talent-card-header">
                     <div class="row justify-content-between">
                         <div class="col-md-6 col-lg-5 ps-md-3">

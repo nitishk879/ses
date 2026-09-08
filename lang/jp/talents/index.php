@@ -45,4 +45,12 @@ return array(
     "application_deadline"  => "応募締切",
     "favourite" => "お気に入り",
     "last_logged_in" => "最終ログイン",
+
+    // JD/candidate match scoring.
+    // English for now — awaiting sign-off before these are translated, so the
+    // wording is settled once rather than translated twice.
+    "match_against_project" => "Show match score for project",
+    "no_project_selected" => "— no project selected —",
+    "ranked_by_match" => "Ranked by match score",
+    "not_scored_yet" => "Not scored yet",
 );

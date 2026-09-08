@@ -59,4 +59,24 @@ return [
         'redirect' => env('TWITTER_REDIRECT_URL'),
     ],
 
+    /*
+     * ses-ai-service — JD/resume structuring and candidate match scoring.
+     *
+     * Runs against the H200 vLLM, so there is no per-call vendor cost; the
+     * timeout is generous because a long resume is several sequential model
+     * calls. `catalog_path` is where `ses:export-skill-catalog` writes the
+     * sub-category taxonomy the parser maps skills onto.
+     */
+    'ai_parser' => [
+        'url' => env('AI_PARSER_URL', 'http://localhost:8100'),
+        'secret' => env('AI_PARSER_SECRET'),
+        'timeout' => env('AI_PARSER_TIMEOUT', 120),
+        'catalog_path' => env('AI_PARSER_CATALOG_PATH', storage_path('app/skill_catalog.json')),
+        'resume_disk' => env('AI_PARSER_RESUME_DISK', 'local'),
+
+        // Business-specific skill synonyms, merged on top of the service's
+        // built-in defaults. Add terms here as they show up in `unmapped`.
+        'aliases' => [],
+    ],
+
 ];

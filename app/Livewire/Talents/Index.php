@@ -61,6 +61,17 @@ class Index extends Component
     #[Url]
     public $sortDirection = 'asc';
 
+    /**
+     * Score candidates against this project.
+     *
+     * A match score only exists for a (project, candidate) pair, so "Find
+     * Talent" cannot show one until the recruiter says which project they are
+     * hiring for. When set, the list is ordered by score instead of by date —
+     * which is the whole point: the best candidate should be at the top.
+     */
+    #[Url]
+    public ?int $matchProject = null;
+
     public ?int $id = null;
     public ?int $pages = 10;
 
@@ -94,6 +105,15 @@ class Index extends Component
         $this->subcategories = $filters['subcategories'];
         $this->work_mode = $filters['work_mode'];
 
+        $this->resetPage();
+    }
+
+    /**
+     * Switching project changes the ordering entirely, so page 3 of the old
+     * ranking is meaningless against the new one.
+     */
+    public function updatedMatchProject(): void
+    {
         $this->resetPage();
     }
 
@@ -243,9 +263,50 @@ class Index extends Component
             $query->where('min_monthly_price', '>=', $this->min_salary)->where('max_monthly_price', '<=', $this->max_salary);
         }
 
-        // Sort the results
-        $query->orderBy($this->sortBy, $this->sortDirection);
+        // Rank by match score when a project is selected, otherwise fall back
+        // to the plain list ordering.
+        if ($this->matchProject) {
+            $query
+                ->leftJoin('ai_matches', function ($join) {
+                    $join->on('ai_matches.talent_id', '=', 'talent.id')
+                        ->where('ai_matches.project_id', '=', $this->matchProject);
+                })
+                // Without this the join's columns would overwrite the model's.
+                ->select('talent.*')
+                // Unscored candidates sort last rather than first, which is
+                // what a NULL would otherwise do on most engines.
+                ->orderByRaw('COALESCE(ai_matches.score, -1) DESC')
+                ->orderBy('talent.id')
+                // Carries reasons/blockers for the badge without a second
+                // query per card.
+                ->with(['aiMatches' => fn ($q) => $q->where('project_id', $this->matchProject)]);
+        } else {
+            $query->orderBy($this->sortBy, $this->sortDirection);
+        }
 
-        return view('livewire.talents.index', ['talents' => $query->paginate($this->pages) ]);
+        return view('livewire.talents.index', [
+            'talents' => $query->paginate($this->pages),
+            'matchableProjects' => $this->matchableProjects(),
+        ]);
+    }
+
+    /**
+     * Projects this user may score against.
+     *
+     * Scoped to the signed-in user's company so one employer cannot rank
+     * candidates against another's requirement.
+     */
+    private function matchableProjects()
+    {
+        $companyId = auth()->user()?->company?->id;
+
+        if (! $companyId) {
+            return collect();
+        }
+
+        return Project::query()
+            ->where('company_id', $companyId)
+            ->orderByDesc('created_at')
+            ->get(['id', 'title']);
     }
 }
