@@ -7,7 +7,7 @@ export default defineConfig({
         laravel({
             input: [
                 'resources/sass/app.scss',
-                'resources/sass/dashboard.scss',
+                'resources/css/admin.css',
                 'resources/js/app.js',
                 'resources/js/main.js',
             ],
@@ -17,6 +17,13 @@ export default defineConfig({
             refresh: ['resources/sass/app.scss'],  // <-- will refresh css (tailwind ) as well
         }),
     ],
+    css: {
+        preprocessorOptions: {
+            scss: {
+                quietDeps: true,
+            },
+        },
+    },
     resolve: {
         alias: {
             // vue: 'vue/dist/vue.esm-bundler.js',

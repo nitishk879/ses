@@ -3,14 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\TalentStatusEnum;
-use App\Events\SavedProjectEvent;
 use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -31,7 +28,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $categories = Category::whereHas('subcategories')->orderBy('title')->get();
+        $categories = Category::get();
         $features = Feature::all();
 
         return view('projects.create', compact('categories', 'features'));
@@ -42,9 +39,6 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request->user()->cannot('create', Project::class)) {
-            abort(403);
-        }
 
         $validated = $request->validate([
             "title" => 'required|unique:projects',
@@ -59,13 +53,11 @@ class ProjectController extends Controller
             "project_description" => 'required',
             "personnel_requirement" => 'required',
             "project_finalized" => 'nullable',
-            "trade_classification" => 'required|int',
+            "trade_classification" => 'required',
             "contract_classification" => 'required',
             "languages" => 'required',
             "workLocations" => 'nullable',
             "deadline" => 'nullable',
-            "experience" => 'nullable',
-            "scoring" => 'nullable',
             "number_of_application" => 'nullable',
             "number_of_interviewers" => 'nullable',
             "commercial_flow" => 'nullable',
@@ -94,13 +86,9 @@ class ProjectController extends Controller
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
             "contract_classification" => $validated["contract_classification"] ?? '',
             "deadline" => $validated["deadline"] ?? '',
-            "scoring" => $validated["scoring"] ?? [50],
             "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
             'work_location_prefer' => $validated["workLocations"] ?? '',
             "affiliation" => $validated["eligibility"] ?? '',
-            "experience" => $validated["experience"] ?? '',
-            "project_finalized" => $validated["project_finalized"] ?? false,
-            "trade_classification" => (int) $validated["trade_classification"] ?? '',
             "number_of_application" => $validated["number_of_application"] ?? '',
             "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
             "commercial_flow" => $validated["commercial_flow"] ?? '',
@@ -139,58 +127,7 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
-        if ($request->user()->cannot('update', $project)) {
-            abort(403);
-        }
-
-        $project->title = $request["title"] ?? '';
-        $project->slug = Str::slug($request['title'], '-');
-        $project->minimum_price = $request["minimum_price"] ?? '';
-        $project->maximum_price = $request["maximum_price"] ?? '';
-        $project->skill_matching = $request["skill_matching"] ?? false;
-        $project->accept = $request["accept"] ?? false;
-        $project->remote_operation_possible = $request["remote_operation_possible"] ?? false;
-        $project->contract_start_date = $request["contract_start_date"] ?? '';
-        $project->contract_end_date = $request["contract_end_date"] ?? '';
-        $project->possible_to_continue = $request["possible_to_continue"] ?? false;
-        $project->project_description = $request["project_description"] ?? '';
-        $project->personnel_requirement = $request["personnel_requirement"] ?? '';
-        $project->person_in_charge = $request["person_in_charge"] ?? auth()->user()->name;
-        $project->is_public = $request->input("is_public") ?? false;
-        $project->company_info_disclose = $request->input("company_info_disclose");
-        $project->contract_classification = $request["contract_classification"] ?? '';
-        $project->deadline = $request["deadline"] ?? '';
-        $project->scoring = $request["scoring"] ?? [50];
-        $project->languages = $request["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '';
-        $project->work_location_prefer = $request["workLocations"] ?? '';
-        $project->affiliation = $request["eligibility"] ?? '';
-        $project->experience = $request["experience"] ?? '';
-        $project->project_finalized = $request["project_finalized"] ?? false;
-        $project->trade_classification = (int) $request["trade_classification"] ?? '';
-        $project->number_of_application = $request["number_of_application"] ?? '';
-        $project->number_of_interviewers = $request["number_of_interviewers"] ?? '';
-        $project->commercial_flow = $request["commercial_flow"] ?? '';
-        $project->company_id = auth()->user()->company->id ?? 0;
-        $project->user_id = auth()->user()->id ?? 0;
-        $project->updater_id = auth()->user()->id ?? 0;
-        $project->save();
-
-        // Check if input has values
-        if ($request->input('category_id')) {
-            $project->subCategories()->sync($request->input('category_id') ?? []);
-        }
-
-        // Check if input has values
-        if ($request->input('project_features')) {
-            $project->features()->sync($request->input("project_features") ?? []);
-        }
-
-        // Check if input has values
-        if ($request->input('locations')) {
-            $project->locations()->sync($request->input("locations") ?? []);
-        }
-
-        return redirect()->route('project.index')->with('success', __("projects/show.project_updated"));
+        //
     }
 
     /**
@@ -198,9 +135,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        $project->update(['deleter_id' => Auth::user()->id]);
         $project->delete();
-        return redirect()->route('project.index')->with('success', __("projects/show.project_deleted"));
+        return redirect()->route('project.index')->with('success', 'Project deleted successfully.');
     }
 
     /**
@@ -284,21 +220,5 @@ class ProjectController extends Controller
             default:
                 return ['labels' => [], 'data' => []];
         }
-    }
-
-    /**
-     * In case, user want to save project for later
-     *
-     * @param Request $request
-     * @return RedirectResponse
-     */
-    public function saveForLater(Request $request)
-    {
-        $myProject = Project::find($request->input('project_id'));
-        $myProject->saves()->toggle(Auth::user()->id ?? []);
-
-        SavedProjectEvent::dispatch($myProject);
-
-        return redirect()->back()->with('success', __("Project Saved for later"));
     }
 }

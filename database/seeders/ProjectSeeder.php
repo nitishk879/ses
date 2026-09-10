@@ -22,7 +22,10 @@ class ProjectSeeder extends Seeder
      */
     public function run(): void
     {
-        Project::truncate();
+        // MySQL cannot truncate a table that is referenced by a foreign key.
+        // A regular delete lets the database cascade to ai_jd_parses and
+        // ai_matches, both of which reference projects.project_id.
+        Project::query()->delete();
         $datafile = File::get(public_path('/dataset/projects.json'));
         $projects = json_decode($datafile);
 
@@ -36,7 +39,7 @@ class ProjectSeeder extends Seeder
                 "accept" => $project->accept,
                 "experience" => $project->experience ?? json_encode([1,2,3]),
                 "scoring" => $project->scoring,
-                "languages" => $project->languages ?? LangEnum::toArray(LangEnum::en->value),
+//                "languages" => $project->languages ?? LangEnum::toArray(LangEnum::en->value),
                 "remote_operation_possible" => $project->remote_operation_possible,
                 "contract_start_date" => $project->contract_start_date ?? today()->addDays(7),
                 "contract_end_date" => $project->contract_end_date ?? today()->addMonth(),

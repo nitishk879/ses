@@ -3,9 +3,6 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Casts\isAdminCast;
-use App\Casts\isEmployeeCast;
-use App\Casts\isEmployerCast;
 use App\Casts\LanguagesCast;
 use App\Enums\GenderEnum;
 use App\Enums\LangEnum;
@@ -44,11 +41,7 @@ class User extends Authenticatable
         'nearest_station_prefecture',
         'nearest_station_line',
         'station_name',
-        'is_public',
-        'address',
-        'avatar',
-        'provider',
-        'provider_id',
+        'is_public'
     ];
 
     /**
@@ -74,12 +67,7 @@ class User extends Authenticatable
             'date_of_birth' => 'datetime',
             'gender' => GenderEnum::class,
             'nationality' => 'string',
-            'languages' => 'array',
-            'is_admin' => isAdminCast::class,
-            'is_employer' => isEmployerCast::class,
-            'is_employee' => isEmployeeCast::class,
-            'is_talent' => 'bool',
-            'last_login' => 'datetime'
+            'languages' => LanguagesCast::class
         ];
     }
 
@@ -101,7 +89,7 @@ class User extends Authenticatable
     public function age(): Attribute
     {
         return Attribute::make(
-            get: fn() => Carbon::parse($this->date_of_birth)->age ?? '',
+            get: fn() => Carbon::parse($this->date_of_birth)->age,
         );
     }
 
@@ -121,7 +109,7 @@ class User extends Authenticatable
     protected function shortName(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => mb_substr($this->firstname, 0, 1) .". ". mb_substr($this->lastname, 0, 1) .".",
+            get: fn (mixed $value) => mb_substr($this->firstname, 0, 1) ." ". mb_substr($this->lastname, 0, 1),
         );
     }
 
@@ -144,7 +132,20 @@ class User extends Authenticatable
      */
     public function hasRole($role): bool
     {
-        if ($this->roles()->where('slug', '=', $role)->first()) {
+        if ($this->roles()->where('title', '=', $role)->first()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if User is Admin
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        if ($this->roles()->where('title', '=', 'admin')->first()) {
             return true;
         }
 
@@ -196,56 +197,44 @@ class User extends Authenticatable
      *
      * @return Attribute
      */
-//    public function languages(): Attribute
-//    {
-//        return Attribute::make(
-//            get: function ($value) {
-//                // Decode the JSON and map to enum names
-//                $decoded = json_decode($value, true);
-//                return !is_array($decoded) ? null: array_map(fn($val) => LangEnum::toName($val), $decoded);
-//            },
-//            set: function ($value) {
-//                // If setting from an array of enum values, encode it as JSON
-//                return json_encode($value);
-//            }
-//        );
-//    }
-
-
-    /**
-     * Get the user's full name.
-     */
-    protected function lastLogin(): Attribute
+    public function languages(): Attribute
     {
         return Attribute::make(
-            get: fn () => optional(
-                $session = \DB::table('sessions')
-                    ->where('user_id', $this->id)
-                    ->orderBy('last_activity', 'desc')
-                    ->first()
-            )->last_activity ? Carbon::createFromTimestamp(optional($session)->last_activity)->diffForHumans() : null
+            get: function ($value) {
+                // Decode the JSON and map to enum names
+                $decoded = json_decode($value, true);
+                return array_map(fn($val) => LangEnum::toName($val), $decoded);
+            },
+            set: function ($value) {
+                // If setting from an array of enum values, encode it as JSON
+                return json_encode($value);
+            }
         );
     }
 
     /**
-     * Let's get list of favourite project for the user.
+     * Let's fetch user's languages
      *
-     * @returns
-    */
-
-    public function savedProjects(): BelongsToMany
+     * @return Attribute
+     */
+    public function preferredLanguages(): Attribute
     {
-        return $this->belongsToMany(Project::class, 'project_save', 'user_id', 'project_id');
+        return Attribute::make(
+            get: fn (mixed $value) =>
+            $this->languages ?
+                $this->languages->name : '',
+        );
     }
 
     /**
-     * Let's get list of favourite project for the user.
+     * Let's fetch user's languages
      *
-     * @returns
-    */
-
-    public function favouriteTalent(): BelongsToMany
-    {
-        return $this->belongsToMany(Talent::class, 'favourite_talent', 'user_id', 'talent_id');
-    }
+     * @return Attribute
+     */
+//    public function gender(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => GenderEnum::toName($this->gender->value),
+//        );
+//    }
 }

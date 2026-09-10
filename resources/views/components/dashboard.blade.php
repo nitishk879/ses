@@ -1,273 +1,52 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-    <meta name="description" content="Responsive Admin &amp; Dashboard Template based on Bootstrap 5">
-    <meta name="author" content="AdminKit">
-    <meta name="keywords" content="adminkit, bootstrap, bootstrap 5, admin, dashboard, template, responsive, css, sass, html, theme, front-end, ui kit, web">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-
-    <link rel="shortcut icon" href="{{ asset("images/logo.png") }}" />
-
-    <link rel="canonical" href="{{ config("app.url") }}" />
-
+    <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? config('app.name') }}</title>
-
-{{--    <link href="{{ asset("build/assets/dashboard-OdKPV8nK.css") }}" rel="stylesheet">--}}
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-
-{{--    <link rel="stylesheet" href="{{ asset("static/css/app.css") }}" />--}}
-    @vite(['resources/sass/dashboard.scss'])
-    <!---- Font Awesome ---->
-    <script src="https://kit.fontawesome.com/8c6f840b1c.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    @vite('resources/css/admin.css')
 </head>
-
-<body>
-<div class="wrapper">
-    <!-- Main Sidebar -->
-    <nav id="sidebar" class="sidebar js-sidebar">
-        <div class="sidebar-content js-simplebar">
-            <a class="sidebar-brand" href="/">
-                <span class="align-middle">
-                    <img src="{{ asset("images/logo-dark.png") }}" alt="{{ config("app.name") }}" height="52"/>
-                </span>
-            </a>
-
-            <ul class="nav nav-pills flex-column mb-auto">
-                <li class="nav-heading">
-                    Pages
-                </li>
-
-                <li class="nav-item active">
-                    <a class="nav-link {{ request()->routeIs('dashboard') ? "active": "" }}" href="{{ route("dashboard") }}">
-                        <i class="align-middle" data-feather="sliders"></i> <span class="align-middle">{{ __("admin/sidebar.dashboard") }}</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link " href="{{ route("messages") }}">
-                        <i class="fa-regular fa-message align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.messages") }}</span> <span class="badge bg-primary rounded-5 ms-auto">3</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link " href="{{ route("company-profile") }}">
-                        <i class="fa-regular fa-building align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.company_profile") }}</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link " href="{{ route("job-applicants") }}">
-                        <i class="fa-solid fa-users-between-lines align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.all_applicants") }}</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link " href="{{ route("job-listing") }}">
-                        <i class="fa-regular fa-rectangle-list align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.job_listings") }}</span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link " href="">
-                        <i class="fa-solid fa-calendar-days align-middle"></i> <span class="align-middle">{{ __("admin/sidebar.my_schedule") }}</span>
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </nav>
-    <!-- Main Sidebar -->
-    <!-- Main content area -->
-    <div class="main">
-        <!-- Navbar for Dashboard --->
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <a class="sidebar-toggle js-sidebar-toggle">
-                <i class="fas fa-bars align-self-center"></i>
-            </a>
-            @if(Auth::user()->company)
-                <a href="" class="d-flex align-items-center gap-2 px-2 company-logo">
-                    <img src="{{ Auth::user()->company->company_logo_url ?? asset("images/logo-dark.png") }}" alt="" height="42" />
-                    <strong>{{ Auth::user()->company->company_name ?? config('app.name') }}</strong>
-                </a>
-            @endif
-            <div class="navbar-collapse collapse">
-                <ul class="navbar-nav navbar-align ms-auto mb-2 pe-2">
-                    @php($unread = Auth::user()->notifications)
-                    <li class="nav-item dropdown">
-                        <a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-bs-toggle="dropdown">
-                            <div class="position-relative">
-                                <i class="fa-regular fa-bell align-middle"></i>
-                                <span class="indicator">{{ Auth::user()->unreadNotifications->count() }}</span>
-                            </div>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="alertsDropdown">
-                            <div class="dropdown-menu-header">
-                                {{ Auth::user()->unreadNotifications->count() }} New Notifications
-                            </div>
-                            <div class="list-group">
-                                @foreach(Auth::user()->unreadNotifications as $notify)
-                                    <a href="{{ $notify->data['url'] }}" class="list-group-item">
-                                        <div class="row g-0 align-items-center">
-                                            <div class="col-2">
-                                                <i class="text-danger" data-feather="alert-circle"></i>
-                                            </div>
-                                            <div class="col-10">
-                                                <div class="text-dark">{{ $notify->data['title'] ?? '' }}</div>
-                                                <div class="text-muted small mt-1">{{ $notify->data['message'] }}</div>
-                                                <div class="text-muted small mt-1">{{ $notify->created_at->diffForHumans() }}</div>
-                                            </div>
-                                        </div>
-                                    </a>
-                                @endforeach
-                            </div>
-                            <div class="dropdown-menu-footer">
-                                <a href="#" class="text-muted">Show all notifications</a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown" data-bs-toggle="dropdown">
-                            <div class="position-relative">
-                                <i class="align-middle" data-feather="message-square"></i>
-                            </div>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-lg dropdown-menu-end py-0" aria-labelledby="messagesDropdown">
-                            <div class="dropdown-menu-header">
-                                <div class="position-relative">
-                                    4 New Messages
-                                </div>
-                            </div>
-                            <div class="list-group">
-                                <a href="#" class="list-group-item">
-                                    <div class="row g-0 align-items-center">
-                                        <div class="col-2">
-                                            <img src="https://picsum.photos/32/32?random=5" class="avatar img-fluid rounded-circle" alt="Vanessa Tucker">
-                                        </div>
-                                        <div class="col-10 ps-2">
-                                            <div class="text-dark">Vanessa Tucker</div>
-                                            <div class="text-muted small mt-1">Nam pretium turpis et arcu. Duis arcu tortor.</div>
-                                            <div class="text-muted small mt-1">15m ago</div>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <div class="row g-0 align-items-center">
-                                        <div class="col-2">
-                                            <img src="https://picsum.photos/32/32?random=2" class="avatar img-fluid rounded-circle" alt="William Harris">
-                                        </div>
-                                        <div class="col-10 ps-2">
-                                            <div class="text-dark">William Harris</div>
-                                            <div class="text-muted small mt-1">Curabitur ligula sapien euismod vitae.</div>
-                                            <div class="text-muted small mt-1">2h ago</div>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <div class="row g-0 align-items-center">
-                                        <div class="col-2">
-                                            <img src="https://picsum.photos/32/32?random=4" class="avatar img-fluid rounded-circle" alt="Christina Mason">
-                                        </div>
-                                        <div class="col-10 ps-2">
-                                            <div class="text-dark">Christina Mason</div>
-                                            <div class="text-muted small mt-1">Pellentesque auctor neque nec urna.</div>
-                                            <div class="text-muted small mt-1">4h ago</div>
-                                        </div>
-                                    </div>
-                                </a>
-                                <a href="#" class="list-group-item">
-                                    <div class="row g-0 align-items-center">
-                                        <div class="col-2">
-                                            <img src="https://picsum.photos/32/32?random=3" class="avatar img-fluid rounded-circle" alt="Sharon Lessman">
-                                        </div>
-                                        <div class="col-10 ps-2">
-                                            <div class="text-dark">Sharon Lessman</div>
-                                            <div class="text-muted small mt-1">Aenean tellus metus, bibendum sed, posuere ac, mattis non.</div>
-                                            <div class="text-muted small mt-1">5h ago</div>
-                                        </div>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="dropdown-menu-footer">
-                                <a href="#" class="text-muted">Show all messages</a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-bs-toggle="dropdown">
-                            <i class="align-middle" data-feather="settings"></i>
-                        </a>
-
-                        <a class="nav-link dropdown-toggle d-none d-sm-inline-block text-decoration-none" href="#" data-bs-toggle="dropdown">
-                            <img src="{{ __("https://picsum.photos/32/32?random=11")  }}" class="avatar img-fluid rounded me-1" alt="Charles Hall" /> <span class="text-dark">{{ Auth::user()->name }}</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="user"></i> Profile</a>
-                            <a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="pie-chart"></i> Analytics</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href=""><i class="align-middle me-1" data-feather="settings"></i> Settings & Privacy</a>
-                            <a class="dropdown-item" href="#"><i class="align-middle me-1" data-feather="help-circle"></i> Help Center</a>
-                            <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                {{ __('common/header.logout') }}
-                            </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </div>
-                    </li>
-                </ul>
-            </div>
+<body class="m-0 bg-slate-50 font-['Inter'] text-slate-950 antialiased">
+@php
+    $company = Auth::user()->company;
+    $unreadCount = Auth::user()->unreadNotifications->count();
+    $navItems = [
+        ['route' => 'dashboard', 'label' => __('admin/sidebar.dashboard'), 'icon' => '▦'],
+        ['route' => 'messages', 'label' => __('admin/sidebar.messages'), 'icon' => '◌'],
+        ['route' => 'company-profile', 'label' => __('admin/sidebar.company_profile'), 'icon' => '⌂'],
+        ['route' => 'job-applicants', 'label' => __('admin/sidebar.all_applicants'), 'icon' => '♙'],
+        ['route' => 'job-listing', 'label' => __('admin/sidebar.job_listings'), 'icon' => '□'],
+    ];
+@endphp
+<div class="min-h-screen lg:grid lg:grid-cols-[16rem_1fr]">
+    <aside class="hidden border-r border-slate-200 bg-white px-4 py-6 lg:block">
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-3 px-3 text-lg font-bold tracking-tight text-slate-950 no-underline"><img src="{{ asset('images/logo-dark.png') }}" alt="{{ config('app.name') }}" class="h-9 max-w-28 object-contain"><span>{{ config('app.name') }}</span></a>
+        <p class="mt-10 px-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">Workspace</p>
+        <nav class="mt-3 space-y-1" aria-label="Admin navigation">
+            @foreach($navItems as $item)
+                <a href="{{ route($item['route']) }}" @class(['flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium no-underline transition', 'bg-sky-600 text-white shadow-sm' => request()->routeIs($item['route']), 'text-slate-600 hover:bg-slate-100 hover:text-slate-950' => !request()->routeIs($item['route'])])><span class="w-4 text-center text-base" aria-hidden="true">{{ $item['icon'] }}</span>{{ $item['label'] }}@if($item['route'] === 'messages' && $unreadCount)<span class="ml-auto rounded-full bg-white/20 px-2 py-0.5 text-xs">{{ $unreadCount }}</span>@endif</a>
+            @endforeach
         </nav>
-        <!-- Navbar for Dashboard --->
-        <!-- Main content slot -->
-        <main class="p-3">
-            {{ $slot }}
-        </main>
-        <!-- Main content slot -->
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="container-fluid">
-                <div class="row text-muted">
-                    <div class="col-md-6 text-start">
-                        <p class="mb-0">
-                            <a class="text-muted" href="{{ config("app.url") }}" target="_blank"><strong>{{ config("app.name") }}</strong></a> - <a class="text-muted" href="{{ config("app.url") }}" target="_blank"><strong>{{ config("app.name") }}</strong></a>								&copy;
-                        </p>
-                    </div>
-                    <div class="col-md-6 text-end">
-                        <ul class="list-inline">
-                            <li class="list-inline-item">
-                                <a class="text-muted" href="https://adminkit.io/" target="_blank">Support</a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="text-muted" href="https://adminkit.io/" target="_blank">Help Center</a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="text-muted" href="https://adminkit.io/" target="_blank">Privacy</a>
-                            </li>
-                            <li class="list-inline-item">
-                                <a class="text-muted" href="https://adminkit.io/" target="_blank">Terms</a>
-                            </li>
-                        </ul>
-                    </div>
+        <div class="mt-10 rounded-xl bg-slate-50 p-4"><p class="m-0 text-xs font-medium text-slate-500">Signed in as</p><p class="mb-0 mt-1 truncate text-sm font-semibold text-slate-900">{{ Auth::user()->name }}</p></div>
+    </aside>
+    <div class="min-w-0">
+        <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+            <div class="mx-auto flex max-w-7xl items-center justify-between gap-4">
+                <a href="{{ route('dashboard') }}" class="flex items-center gap-2 text-sm font-semibold text-slate-900 no-underline lg:hidden"><img src="{{ asset('images/logo-dark.png') }}" alt="" class="h-8 w-8 object-contain">{{ config('app.name') }}</a>
+                <div class="hidden items-center gap-3 lg:flex"><img src="{{ $company?->company_logo_url ?? asset('images/logo-dark.png') }}" alt="" class="h-8 w-8 rounded-md object-cover"><span class="text-sm font-medium text-slate-700">{{ $company?->company_name ?? config('app.name') }}</span></div>
+                <div class="flex items-center gap-3">
+                    <details class="relative"><summary class="flex h-9 min-w-9 cursor-pointer list-none items-center justify-center rounded-md border border-slate-200 bg-white px-2 text-sm text-slate-600 hover:bg-slate-50">◌@if($unreadCount)<span class="ml-1 text-xs font-bold text-sky-600">{{ $unreadCount }}</span>@endif</summary><div class="absolute right-0 mt-2 w-80 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"><p class="m-0 border-b border-slate-100 px-4 py-3 text-sm font-semibold">Notifications</p>@forelse(Auth::user()->unreadNotifications->take(4) as $notification)<a href="{{ $notification->data['url'] ?? '#' }}" class="block border-b border-slate-100 px-4 py-3 text-sm no-underline hover:bg-slate-50"><p class="m-0 font-medium text-slate-800">{{ $notification->data['title'] ?? 'Notification' }}</p><p class="mb-0 mt-1 text-xs text-slate-500">{{ $notification->data['message'] ?? '' }}</p></a>@empty<p class="p-4 text-sm text-slate-500">You are all caught up.</p>@endforelse</div></details>
+                    <details class="relative"><summary class="flex cursor-pointer list-none items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-slate-50"><span class="flex h-8 w-8 items-center justify-center rounded-full bg-sky-100 font-semibold text-sky-700">{{ str(Auth::user()->name)->substr(0, 1)->upper() }}</span><span class="hidden font-medium text-slate-700 sm:block">{{ Auth::user()->name }}</span></summary><div class="absolute right-0 mt-2 w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-lg"><form action="{{ route('logout') }}" method="POST">@csrf<button class="w-full rounded-lg px-3 py-2 text-left text-sm text-slate-600 hover:bg-slate-100">{{ __('common/header.logout') }}</button></form></div></details>
                 </div>
             </div>
-        </footer>
-        <!-- Footer -->
+            <details class="mx-auto mt-3 max-w-7xl lg:hidden"><summary class="cursor-pointer text-sm font-medium text-slate-600">Menu</summary><nav class="mt-2 grid grid-cols-2 gap-1">@foreach($navItems as $item)<a href="{{ route($item['route']) }}" @class(['rounded-md px-3 py-2 text-sm no-underline', 'bg-sky-600 text-white' => request()->routeIs($item['route']), 'text-slate-600 hover:bg-slate-100' => !request()->routeIs($item['route'])])>{{ $item['label'] }}</a>@endforeach</nav></details>
+        </header>
+        <main class="mx-auto w-full max-w-7xl px-4 py-7 sm:px-6 lg:px-8">{{ $slot }}</main>
+        <footer class="border-t border-slate-200 px-4 py-6 text-center text-sm text-slate-500 sm:px-6 lg:px-8">© {{ now()->year }} {{ config('app.name') }}</footer>
     </div>
-    <!-- Main content area -->
 </div>
-
-<script src="{{ asset("static/js/app.js") }}"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="{{ asset('static/js/app.js') }}"></script><script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 @stack('scripts')
 </body>
-
 </html>

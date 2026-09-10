@@ -23,4 +23,5 @@ return array(
     'close' => 'Close',
     'sample_data_title' => 'Sample data',
     'modal_title' => 'Modal title',
+    'interview_status'
 );

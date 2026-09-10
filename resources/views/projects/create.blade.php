@@ -3,21 +3,15 @@
 @section('title', 'Projects')
 
 @section('content')
-    <div class="container-fluid container-lg" id="dashboard">
+    <div class="container" id="dashboard">
         <div class="row">
             <div class="col-md-12 text-center">
                 <h1 class="page-heading">{{ __('projects/form.project_registration') }}</h1>
             </div>
-            <div class="col-md-12 py-3">
-                <!-- Progress Bar -->
-                <div class="progress mb-4">
-                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
-                </div>
-            </div>
         </div>
         <div class="row justify-content-center">
             <div class="col-md-12">
-                <form class="row justify-content-center" id="progressForm" action="{{ route("project.store") }}" method="post">
+                <form class="row justify-content-center" action="{{ route("project.store") }}" method="post">
                     @csrf
                     <div class="col-md-6">
                         <div class="col-md-12 mb-4">
@@ -32,9 +26,9 @@
                                     @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="targetTextarea1" class="form-label">{{ __('projects/form.project_description') }}</label>
+                                    <label for="projectDescription" class="form-label">{{ __('projects/form.project_description') }}</label>
                                     <textarea class="form-control tinyEditor @error('project_description') is-invalid @enderror"
-                                              id="targetTextarea1"
+                                              id="projectDescription"
                                               name="project_description"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! old("project_description") ?? '' !!}</textarea>
@@ -46,9 +40,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
-                                    <label for="targetTextarea2" class="form-label">{{ __('projects/form.project_requirements') }}</label>
+                                    <label for="projectRequirement" class="form-label">{{ __('projects/form.project_requirements') }}</label>
                                     <textarea class="form-control tinyEditor @error('personnel_requirement') is-invalid @enderror"
-                                              id="targetTextarea2"
+                                              id="projectRequirement"
                                               name="personnel_requirement"
                                               rows="3"
                                               placeholder="{{ __('talents/registration.write_bio') }}">{!! old("personnel_requirement") ?? '' !!}</textarea>
@@ -159,7 +153,7 @@
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="minBudget">{{ __("common/sidebar.min_salary") }}</label>
-                                            <input type="number" class="form-control @error('minimum_price') is-invalid @enderror"
+                                            <input type="text" class="form-control @error('minimum_price') is-invalid @enderror"
                                                    name="minimum_price"
                                                    id="expectedMinSalary"
                                                    value="{{ old("minimum_price") ?? '' }}"
@@ -169,7 +163,7 @@
                                         </div>
                                         <div class="col-md-6 mb-3">
                                             <label class="form-label" for="maxBudget">{{ __("common/sidebar.max_salary") }}</label>
-                                            <input type="number" class="form-control @error('maximum_price') is-invalid @enderror"
+                                            <input type="text" class="form-control @error('maximum_price') is-invalid @enderror"
                                                    name="maximum_price"
                                                    id="expectedMaxSalary"
                                                    value="{{ old("maximum_price") ?? '' }}"
@@ -180,34 +174,20 @@
                                     </div>
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label" for="maxBudget">{{ __("projects/form.locations") }}</label>
-                                    </div>
-                                    <div class="mb-3 col-md-12">
-                                        <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
-                                            <option value="">{{ __("talents/registration.choose") }}</option>
-                                            @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                                <option value="{{ $location->id }}">{{ $location->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-{{--                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)--}}
-{{--                                        <div class="mb-3 col-md-4">--}}
-{{--                                            <div class="form-check form-check-inline">--}}
-{{--                                                <input class="form-check-input" type="checkbox"--}}
-{{--                                                       name="locations[]"--}}
-{{--                                                       id="{{ $location->slug."_".$location->id }}"--}}
-{{--                                                       value="{{ $location->id }}">--}}
-{{--                                                <label class="form-check-label"--}}
-{{--                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    @endforeach--}}
+                                    @foreach(\App\Models\Location::orderBy('title')->get() as $location)
+                                        <div class="mb-3 col-md-4">
+                                            <div class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="locations[]"
+                                                       id="{{ $location->slug."_".$location->id }}"
+                                                       value="{{ $location->id }}">
+                                                <label class="form-check-label"
+                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
                                 <div class="row mb-3">
-                                    <div class="col-md-12">
-                                        <label class="form-label" for="maxBudget">{{ __("projects/form.work_mode") }}</label>
-                                    </div>
                                     @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
                                         <div class="mb-3 col-md-6">
                                             <div class="form-check form-check-inline">
@@ -224,12 +204,12 @@
 {{--                                <div class="mb-3">--}}
 {{--                                    <label for="preferredLocation"--}}
 {{--                                           class="form-label">{{ __('talents/registration.preferred_location') }}</label>--}}
-{{--                                    <input type="text" class="form-control @errors('preferred_location') is-invalid @enderror"--}}
+{{--                                    <input type="text" class="form-control @error('preferred_location') is-invalid @enderror"--}}
 {{--                                           name="preferred_location" id="preferredLocation"--}}
 {{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}"--}}
 {{--                                           value="{{ old("preferred_location") ?? '' }}"--}}
 {{--                                           >--}}
-{{--                                    @errors('preferred_location')--}}
+{{--                                    @error('preferred_location')--}}
 {{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
 {{--                                    @enderror--}}
 {{--                                </div>--}}
@@ -237,11 +217,11 @@
 {{--                                    <label for="otherDesiredLocation"--}}
 {{--                                           class="form-label">{{ __('talents/registration.other_desired_location') }}</label>--}}
 {{--                                    <input type="text"--}}
-{{--                                           class="form-control @errors('other_desired_location') is-invalid @enderror"--}}
+{{--                                           class="form-control @error('other_desired_location') is-invalid @enderror"--}}
 {{--                                           name="other_desired_location" id="otherDesiredLocation"--}}
 {{--                                           value="{{ old("other_desired_location") ?? "" }}"--}}
 {{--                                           placeholder="{{ __('talents/registration.location_placeholder') }}">--}}
-{{--                                    @errors('other_desired_location')--}}
+{{--                                    @error('other_desired_location')--}}
 {{--                                    <div class="invalid-feedback d-block">{{ $message }}</div>--}}
 {{--                                    @enderror--}}
 {{--                                </div>--}}
@@ -286,20 +266,6 @@
                                                 <input class="form-check-input" type="checkbox" name="eligibility[]" value="{{$eligible->value}}" id="category_{{$eligible->value}}">
                                                 <label class="form-check-label" for="category_{{$eligible->value}}">
                                                     {{ __("projects/form.{$eligible->name}") }}
-                                                </label>
-                                                @error('eligibility') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-12 mb-3">
-                                        <h4>{{ __("projects/form.scoring") }}</h4>
-                                        @foreach(\App\Enums\ScoringEnum::cases() as $score)
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox" name="scoring[]" value="{{$score->value}}" id="category_{{$score->value}}">
-                                                <label class="form-check-label" for="category_{{$score->value}}">
-                                                    {{ __("projects/form.score_{$score->name}") }}
                                                 </label>
                                                 @error('eligibility') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                             </div>
@@ -374,58 +340,53 @@
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <h5>{{ __("projects/form.number_of_interview") }}</h5>
-                                    @foreach(\App\Enums\InterviewEnum::cases() as $i)
+                                    @for($i=1; $i <=4; $i++)
                                         <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i->value}}" id="interview_{{$i->value}}">
-                                            <label class="form-check-label" for="interview_{{$i->value}}">
-                                                {{ __("projects/form.interview_{$i->value}") }}
+                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i}}" id="interview_{{$i}}">
+                                            <label class="form-check-label" for="interview_{{$i}}">
+                                                {{ __("projects/form.interview_{$i}") }}
                                             </label>
                                             @error('number_of_interviewers') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
-                                    @endforeach
+                                    @endfor
                                 </div>
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
-                                            <select class="form-select @error('commercial_flow') is-invalid @enderror"
-                                                    name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
-                                                <option value="">{{ __("talents/registration.choose") }}</option>
-                                                @foreach(\App\Enums\CommercialFlow::cases() as $case)
-                                                    <option value="{{ $case->value }}">{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
-                                                @endforeach
-                                            </select>
-                                            @error('commercial_flow')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <h5>{{ __("talents/registration.language") }}</h5>
-                                        @foreach(\App\Enums\LangEnum::cases() as $lang)
-                                            <div class="form-check form-check-inline">
-                                                <input class="form-check-input" type="radio" name="languages" value="{{$lang->value}}" id="language_{{$lang->value}}">
-                                                <label class="form-check-label" for="language_{{$lang->value}}">
-                                                    {{ __("common/sidebar.{$lang->name}") ?? __("projects/form.interview_{$lang->value}") }}
-                                                </label>
-                                                @error('languages') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                            </div>
+                                <div class="mb-3">
+                                    <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
+                                    <select class="form-select @error('commercial_flow') is-invalid @enderror"
+                                            name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
+                                        <option value="">{{ __("talents/registration.choose") }}</option>
+                                        @foreach(\App\Enums\CommercialFlow::cases() as $case)
+                                            <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
                                         @endforeach
-                                    </div>
-                                    <div class="col-md-12">
-                                        <h5>{{ __("projects/form.experience") }}</h5>
-                                        <div class="form-group">
-                                            <label class="form-label" for="experience">
-                                                {{ __("projects/form.experience_x") }}
+                                    </select>
+                                    @error('commercial_flow')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="col-md-12 mb-3">
+                                    <h5>{{ __("talents/registration.language") }}</h5>
+                                    @foreach(\App\Enums\LangEnum::cases() as $lang)
+                                        <div class="form-check form-check-inline">
+                                            <input class="form-check-input" type="radio" name="languages" value="{{$lang->value}}" id="language_{{$lang->value}}">
+                                            <label class="form-check-label" for="language_{{$lang->value}}">
+                                                {{ __("common/sidebar.{$lang->name}") ?? __("projects/form.interview_{$lang->value}") }}
                                             </label>
-                                            <textarea class="form-control" name="experience" id="experience">{{ old('experience' ?? '') }}</textarea>
-                                            @error('experience') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            @error('languages') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
-                                    </div>
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
                     </div>
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <div class="col-md-12 mb-3 text-center">
                         @foreach($errors as $error)
                             <p>{{ $message }}</p>
@@ -437,23 +398,70 @@
 {{--            <livewire:projects.new-project />--}}
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="d-flex justify-content-center align-items-center w-100">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
+                </div>
+                <div class="modal-body">
+                    <div class="cover-letter ">
+                        <h4 id="modalTitle">{{ __("Cover Letter") }}</h4>
+                        <div class="cover-letter-description border border-secondary-subtle p-4"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Understood</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+        <!---- Summer note libraries -->
+        <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
+        <script>
+            $('.tinyEditor').summernote({
+                placeholder: "{{ __("talents/registration.write_bio") }}",
+                tabsize: 2,
+                height: 120,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link', 'picture', 'video']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
+            });
+        </script>
+        <!---- Summer note libraries -->
+        <!-- Add Axios via CDN (optional if not already included) -->
+        <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <!-- Modal Popup call -->
+        <script>
+            function openDynamicModal(id) {
+                // Make an Axios request to fetch data for the modal
+                axios.get('/sample/' + id)
+                    .then(response => {
+                        const data = response.data;
+                        console.log(data);
+                        // Set the modal title and content dynamically
+                        document.getElementById('staticBackdropLabel').textContent = data.title;
+                        document.getElementById('modalTitle').textContent = data.title;
+                        document.querySelector('.cover-letter-description').innerHTML = data.content;
+                    })
+                    .catch(error => {
+                        console.error('There was an error fetching the data!', error);
+                        alert('Failed to fetch data.');
+                    });
+            }
+        </script>
+        <!-- Modal Popup call -->
+    @endpush
 @endsection
-
-@section('modals', true)
-
-@section('select2', true)
-
-@push('scripts')
-    <!-- Modal Popup call -->
-    <script>
-        $( '#multiple-select-field' ).select2( {
-            theme: "bootstrap-5",
-            width: $( this ).data( 'width' ) ? $( this ).data( 'width' ) : $( this ).hasClass( 'w-100' ) ? '100%' : 'style',
-            placeholder: $( this ).data( 'placeholder' ),
-            closeOnSelect: false,
-        } );
-    </script>
-    <!-- Modal Popup call -->
-    @vite('resources/js/main.js')
-@endpush
-

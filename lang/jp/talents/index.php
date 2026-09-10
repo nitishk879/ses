@@ -49,8 +49,8 @@ return array(
     // JD/candidate match scoring.
     // English for now — awaiting sign-off before these are translated, so the
     // wording is settled once rather than translated twice.
-    "match_against_project" => "Show match score for project",
-    "no_project_selected" => "— no project selected —",
-    "ranked_by_match" => "Ranked by match score",
-    "not_scored_yet" => "Not scored yet",
+    "match_against_project" => "プロジェクトの適合度スコアを表示",
+    "no_project_selected" => "— プロジェクト未選択 —",
+    "ranked_by_match" => "適合度スコア順",
+    "not_scored_yet" => "未スコア"
 );

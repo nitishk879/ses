@@ -2,6 +2,11 @@
 
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\InterviewAnswerController;
+use App\Http\Controllers\InterviewAttemptController;
+use App\Http\Controllers\InterviewController;
+use App\Http\Controllers\InterviewEvaluationController;
+use App\Http\Controllers\InterviewQuestionController;
 use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
@@ -64,6 +69,35 @@ Route::post('talent-registration', [TalentRegistrationController::class, 'store'
 Route::get('members-registration', [MemberRegistration::class, 'create'])->name('members.registration');
 Route::post('members-registration', [MemberRegistration::class, 'store']);
 Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
+
+
+// interviews:
+Route::prefix('interviews/{interview}/attempts')->middleware(['auth', 'role:admin,user'])->group(function () {
+        Route::apiResource('interviews', InterviewController::class);
+        Route::apiResource('interviews.attempts', InterviewAttemptController::class);
+
+        Route::get('/', [InterviewAttemptController::class, 'index']);
+        Route::post('/', [InterviewAttemptController::class, 'store']);
+        Route::get('/{attempt}', [InterviewAttemptController::class, 'show']);
+        Route::post('/{attempt}/start', [InterviewAttemptController::class, 'start']);
+        Route::post('/{attempt}/begin', [InterviewAttemptController::class, 'begin',]);
+        Route::post('/{attempt}/complete', [InterviewAttemptController::class, 'complete',]);
+        Route::post('/{attempt}/fail', [InterviewAttemptController::class, 'fail']);
+        Route::post('/{attempt}/no-answer', [InterviewAttemptController::class, 'noAnswer']);
+        Route::post('/{attempt}/cancel', [InterviewAttemptController::class, 'cancel']);
+
+        Route::get('/', [InterviewQuestionController::class, 'index']);
+        Route::post('/', [InterviewQuestionController::class, 'store']);
+        Route::get('/{question}', [InterviewQuestionController::class, 'show']);
+        Route::delete('/{question}', [InterviewQuestionController::class, 'destroy']);
+
+        Route::get('/', [InterviewAnswerController::class, 'show']);
+        Route::post('/', [InterviewAnswerController::class, 'store']);
+        Route::put('/', [InterviewAnswerController::class, 'update']);
+
+        Route::get('/interview-attempts/{interviewAttempt}/evaluation', [InterviewEvaluationController::class, 'show'])->name('interview-evaluations.show');
+        Route::post('/interview-attempts/{interviewAttempt}/evaluation', [InterviewEvaluationController::class, 'store'])->name('interview-evaluations.store');
+    });
 
 
 /**

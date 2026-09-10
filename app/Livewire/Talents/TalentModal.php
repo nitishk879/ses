@@ -35,7 +35,7 @@ class TalentModal extends Component
      */
     public function download(): StreamedResponse
     {
-        return Storage::disk('public')->download("talents/{$this->talent->resume}");
+        return Storage::disk('public')->download("talents/{$this?->talent?->resume}");
     }
 
     public function render()

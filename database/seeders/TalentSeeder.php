@@ -18,7 +18,10 @@ class TalentSeeder extends Seeder
      */
     public function run(): void
     {
-        Talent::truncate();
+        // MySQL cannot truncate a table that is referenced by a foreign key.
+        // A regular delete lets the database cascade to ai_resume_parses and
+        // ai_matches, both of which reference talent.id.
+        Talent::query()->delete();
         $datafile = File::get(public_path('/dataset/talent.json'));
         $talents = json_decode($datafile);
 

@@ -10,7 +10,7 @@ return array(
     'register' => 'Register',
     'call_now' => 'Call now',
     'pricing' => 'Pricing',
-    'save_jobs' => 'Save projects', //Nov 8th, 2024
+    'save_jobs' => 'Save jobs',
     'faq' => 'FAQ',
     'privacy' => 'Privacy Policies',
     'terms' => 'Terms & Conditions',
@@ -18,16 +18,16 @@ return array(
     'customer_support' => 'Customer Support',
     'copyright' => 'Copyright',
     'all_rights_reserved' => 'All Rights Reserved',
-    'browse_jobs' => 'Browse Projects', //Nov 8th, 2024
-    'browse_employers' => 'Browse Projects',
+    'browse_jobs' => 'Browse Jobs',
+    'browse_employers' => 'Browse Employers',
     'employers' => 'Employers',
-    'browse_employees' => 'Browse Talents',
-    'candidates' => 'Profiles', //Nov 8th, 2024
-    'candidate_dashboard' => 'Profile Dashboard', //Nov 8th, 2024
-    'post_a_job' => 'Post a Project', //Nov 8th, 2024
-    'browse_candidates' => 'Browse Talents', //Nov 8th, 2024
-    'employer_dashboard' => 'Projects Dashboard',
+    'browse_employees' => 'Browse Employees',
+    'candidates' => 'Candidates',
+    'candidate_dashboard' => 'Candidate Dashboard',
+    'post_a_job' => 'Post a Job',
+    'browse_candidates' => 'Browse Candidates',
+    'employer_dashboard' => 'Employer Dashboard',
     'applications' => 'Applications',
-    'address' => '〒102-0085 Chiyoda-ku, Tokyo ,Rokubancho 15-2, 2nd floor',
-    'phone' => '03-6826-0312'
+    'address' => '6391 Elgin St. Celina, Delaware 10299, New York, United States of America',
+    'phone' => '(319) 555-0115'
 );

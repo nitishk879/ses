@@ -3,13 +3,11 @@
 namespace App\Models;
 
 use App\Casts\LanguagesCast;
-use App\Casts\ScoreCast;
 use App\Enums\CommercialFlow;
 use App\Enums\ContractClassificationEnum;
 use App\Enums\InterviewEnum;
 use App\Enums\LangEnum;
 use App\Enums\ProjectStatusEnum;
-use App\Enums\ScoringEnum;
 use App\Enums\TradeClassification;
 use App\Enums\WorkLocationEnum;
 use App\Http\Traits\FormatNumberTrait;
@@ -50,11 +48,11 @@ class Project extends Model
         "project_finalized",
         "trade_classification",
         "contract_classification",
-        "scoring",
         "deadline",
         "languages",
         "experience",
         "affiliation",
+        "scoring",
         "number_of_application",
         "number_of_interviewers",
         "commercial_flow",
@@ -81,14 +79,14 @@ class Project extends Model
             'contract_start_date' => 'datetime',
             'contract_end_date' => 'datetime',
             'affiliation' => 'array',
+            'scoring' => 'array',
             'commercial_flow' => CommercialFlow::class,
             'number_of_interviewers' => InterviewEnum::class,
             'trade_classification' => TradeClassification::class,
             'contract_classification' => ContractClassificationEnum::class,
-            'languages' => 'array', //LanguagesCast::class,
+            'languages' => LanguagesCast::class,
             'work_location_prefer' => 'array',
-            'status' => ProjectStatusEnum::class,
-            'scoring' => 'array', //ScoringEnum::class,
+            'project_status' => ProjectStatusEnum::class,
         ];
     }
 
@@ -108,26 +106,6 @@ class Project extends Model
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    /**
-     * The structured form of this project's JD.
-     *
-     * @return HasOne
-     */
-    public function aiJdParse(): HasOne
-    {
-        return $this->hasOne(AiJdParse::class);
-    }
-
-    /**
-     * Candidate match scores for this project.
-     *
-     * @return HasMany
-     */
-    public function aiMatches(): HasMany
-    {
-        return $this->hasMany(AiMatch::class);
     }
 
     /**
@@ -159,17 +137,6 @@ class Project extends Model
     }
 
     /**
-     * Save project for later for some actions
-     *
-     * @returns
-    */
-
-    public function saves()
-    {
-        return $this->belongsToMany(User::class, 'project_save')->withTimestamps();
-    }
-
-    /**
      * Let's get all talents related to project
      *
      * @return BelongsToMany
@@ -179,16 +146,6 @@ class Project extends Model
         return $this->belongsToMany(Talent::class)
             ->withPivot('status', 'interview_count', 'remarks')
             ->withTimestamps();
-    }
-
-    /**
-     * Let's get all talent's interview Schedule
-     *
-     * @return BelongsToMany
-    */
-    public function interviewSchedules(): BelongsToMany
-    {
-        return $this->belongsToMany(Talent::class, 'interview_schedules', 'talent_id')->withPivot('interview_data')->withTimestamps();
     }
 
     /**
@@ -249,43 +206,6 @@ class Project extends Model
      *
      * @return Attribute
     */
-    public function projectStatus(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $this->status ? ProjectStatusEnum::toName($this->status->value): ProjectStatusEnum::open,
-        );
-    }
-
-    /**
-     * Let's set progress bar color as per status
-     *
-     * @return Attribute
-     */
-    public function progress(): Attribute
-    {
-        return Attribute::make(
-            get: fn(mixed $value, array $attributes) => $this->status ? ProjectStatusEnum::color($this->status->value): 'primary'
-        );
-    }
-
-    /**
-     * Let's set progress in int as per status
-     *
-     * @return Attribute
-     */
-    public function percentage(): Attribute
-    {
-        return Attribute::make(
-            get: fn(mixed $value, array $attributes) => $this->status ? ProjectStatusEnum::percentage($this->status->value): 0
-        );
-    }
-
-    /**
-     * Let's make project id based on
-     * company id, company Owner id and project id
-     *
-     * @return Attribute
-    */
     public function projectId(): Attribute
     {
         return Attribute::make(
@@ -320,7 +240,7 @@ class Project extends Model
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
-                return json_encode($value); //json_encode($value);
+                return $value; //json_encode($value);
             }
         );
     }
@@ -334,8 +254,10 @@ class Project extends Model
     public function workLocation(): Attribute
     {
         return Attribute::make(
-            get: function () {
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $this->work_location_prefer);
+            get: function ($value) {
+                // Decode the JSON and map to enum names
+                $decoded = json_decode($value, true);
+                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
@@ -344,44 +266,27 @@ class Project extends Model
         );
     }
 
-    /**
-     * Let's get work location from array
-     *
-     * @return Attribute
-     */
-    public function work_location_prefer(): Attribute
-    {
-        return Attribute::make(
-            get: function ($value) {
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
-            },
-            set: function ($value){
-                return json_encode($value);
-            }
-        );
-    }
 
     /**
      * Let's fetch salary range min-max
      *
      * @return Attribute
      */
-    public function workLocationPreferred(): Attribute
-    {
-        return Attribute::make(
-            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
-        );
-    }
+//    public function workLocationPreferred(): Attribute
+//    {
+//        return Attribute::make(
+//            get: fn (mixed $value) => $this->work_location_prefer ? WorkLocationEnum::toName($this->work_location_prefer) : '',
+//        );
+//    }
     /**
      * Let's fetch salary range min-max
      *
      * @return Attribute
     */
-    public function commercialFlow(): Attribute
+    public function projectStatus(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value) => $value ? CommercialFlow::toName($value) : '',
+            get: fn (mixed $value) => $this->commercial_flow ? $this->commercial_flow->name : '',
         );
     }
 
@@ -407,5 +312,14 @@ class Project extends Model
         return Attribute::make(
             get: fn (mixed $value) => $this->contract_classification ? $this->contract_classification->value : '',
         );
+    }
+
+    /**
+     * A project can have multiple interviews
+     * @return Project|HasMany
+     */
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class);
     }
 }

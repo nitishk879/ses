@@ -9,13 +9,12 @@ class isEmployerCast implements CastsAttributes
 {
     /**
      * Cast the given value.
-     * User should be either projects or has a user role
      *
      * @param  array<string, mixed>  $attributes
      */
     public function get(Model $model, string $key, mixed $value, array $attributes): bool
     {
-        return $model?->company?->projects->count()  >=1 || $model->hasRole('user');
+        return $model->company->talents->count()  >=1;
     }
 
     /**

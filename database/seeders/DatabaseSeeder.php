@@ -85,6 +85,14 @@ class DatabaseSeeder extends Seeder
             ProjectSeeder::class,
             LocationSeeder::class,
             TalentSeeder::class,
+
+            InterviewSeeder::class,
+            InterviewAttemptSeeder::class,
+            InterviewSeeder::class,
+            InterviewAttemptSeeder::class,
+            InterviewQuestionSeeder::class,
+            InterviewAnswerSeeder::class,
+            InterviewEvaluationSeeder::class
         ]);
     }
 }

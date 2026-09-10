@@ -71,7 +71,7 @@
                             <form action="{{ route('project.save-for-later', $project) }}" method="post" id="save-for-later" class="d-inline">
                                 @csrf
                                 <input type="hidden" name="project_id" value="{{ $project->id }}">
-                                <button type="submit" class="btn btn-sm btn-secondary" @if($project->saves->contains($project->id)) disabled @endif>{{ __("common/index.apply_later") }}</button>
+                                <button type="submit" class="btn btn-sm btn-secondary" @if($project?->saves?->contains($project->id)) disabled @endif>{{ __("common/index.apply_later") }}</button>
                             </form>
                         </div>
                     </div>

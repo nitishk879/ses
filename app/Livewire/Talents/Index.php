@@ -9,7 +9,9 @@ use App\Models\Talent;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Application;
+use LaravelIdea\Helper\App\Models\_IH_Project_C;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -295,8 +297,10 @@ class Index extends Component
      *
      * Scoped to the signed-in user's company so one employer cannot rank
      * candidates against another's requirement.
+     *
+     * @return Project[]|Collection|\Illuminate\Support\Collection|_IH_Project_C
      */
-    private function matchableProjects()
+    private function matchableProjects(): Collection|array|\Illuminate\Support\Collection|_IH_Project_C
     {
         $companyId = auth()->user()?->company?->id;
 

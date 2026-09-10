@@ -1,0 +1,3 @@
+/* Utility-only build: legacy Bootstrap pages keep their existing reset. */
+@tailwind components;
+@tailwind utilities;

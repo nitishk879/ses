@@ -317,4 +317,13 @@ class Talent extends Model
     {
         return $this->morphToMany(User::class, 'favourite_talent');
     }
+
+    /**
+     * Talent can has many interviews
+     * @return Talent|HasMany
+     */
+    public function interviews()
+    {
+        return $this->hasMany(Interview::class);
+    }
 }

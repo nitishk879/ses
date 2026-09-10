@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Contracts\InterviewEvaluationProvider;
 use App\Events\SavedProjectEvent;
 use App\Events\SkillMatch;
 use App\Events\TalentInvitationEvent;
@@ -14,6 +15,7 @@ use App\Models\Talent;
 use App\Policies\CompanyPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\TalentPolicy;
+use App\Services\Ai\MockInterviewEvaluationProvider;
 use Event;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -26,7 +28,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(
+            InterviewEvaluationProvider::class,
+            MockInterviewEvaluationProvider::class
+        );
     }
 
     /**
