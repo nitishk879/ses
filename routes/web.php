@@ -71,33 +71,74 @@ Route::post('members-registration', [MemberRegistration::class, 'store']);
 Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show');
 
 
-// interviews:
-Route::prefix('interviews/{interview}/attempts')->middleware(['auth', 'role:admin,user'])->group(function () {
-        Route::apiResource('interviews', InterviewController::class);
-        Route::apiResource('interviews.attempts', InterviewAttemptController::class);
+/*
+ * Interviews.
+ *
+ * Every route below used to live inside a `prefix('interviews/{interview}/attempts')`
+ * group that also declared `apiResource('interviews', ...)`, producing the URI
+ * `interviews/{interview}/attempts/interviews/{interview}` — the same parameter
+ * name twice. Symfony compiles routes lazily during matching, so that single
+ * malformed pattern threw a LogicException out of the whole matching pass and
+ * took six unrelated pages down with it (/projects, /dashboard, /job-listing,
+ * /job-applicants, /company-profile, /messages, /language/{locale}).
+ *
+ * The second defect was quieter: `GET /`, `POST /` and `PUT /` were each
+ * registered three times against the same URI, so last-registration-wins left
+ * the attempt and question collections unreachable behind the answer handlers.
+ *
+ * Hence the shape here: resources are declared once at their own depth, and
+ * every collection gets its own path segment. `routes:list` is now a faithful
+ * description of what is reachable.
+ */
+Route::middleware(['auth', 'role:admin,user'])->group(function () {
+    Route::apiResource('interviews', InterviewController::class);
+    Route::apiResource('interviews.attempts', InterviewAttemptController::class)
+        ->only(['index', 'store', 'show', 'destroy']);
 
-        Route::get('/', [InterviewAttemptController::class, 'index']);
-        Route::post('/', [InterviewAttemptController::class, 'store']);
-        Route::get('/{attempt}', [InterviewAttemptController::class, 'show']);
-        Route::post('/{attempt}/start', [InterviewAttemptController::class, 'start']);
-        Route::post('/{attempt}/begin', [InterviewAttemptController::class, 'begin',]);
-        Route::post('/{attempt}/complete', [InterviewAttemptController::class, 'complete',]);
-        Route::post('/{attempt}/fail', [InterviewAttemptController::class, 'fail']);
-        Route::post('/{attempt}/no-answer', [InterviewAttemptController::class, 'noAnswer']);
-        Route::post('/{attempt}/cancel', [InterviewAttemptController::class, 'cancel']);
+    Route::prefix('interviews/{interview}/attempts/{attempt}')->group(function () {
+        /*
+         * Lifecycle transitions. POST rather than PATCH: each of these is an
+         * event that happened to the call, not an edit to the row, and the
+         * service refuses an out-of-order transition.
+         */
+        Route::post('start', [InterviewAttemptController::class, 'start'])
+            ->name('interview-attempts.start');
+        Route::post('begin', [InterviewAttemptController::class, 'begin'])
+            ->name('interview-attempts.begin');
+        Route::post('complete', [InterviewAttemptController::class, 'complete'])
+            ->name('interview-attempts.complete');
+        Route::post('fail', [InterviewAttemptController::class, 'fail'])
+            ->name('interview-attempts.fail');
+        Route::post('no-answer', [InterviewAttemptController::class, 'noAnswer'])
+            ->name('interview-attempts.no-answer');
+        Route::post('cancel', [InterviewAttemptController::class, 'cancel'])
+            ->name('interview-attempts.cancel');
 
-        Route::get('/', [InterviewQuestionController::class, 'index']);
-        Route::post('/', [InterviewQuestionController::class, 'store']);
-        Route::get('/{question}', [InterviewQuestionController::class, 'show']);
-        Route::delete('/{question}', [InterviewQuestionController::class, 'destroy']);
+        // Questions belong to an attempt.
+        Route::get('questions', [InterviewQuestionController::class, 'index'])
+            ->name('interview-questions.index');
+        Route::post('questions', [InterviewQuestionController::class, 'store'])
+            ->name('interview-questions.store');
+        Route::get('questions/{question}', [InterviewQuestionController::class, 'show'])
+            ->name('interview-questions.show');
+        Route::delete('questions/{question}', [InterviewQuestionController::class, 'destroy'])
+            ->name('interview-questions.destroy');
 
-        Route::get('/', [InterviewAnswerController::class, 'show']);
-        Route::post('/', [InterviewAnswerController::class, 'store']);
-        Route::put('/', [InterviewAnswerController::class, 'update']);
+        // One answer per question, so it hangs off the question rather than
+        // sharing a URI with the question collection.
+        Route::get('questions/{question}/answer', [InterviewAnswerController::class, 'show'])
+            ->name('interview-answers.show');
+        Route::post('questions/{question}/answer', [InterviewAnswerController::class, 'store'])
+            ->name('interview-answers.store');
+        Route::put('questions/{question}/answer', [InterviewAnswerController::class, 'update'])
+            ->name('interview-answers.update');
 
-        Route::get('/interview-attempts/{interviewAttempt}/evaluation', [InterviewEvaluationController::class, 'show'])->name('interview-evaluations.show');
-        Route::post('/interview-attempts/{interviewAttempt}/evaluation', [InterviewEvaluationController::class, 'store'])->name('interview-evaluations.store');
+        Route::get('evaluation', [InterviewEvaluationController::class, 'show'])
+            ->name('interview-evaluations.show');
+        Route::post('evaluation', [InterviewEvaluationController::class, 'store'])
+            ->name('interview-evaluations.store');
     });
+});
 
 
 /**

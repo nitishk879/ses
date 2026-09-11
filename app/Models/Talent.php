@@ -13,6 +13,7 @@ use App\Enums\TalentCharEnum;
 use App\Enums\WorkLocationEnum;
 use App\Http\Traits\FormatNumberTrait;
 use App\Http\Traits\HasTalentDocumentTrait;
+use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Casts\AsEnumCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -78,6 +79,28 @@ class Talent extends Model
      *
      * @return BelongsTo
     */
+    /**
+     * The candidate's number in a form a carrier will route, or null.
+     *
+     * The phone lives on `users`, not on `talent` — there is no phone column
+     * here at all — and every value in the table today is a bare local string
+     * that Twilio rejects. Normalising is therefore not a nicety: without it
+     * the automated interview cannot dial a single existing candidate.
+     *
+     * Null means "not dialable", which the orchestrator treats as a reason to
+     * fail the attempt with a message a recruiter can act on rather than as a
+     * call worth attempting.
+     */
+    public function interviewPhone(?string $defaultRegion = null): ?PhoneNumber
+    {
+        $this->loadMissing('user');
+
+        return PhoneNumber::parse(
+            $this->user?->phone,
+            $defaultRegion ?? config('services.interview.default_phone_region', 'JP')
+        );
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

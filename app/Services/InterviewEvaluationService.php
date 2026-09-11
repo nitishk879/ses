@@ -78,6 +78,14 @@ class InterviewEvaluationService
                     'prompt_version' =>
                         $result['prompt_version'] ?? null,
 
+                    /*
+                     * Carries how much of the interview was actually answered.
+                     * Without it a 78 from a full interview and a 78 from one
+                     * answered question are indistinguishable on the screen a
+                     * recruiter makes a decision from.
+                     */
+                    'metadata' => $result['metadata'] ?? null,
+
                     'evaluated_at' => now(),
                     'failure_reason' => null,
                 ]);

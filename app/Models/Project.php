@@ -84,7 +84,16 @@ class Project extends Model
             'number_of_interviewers' => InterviewEnum::class,
             'trade_classification' => TradeClassification::class,
             'contract_classification' => ContractClassificationEnum::class,
-            'languages' => LanguagesCast::class,
+            /*
+             * `languages` is deliberately NOT cast here.
+             *
+             * The `languages()` Attribute accessor below is the single
+             * definition. Eloquent checks attribute accessors before casts, so
+             * a cast entry for this key never actually runs — leaving one in
+             * place reads like configuration that is in effect when it is dead
+             * code, and the LanguagesCast it pointed at disagreed with the
+             * accessor anyway (it returns one enum; the column holds a list).
+             */
             'work_location_prefer' => 'array',
             'project_status' => ProjectStatusEnum::class,
         ];
@@ -233,16 +242,69 @@ class Project extends Model
     public function languages(): Attribute
     {
         return Attribute::make(
+            /*
+             * Reading: the stored JSON becomes a list of display names.
+             *
+             * Tolerates a scalar because the project form posts `languages` as
+             * a radio — one value, not a list — so plenty of rows hold `1`
+             * rather than `[1]`. The previous version called array_map() on
+             * whatever json_decode returned, which raised a TypeError on every
+             * one of those rows the moment a view iterated them.
+             */
             get: function ($value) {
-                // Decode the JSON and map to enum names
+                if ($value === null || $value === '') {
+                    return [];
+                }
+
                 $decoded = json_decode($value, true);
-                return array_map(fn($val) => LangEnum::toName($val), $decoded);
+
+                if ($decoded === null) {
+                    // Not JSON — a bare column value written before this was
+                    // encoded. Treat it as the single entry it is.
+                    $decoded = $value;
+                }
+
+                return array_map(
+                    fn ($val) => LangEnum::toName($val),
+                    is_array($decoded) ? $decoded : [$decoded]
+                );
             },
+
+            /*
+             * Writing: always store JSON.
+             *
+             * This MUST return a string. An attribute setter that returns an
+             * array has its entries merged straight into the model's attribute
+             * bag, so returning `[2, 1]` produced columns named "0" and "1" and
+             * every save failed with:
+             *
+             *     SQLSTATE[HY000]: table projects has no column named 0
+             *
+             * which broke project creation, the seeders and the factory alike.
+             */
             set: function ($value) {
-                // If setting from an array of enum values, encode it as JSON
-                return $value; //json_encode($value);
+                if ($value === null || $value === '') {
+                    return [$this->getLanguagesColumn() => null];
+                }
+
+                return [
+                    $this->getLanguagesColumn() => json_encode(
+                        array_values(array_map(
+                            static fn ($val) => $val instanceof LangEnum ? $val->value : $val,
+                            is_array($value) ? $value : [$value]
+                        ))
+                    ),
+                ];
             }
         );
+    }
+
+    /**
+     * Named so the setter above cannot drift from the column it writes.
+     */
+    private function getLanguagesColumn(): string
+    {
+        return 'languages';
     }
 
 

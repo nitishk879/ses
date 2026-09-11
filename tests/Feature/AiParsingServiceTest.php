@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ContractClassificationEnum;
 use App\Models\Company;
 use App\Models\Project;
 use App\Models\Talent;
@@ -32,6 +33,16 @@ class AiParsingServiceTest extends TestCase
         config()->set('services.ai_parser.secret', self::SECRET);
     }
 
+    /**
+     * A project whose every hashed field is pinned.
+     *
+     * The factory randomises `experience`, `contract_classification` and
+     * `remote_operation_possible`, and all three go into the fingerprint. Two
+     * "identical" projects built from it were therefore only identical by
+     * chance, which made the content-hash test flaky by construction. Anything
+     * {@see AiParsingService::buildProjectPayload()} reads is fixed here; pass
+     * $attributes to vary exactly the field under test.
+     */
     private function project(array $attributes = []): Project
     {
         $company = Company::factory()->create();
@@ -43,6 +54,9 @@ class AiParsingServiceTest extends TestCase
             'personnel_requirement' => 'Five years of experience.',
             'minimum_price' => 600000,
             'maximum_price' => 900000,
+            'experience' => 2,
+            'contract_classification' => ContractClassificationEnum::cases()[0]->value,
+            'remote_operation_possible' => true,
         ], $attributes));
     }
 

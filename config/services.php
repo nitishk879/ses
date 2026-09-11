@@ -79,4 +79,52 @@ return [
         'aliases' => [],
     ],
 
+    /*
+     * Automated screening interviews.
+     *
+     * Shares `ai_parser`'s URL and secret — it is the same service — but the
+     * call-placing half needs settings of its own, and none of them have a
+     * safe default: `from_number` is a number we pay for, and guessing a
+     * region for an un-prefixed phone number means possibly dialling a
+     * stranger. Anything unset here disables the feature rather than
+     * approximating it.
+     */
+    'interview' => [
+        // Master switch. Off means interviews are planned and stored but never
+        // dialled — the correct state for an environment with no telephony.
+        'enabled' => env('INTERVIEW_ENABLED', false),
+
+        // The outbound number the candidate sees. E.164.
+        'from_number' => env('INTERVIEW_FROM_NUMBER'),
+
+        // Assumed only for stored numbers that carry no country code. Every
+        // talent number in the database today is in that state.
+        'default_phone_region' => env('INTERVIEW_DEFAULT_PHONE_REGION', 'JP'),
+
+        // Target call length. The AI service derives the question count from
+        // this; the voicebot is handed 1.2x it as a hard cut.
+        'duration_seconds' => env('INTERVIEW_DURATION_SECONDS', 300),
+
+        'language' => env('INTERVIEW_LANGUAGE', 'japanese'),
+
+        /*
+         * Polling. The voicebot has no post-call webhook, so a placed call is
+         * followed by asking. `max_attempts * interval` must comfortably
+         * exceed the hard call cap plus teardown, or a normal call would be
+         * abandoned as timed out while it is still running.
+         */
+        'poll_interval_seconds' => env('INTERVIEW_POLL_INTERVAL_SECONDS', 20),
+        'poll_max_attempts' => env('INTERVIEW_POLL_MAX_ATTEMPTS', 45),
+
+        // Retries for a call nobody answered. Distinct from job retries: this
+        // counts times we phoned the candidate, which is a thing they notice.
+        'max_attempts' => env('INTERVIEW_MAX_ATTEMPTS', 3),
+        'retry_delay_minutes' => env('INTERVIEW_RETRY_DELAY_MINUTES', 60),
+
+        // How far past its slot a scheduled interview may still be started.
+        // Beyond this the candidate has been waiting too long for an unheralded
+        // call to be welcome, and it is rescheduled instead.
+        'dispatch_grace_minutes' => env('INTERVIEW_DISPATCH_GRACE_MINUTES', 15),
+    ],
+
 ];

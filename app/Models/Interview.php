@@ -26,7 +26,10 @@ class Interview extends Model
         'failure_reason',
         'provider_reference',
         'metadata',
-        'attempt_number',
+        // `attempt_number` is deliberately absent: it belongs to
+        // `interview_attempts` and there is no such column on `interviews`.
+        // Listing it here made any create()/update() that happened to carry the
+        // key fail with an "Unknown column" SQL error at runtime.
     ];
 
     protected function casts(): array

@@ -16,6 +16,7 @@ use App\Policies\CompanyPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\TalentPolicy;
 use App\Services\Ai\MockInterviewEvaluationProvider;
+use App\Services\Ai\SesAiInterviewEvaluationProvider;
 use Event;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\Gate;
@@ -28,9 +29,21 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        /*
+         * The real evaluator scores the transcript against the job
+         * description; the mock returns a hardcoded 85/90/82 for everyone.
+         *
+         * The mock stays bound under `testing` on purpose — a test asserting
+         * the evaluation *pipeline* should not depend on a language model's
+         * judgement, or on the H200 being reachable from CI. Everywhere else
+         * the real one is used, because a constant score is indistinguishable
+         * from a real one on the screen a recruiter decides from.
+         */
         $this->app->bind(
             InterviewEvaluationProvider::class,
-            MockInterviewEvaluationProvider::class
+            fn ($app) => $app->environment('testing')
+                ? $app->make(MockInterviewEvaluationProvider::class)
+                : $app->make(SesAiInterviewEvaluationProvider::class)
         );
     }
 
