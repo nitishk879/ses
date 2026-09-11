@@ -36,4 +36,52 @@ return [
         'candidate_specific' => '候補者別',
         'follow_up' => '追加質問',
     ],
+
+    // ── 招待と日程選択 (tasks 5-7) ───────────────────────────────────────────
+    'slot_status' => [
+        'offered' => '提示済み',
+        'selected' => '選択済み',
+        'expired' => '期限切れ',
+        'released' => '解放済み',
+    ],
+
+    'invitation_expired' => 'この招待は有効期限が切れています。',
+    'invitation_not_answered' => '有効期限までに候補者が日程を選択しませんでした。',
+    'link_not_recognised' => 'このリンクは無効です。既に使用されたか、有効期限が切れている可能性があります。',
+    'all_slots_passed' => '提示されたすべての日時が過ぎています。',
+    'slot_no_longer_available' => 'その日時は選択できなくなりました。',
+    'slot_just_taken' => 'その日時は先ほど他の方に確定されました。別の日時をお選びください。',
+    'slot_not_for_this_interview' => 'その日時はこの招待のものではありません。',
+    'already_scheduled_notice' => '面接は既に :date に予定されています。',
+    'session_expired_retry' => 'ページを開いたままセッションの有効期限が切れました。もう一度日時をお選びください。',
+
+    'mail' => [
+        'subject' => '面接のご案内 — :project',
+        'heading' => '書類選考を通過されました',
+        'intro' => ':project の一次スクリーニング面接にご案内いたします。',
+        'about' => '面接は自動化されており、所要時間は約 :minutes 分です。ご選択いただいた日時にお電話いたします。',
+        'slots_heading' => 'ご選択可能な日時',
+        'cta' => '日時を選択する',
+        'expires' => ':date までにご選択ください。',
+        'none_suitable' => 'ご都合の合う日時がない場合は、本メールへの返信は不要です。担当者より別途ご連絡いたします。',
+        'recorded_notice' => 'ご回答確認のため、通話は録音させていただきます。',
+        'regards' => 'よろしくお願いいたします。',
+        'button_fallback' => '上のボタンが動作しない場合は、以下のURLをブラウザに貼り付けてください。',
+    ],
+
+    'page' => [
+        'title' => '面接日程の調整',
+        'choose_title' => '面接日時をお選びください',
+        'choose_intro' => ':project の一次スクリーニング面接について、以下から日時をお選びください。',
+        'duration_note' => '面接は自動化されており、所要時間は約 :minutes 分です。ご選択の日時にお電話いたします。',
+        'times_shown_in' => '表示はすべて :timezone の時刻です。',
+        'confirm_button' => 'この日時で確定する',
+        'confirmed_title' => '面接の日時が確定しました',
+        'confirmed_intro' => ':project について、上記の日時にお電話いたします。',
+        'confirmed_what_happens' => '電波の良い静かな場所でお待ちください。お出になれなかった場合は改めておかけ直しします。',
+        'unavailable_title' => 'このリンクはご利用いただけません',
+        'unavailable_next' => 'ご参加をご希望の場合は、招待メールにご返信ください。担当者が新しい日時を調整いたします。',
+        'recorded_notice' => 'ご回答確認のため、通話は録音させていただきます。',
+        'footer_note' => 'このリンクは選考通過者の方にお送りしています。お心当たりがない場合は破棄してください。',
+    ],
 ];

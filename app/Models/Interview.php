@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Interview extends Model
 {
@@ -26,11 +27,27 @@ class Interview extends Model
         'failure_reason',
         'provider_reference',
         'metadata',
+        'invitation_token',
+        'invitation_sent_at',
+        'invitation_expires_at',
+        'slot_selected_at',
+        'match_score',
         // `attempt_number` is deliberately absent: it belongs to
         // `interview_attempts` and there is no such column on `interviews`.
         // Listing it here made any create()/update() that happened to carry the
         // key fail with an "Unknown column" SQL error at runtime.
     ];
+
+    /**
+     * The invitation token never leaves the server except inside the email.
+     *
+     * Hidden so it cannot be leaked by a `toJson()` on any of the interview
+     * API endpoints — one of which a recruiter can call, and none of which
+     * should hand out a credential that books somebody else's interview.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = ['invitation_token'];
 
     protected function casts(): array
     {
@@ -39,8 +56,36 @@ class Interview extends Model
             'scheduled_at' => 'datetime',
             'started_at' => 'datetime',
             'ended_at' => 'datetime',
+            'invitation_sent_at' => 'datetime',
+            'invitation_expires_at' => 'datetime',
+            'slot_selected_at' => 'datetime',
             'metadata' => 'array',
         ];
+    }
+
+    public function slots(): HasMany
+    {
+        return $this->hasMany(InterviewSlot::class)->orderBy('starts_at');
+    }
+
+    public function selectedSlot(): HasOne
+    {
+        return $this->hasOne(InterviewSlot::class)
+            ->where('status', \App\Enums\InterviewSlotStatus::SELECTED);
+    }
+
+    /**
+     * The link posted to the candidate.
+     *
+     * Built from the named route so it follows APP_URL — which is why APP_URL
+     * being wrong is not cosmetic here: a `http://localhost` base produces a
+     * dead link in a real person's inbox.
+     */
+    public function invitationUrl(): ?string
+    {
+        return filled($this->invitation_token)
+            ? route('interview-slots.show', ['token' => $this->invitation_token])
+            : null;
     }
 
     public function project(): BelongsTo

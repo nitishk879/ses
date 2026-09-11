@@ -7,6 +7,9 @@ use App\Http\Controllers\InterviewAttemptController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewEvaluationController;
 use App\Http\Controllers\InterviewQuestionController;
+use App\Http\Controllers\InterviewSlotController;
+use App\Http\Middleware\NoIndexNoStore;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SampleController;
@@ -90,6 +93,46 @@ Route::get('/sample/{id}', [SampleController::class, 'show'])->name('sample.show
  * every collection gets its own path segment. `routes:list` is now a faithful
  * description of what is reachable.
  */
+/*
+ * Candidate-facing slot picker (tasks 6-7).
+ *
+ * Unauthenticated by design — a shortlisted talent may not have signed in for
+ * months, and a login wall between an invitation and a reply is the surest way
+ * to lose the reply. The 64-hex token IS the credential: single-use, expiring,
+ * and destroyed the moment a slot is confirmed.
+ *
+ * Outside the `auth` group on purpose, and constrained so only a token-shaped
+ * string reaches the controller at all.
+ */
+Route::middleware([NoIndexNoStore::class])->group(function () {
+    Route::get('interview/slots/{token}', [InterviewSlotController::class, 'show'])
+        ->where('token', '[0-9a-f]{64}')
+        ->name('interview-slots.show');
+
+    // POST, so an email client prefetching the link cannot book a slot.
+    Route::post('interview/slots/{token}', [InterviewSlotController::class, 'store'])
+        ->where('token', '[0-9a-f]{64}')
+        ->name('interview-slots.store');
+
+    /*
+     * The "you're booked" page.
+     *
+     * Signed, because it is addressed by interview id and would otherwise be
+     * walkable: /interview/scheduled/1..n would list every booked role and
+     * time to anyone who tried. The confirmation token is deliberately
+     * destroyed on booking, so a signature is what stands in its place.
+     *
+     * `relative` signing on purpose — the signature covers the path and query
+     * only, so it survives the app being reached on a host that does not match
+     * APP_URL (a proxy, an IP, a staging domain). An absolute signature would
+     * 403 every candidate the moment those diverged.
+     */
+    Route::get('interview/scheduled/{interview}', [InterviewSlotController::class, 'confirmed'])
+        ->where('interview', '[0-9]+')
+        ->middleware(ValidateSignature::class.':relative')
+        ->name('interview-slots.confirmed');
+});
+
 Route::middleware(['auth', 'role:admin,user'])->group(function () {
     Route::apiResource('interviews', InterviewController::class);
     Route::apiResource('interviews.attempts', InterviewAttemptController::class)

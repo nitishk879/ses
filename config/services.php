@@ -125,6 +125,49 @@ return [
         // Beyond this the candidate has been waiting too long for an unheralded
         // call to be welcome, and it is rescheduled instead.
         'dispatch_grace_minutes' => env('INTERVIEW_DISPATCH_GRACE_MINUTES', 15),
+
+        /*
+         * Invitation and slot offering (tasks 5-7).
+         *
+         * The shape of the calendar lives here because it is a business
+         * decision, not a technical one: when a client's screening hours
+         * change, nobody should have to deploy code.
+         */
+        'invitation' => [
+            // Match score at or above which a candidate is shortlisted. The
+            // task sheet calls this "recruiter-defined", so it is a setting
+            // rather than a constant — and the score each invitation was
+            // issued on is recorded, so tuning it stays explainable.
+            'min_match_score' => env('INTERVIEW_MIN_MATCH_SCORE', 70),
+
+            'slots_offered' => env('INTERVIEW_SLOTS_OFFERED', 3),
+
+            // How long the candidate has to answer before the offer goes stale.
+            'offer_valid_hours' => env('INTERVIEW_OFFER_VALID_HOURS', 72),
+
+            // Never offer a time sooner than this. A slot 20 minutes away is a
+            // slot nobody can prepare for.
+            'lead_time_hours' => env('INTERVIEW_LEAD_TIME_HOURS', 24),
+
+            // ...nor further out than this; an interview a fortnight away is
+            // one the candidate will have forgotten agreeing to.
+            'horizon_days' => env('INTERVIEW_HORIZON_DAYS', 7),
+
+            /*
+             * Business hours, in the candidate's timezone. Slot length is the
+             * spacing between bookings, not the call length — the call is
+             * ~5 minutes, and the rest is margin, because with a single
+             * concurrent line an overrun delays the next candidate.
+             */
+            'business_start_hour' => env('INTERVIEW_BUSINESS_START_HOUR', 10),
+            'business_end_hour' => env('INTERVIEW_BUSINESS_END_HOUR', 18),
+            'slot_minutes' => env('INTERVIEW_SLOT_MINUTES', 30),
+            'skip_weekends' => env('INTERVIEW_SKIP_WEEKENDS', true),
+
+            // Used when the interview carries no timezone of its own. SES
+            // stores none against a user yet.
+            'timezone' => env('INTERVIEW_TIMEZONE', 'Asia/Tokyo'),
+        ],
     ],
 
 ];
