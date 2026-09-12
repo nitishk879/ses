@@ -107,7 +107,21 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('interviews', function (Blueprint $table) {
+            /*
+             * Indexes come off before the columns they cover, and the unique
+             * one is named explicitly.
+             *
+             * `->unique()` on the column above creates
+             * `interviews_invitation_token_unique`, which `dropColumn` does not
+             * clean up. Leaving it in place made this rollback fail with
+             * "error in index ... after drop column: no such column" — on
+             * SQLite immediately, and on MySQL as an orphaned index. A
+             * rollback is what you reach for when a deploy has gone wrong, so
+             * it failing then is the worst possible time to find out.
+             */
+            $table->dropUnique(['invitation_token']);
             $table->dropIndex(['status', 'invitation_expires_at']);
+
             $table->dropColumn([
                 'invitation_token',
                 'invitation_sent_at',
@@ -117,6 +131,8 @@ return new class extends Migration
             ]);
         });
 
+        // Dropped last: its rows reference `interviews`, and on a driver that
+        // enforces foreign keys the parent must still be intact.
         Schema::dropIfExists('interview_slots');
     }
 };

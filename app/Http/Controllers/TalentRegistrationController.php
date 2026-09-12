@@ -42,7 +42,9 @@ class TalentRegistrationController extends Controller
             'language' => 'required',
             'address' => 'required|max:255',
             'cover_letter' => 'required|min:64',
-            'resume' => 'required|file|mimes:doc,docs,pdf|max:2048',
+            // `docs` was a typo for `docx` — see TalentController for why it
+            // mattered: it rejected the only Word format the parser can read.
+            'resume' => 'required|file|mimes:pdf,docx,doc|max:2048',
             'education' => 'required|min:3',
             'experience' => 'required|min:3',
             'work_experience' => 'required',

@@ -94,17 +94,9 @@ class AiParsingService
      */
     public function resumeInputHash(Talent $talent): ?string
     {
-        if (blank($talent->resume)) {
-            return null;
-        }
+        $located = $this->locateResume($talent);
 
-        $disk = Storage::disk(config('services.ai_parser.resume_disk', 'local'));
-
-        if (! $disk->exists($talent->resume)) {
-            return null;
-        }
-
-        return hash('sha256', $disk->get($talent->resume));
+        return $located === null ? null : hash('sha256', $located['contents']);
     }
 
     /**
@@ -119,17 +111,93 @@ class AiParsingService
             throw new RuntimeException("Talent {$talent->id} has no resume on file.");
         }
 
-        $disk = Storage::disk(config('services.ai_parser.resume_disk', 'local'));
+        $located = $this->locateResume($talent);
 
-        if (! $disk->exists($talent->resume)) {
-            throw new RuntimeException("Resume file missing for talent {$talent->id}.");
+        if ($located === null) {
+            throw new RuntimeException(
+                "Resume file missing for talent {$talent->id} (stored as \"{$talent->resume}\"); "
+                .'looked on the local and public disks, with and without the talents/ prefix.'
+            );
         }
 
         return $this->post('/v1/parse/resume', [
             'talent_id' => (int) $talent->id,
-            'file_base64' => base64_encode($disk->get($talent->resume)),
-            'filename' => basename($talent->resume),
+            'file_base64' => base64_encode($located['contents']),
+            'filename' => basename($located['path']),
         ]);
+    }
+
+    /**
+     * Find a talent's resume wherever SES actually put it.
+     *
+     * `talent.resume` is not one shape, because two upload paths write it
+     * differently and neither is going to be rewritten under us:
+     *
+     * * {@see \App\Http\Controllers\TalentController} and
+     *   `TalentRegistrationController` call `storeAs('public/talents/', $name)`
+     *   but save only `$name` — so the row says `Taro-Tanaka.pdf` while the
+     *   bytes are at `storage/app/public/talents/Taro-Tanaka.pdf`;
+     * * {@see \App\Http\Traits\HasTalentDocumentTrait} saves the full
+     *   `talents/Taro-Tanaka.pdf` relative to whichever disk it used;
+     * * seeded rows are plain filenames sitting at the root of the local disk.
+     *
+     * Resolving all three here is what makes a resume uploaded through the UI
+     * parseable at all. Before this, only seeded rows could be read, and a
+     * genuine upload failed with "Resume file missing" — the one path a person
+     * testing the feature would actually take.
+     *
+     * @return array{disk: string, path: string, contents: string}|null
+     */
+    public function locateResume(Talent $talent): ?array
+    {
+        $stored = trim((string) $talent->resume);
+
+        if ($stored === '') {
+            return null;
+        }
+
+        $configured = (string) config('services.ai_parser.resume_disk', 'local');
+        $name = basename($stored);
+
+        // Ordered most- to least-specific: the value as stored comes first on
+        // each disk, so a correctly-recorded path never loses to a guess.
+        $candidates = [
+            [$configured, $stored],
+            [$configured, 'talents/'.$name],
+            [$configured, 'public/talents/'.$name],
+            ['public', $stored],
+            ['public', 'talents/'.$name],
+        ];
+
+        foreach ($candidates as [$diskName, $path]) {
+            try {
+                $disk = Storage::disk($diskName);
+            } catch (\InvalidArgumentException) {
+                // A disk that is not configured in this environment.
+                continue;
+            }
+
+            if (! $disk->exists($path)) {
+                continue;
+            }
+
+            $contents = $disk->get($path);
+
+            if ($contents === null || $contents === '') {
+                // Present but empty — keep looking rather than sending the
+                // parser zero bytes and getting back an empty resume.
+                continue;
+            }
+
+            return ['disk' => $diskName, 'path' => $path, 'contents' => $contents];
+        }
+
+        Log::warning('ai_parser.resume_not_found', [
+            'talent_id' => $talent->id,
+            'stored' => $stored,
+        ]);
+
+        return null;
     }
 
     /**
