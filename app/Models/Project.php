@@ -118,6 +118,30 @@ class Project extends Model
     }
 
     /**
+     * The current structured parse of this project's job description.
+     *
+     * One row per project — a re-parse updates it rather than appending, so
+     * there is never a question of which of several is the live one.
+     *
+     * The inverse (`AiJdParse::project()`) and the mirror on the candidate
+     * side (`Talent::aiResumeParse()`) both already existed; this one did not,
+     * which made `php artisan ses:ai-match` fail with "Call to undefined
+     * relationship [aiJdParse]" before it had parsed anything.
+     */
+    public function aiJdParse(): HasOne
+    {
+        return $this->hasOne(AiJdParse::class);
+    }
+
+    /**
+     * Scores of every candidate against this project, best first.
+     */
+    public function aiMatches(): HasMany
+    {
+        return $this->hasMany(AiMatch::class)->orderByDesc('score');
+    }
+
+    /**
      * Project Belongs to Many sub-categories
      *
      * @returns BelongsToMany
