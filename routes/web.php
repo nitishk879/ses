@@ -150,8 +150,23 @@ Route::middleware(['auth', 'role:admin,user'])
     ->name('interview-dashboard.')
     ->group(function () {
         Route::get('/', [InterviewDashboardController::class, 'index'])->name('index');
-        Route::post('match/{project}', [InterviewDashboardController::class, 'runMatching'])->name('match');
-        Route::post('invite/{project}', [InterviewDashboardController::class, 'invite'])->name('invite');
+
+        /*
+         * Bound as `{project:id}`, not `{project}`.
+         *
+         * Project::getRouteKeyName() returns 'slug', so the bare parameter
+         * would look for a project whose *slug* is "8" and 404 on every
+         * submission. The forms on this page post the id — a <select> built
+         * from a list the controller already scoped — so the id is what the
+         * route has to resolve. Stated explicitly here rather than by changing
+         * the model's route key, which the public project URLs depend on.
+         */
+        Route::post('match/{project:id}', [InterviewDashboardController::class, 'runMatching'])
+            ->whereNumber('project')
+            ->name('match');
+        Route::post('invite/{project:id}', [InterviewDashboardController::class, 'invite'])
+            ->whereNumber('project')
+            ->name('invite');
         Route::get('{interview}', [InterviewDashboardController::class, 'show'])
             ->whereNumber('interview')
             ->name('show');
