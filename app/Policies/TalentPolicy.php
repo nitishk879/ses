@@ -42,7 +42,23 @@ class TalentPolicy
      */
     public function create(User $user): bool
     {
-        return $user->is_employer;
+        /*
+         * Was `return $user->is_employer;` — an attribute that does not exist.
+         * `User` declares no such column and no such cast (`isEmployerCast` is
+         * written but never registered anywhere), so the expression always
+         * evaluated to null and this `bool` return type threw a TypeError.
+         *
+         * It went unnoticed because `before()` short-circuits for admins and
+         * never reaches here, and the only admin is the person who tests. For
+         * everyone else, `@can('create', Talent::class)` in the site header
+         * meant a 500 on every page that renders a header.
+         *
+         * Restoring the intent rather than the expression: an employer is a
+         * user who has a company. Deliberately not "a company that already has
+         * talents", which the unused cast checked — that is circular, since
+         * adding the first talent is exactly what this permission is for.
+         */
+        return $user->company()->exists();
     }
 
     /**

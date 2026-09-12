@@ -109,6 +109,22 @@ class Interview extends Model
             ->orderBy('attempt_number');
     }
 
+    /**
+     * The most recent call attempt, as a single relation.
+     *
+     * Exists so a list view can eager-load one attempt per interview. The
+     * obvious alternative — `with(['attempts' => fn ($q) => $q->limit(1)])` —
+     * is a trap: Laravel 11 can apply that per parent, but only by emitting a
+     * window function, which ties a page to what the database engine happens
+     * to support. `latestOfMany()` is a plain correlated subquery and works
+     * everywhere, which for a screen a recruiter opens all day is the right
+     * trade.
+     */
+    public function latestAttempt(): HasOne
+    {
+        return $this->hasOne(InterviewAttempt::class)->latestOfMany('attempt_number');
+    }
+
     public function evaluations(): HasManyThrough
     {
         return $this->hasManyThrough(

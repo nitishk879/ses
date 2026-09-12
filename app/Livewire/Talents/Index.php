@@ -296,21 +296,38 @@ class Index extends Component
      * Projects this user may score against.
      *
      * Scoped to the signed-in user's company so one employer cannot rank
-     * candidates against another's requirement.
+     * candidates against another's requirement — **except for admins**, who
+     * see everything.
+     *
+     * That exception is not a convenience. {@see \App\Policies\TalentPolicy}
+     * already grants admins blanket access through its `before()` hook, so a
+     * dropdown that hid projects from them was inconsistent with the rest of
+     * the app: an administrator could open any talent and any project, but the
+     * one screen that ranks the two together came back empty, with nothing on
+     * it to explain why.
      *
      * @return Project[]|Collection|\Illuminate\Support\Collection|_IH_Project_C
      */
     private function matchableProjects(): Collection|array|\Illuminate\Support\Collection|_IH_Project_C
     {
-        $companyId = auth()->user()?->company?->id;
+        $user = auth()->user();
 
-        if (! $companyId) {
+        if (! $user) {
             return collect();
         }
 
-        return Project::query()
-            ->where('company_id', $companyId)
-            ->orderByDesc('created_at')
-            ->get(['id', 'title']);
+        $query = Project::query()->orderByDesc('created_at');
+
+        if (! $user->hasRole('admin')) {
+            $companyId = $user->company?->id;
+
+            if (! $companyId) {
+                return collect();
+            }
+
+            $query->where('company_id', $companyId);
+        }
+
+        return $query->get(['id', 'title']);
     }
 }

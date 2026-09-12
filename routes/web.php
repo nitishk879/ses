@@ -6,6 +6,7 @@ use App\Http\Controllers\InterviewAnswerController;
 use App\Http\Controllers\InterviewAttemptController;
 use App\Http\Controllers\InterviewController;
 use App\Http\Controllers\InterviewEvaluationController;
+use App\Http\Controllers\InterviewDashboardController;
 use App\Http\Controllers\InterviewQuestionController;
 use App\Http\Controllers\InterviewSlotController;
 use App\Http\Middleware\NoIndexNoStore;
@@ -132,6 +133,29 @@ Route::middleware([NoIndexNoStore::class])->group(function () {
         ->middleware(ValidateSignature::class.':relative')
         ->name('interview-slots.confirmed');
 });
+
+/*
+ * Task 16: the recruiter-facing screens.
+ *
+ * Declared before the JSON `apiResource` below so `interviews/dashboard` is
+ * matched as a literal path rather than being swallowed by
+ * `interviews/{interview}` and failing to bind a model named "dashboard".
+ *
+ * Separate from the JSON API on purpose — these render HTML, that serves
+ * whatever consumes the endpoints, and one controller doing both would be two
+ * contracts wearing one name.
+ */
+Route::middleware(['auth', 'role:admin,user'])
+    ->prefix('interviews/dashboard')
+    ->name('interview-dashboard.')
+    ->group(function () {
+        Route::get('/', [InterviewDashboardController::class, 'index'])->name('index');
+        Route::post('match/{project}', [InterviewDashboardController::class, 'runMatching'])->name('match');
+        Route::post('invite/{project}', [InterviewDashboardController::class, 'invite'])->name('invite');
+        Route::get('{interview}', [InterviewDashboardController::class, 'show'])
+            ->whereNumber('interview')
+            ->name('show');
+    });
 
 Route::middleware(['auth', 'role:admin,user'])->group(function () {
     Route::apiResource('interviews', InterviewController::class);

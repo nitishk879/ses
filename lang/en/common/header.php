@@ -21,6 +21,7 @@ return array(
     'language' => 'Language',
     'english' => 'English',
     'japanese' => 'Japanese',
+    'interviews' => 'Interviews',
     'pricing_plan' => 'Pricing Plan',
     'customer_support' => 'Customer Support',
     // Oct21, 2024

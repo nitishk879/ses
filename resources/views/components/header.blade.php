@@ -54,6 +54,20 @@
                             <li><a class="dropdown-item" href="#">{{ __("common/header.bookmarks") }}</a></li>
                         </ul>
                     </li>
+                    {{-- Task 16. Shown only to signed-in staff: a talent has no
+                         business on a screen that lists other candidates'
+                         transcripts, and the controller scopes every query
+                         besides. --}}
+                    @auth
+                        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('user'))
+                            <li class="nav-item">
+                                <a class="nav-link {{ request()->routeIs('interview-dashboard.*') ? 'active' : '' }}"
+                                   href="{{ route('interview-dashboard.index') }}">
+                                    {{ __("common/header.interviews") }}
+                                </a>
+                            </li>
+                        @endif
+                    @endauth
                     <li class="nav-item">
                         <a class="nav-link" href="/pricing">{{ __("common/header.pricing_plan") }}</a>
                     </li>

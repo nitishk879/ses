@@ -21,6 +21,7 @@ return array(
     'english' => '英語',
     'japanese' => '日本語',
     'find_talent' => '人材検索',
+    'interviews' => '面接',
     'pricing_plan' => '料金プラン',
     'customer_support' => 'カスタマーサポート',
     // Oct21, 2024

@@ -22,6 +22,26 @@ enum InterviewStatus: string
     case RESCHEDULE_REQUIRED = "rescheduled_required";
 
     /**
+     * Bootstrap colour for this status on the recruiter dashboard.
+     *
+     * Grouped by what the reader should do about it, not by where the status
+     * sits in the lifecycle: anything needing a human is warning or danger,
+     * anything in flight is informational, and anything finished is quiet.
+     * A row that is merely waiting must not look like a row that is stuck.
+     */
+    public function badgeVariant(): string
+    {
+        return match ($this) {
+            self::COMPLETED, self::EVALUATED => 'success',
+            self::SCHEDULED, self::STARTING, self::IN_PROGRESS, self::EVALUATING => 'primary',
+            self::INVITED, self::SLOT_SELECTION => 'info',
+            self::NO_ANSWER, self::MISSED, self::RESCHEDULE_REQUIRED => 'warning',
+            self::FAILED => 'danger',
+            self::PENDING, self::CANCELLED => 'secondary',
+        };
+    }
+
+    /**
      * @param InterviewStatus $value
      * @return string
      */
