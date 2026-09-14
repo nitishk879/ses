@@ -51,6 +51,7 @@ return array(
     "no_project_selected" => "— No project selected —",
     "ranked_by_match" => "Ranked by match score",
     "not_scored_yet" => "Not scored yet",
+    "match_score" => "match score",
     "scored_from_profile" => "from profile",
     "scored_from_profile_help" => "No CV file on record, so this score was read from the profile the candidate filled in.",
     "not_scored_no_parse" => "Neither a readable CV nor any profile details on record.",

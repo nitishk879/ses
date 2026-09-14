@@ -133,35 +133,56 @@
                     <i class="fa-solid fa-star"></i>
                 </a>
 
+                {{-- The match block sits in the card's top-left corner, which is
+                     already occupied: `.add-to-favourite` is absolutely positioned
+                     at top:-1rem / left:-1rem with a 3.5rem circle and z-index 1,
+                     so it covers everything up to 2.5rem in from the card edge.
+                     The first version of this put the score there and the star ate
+                     the leading digits — "64/100" rendered as "100", which is not a
+                     cosmetic bug: it is a wrong number shown to a recruiter.
+
+                     `.talent-match` clears it with padding rather than with a
+                     z-index fight, because the star has to stay clickable. The
+                     rule lives in the parent view's stylesheets stack: the
+                     compiled CSS bundle on the server is from Dec 2024 and
+                     rebuilding it would ship two years of unrelated style changes
+                     at the same time. --}}
                 @if($matchProject)
                     @php($parse = $talent->aiResumeParse)
-                    <div class="talent-match p-2 mb-2 border rounded">
+                    <div class="talent-match">
                         @if($match)
-                            {{-- Colour is a reading aid only; the reasons below are
-                                 what a recruiter should actually act on. --}}
-                            @php($tone = $match->score >= 75 ? 'success' : ($match->score >= 50 ? 'warning' : 'secondary'))
-                            <span class="badge bg-{{ $tone }}">{{ $match->score }}/100</span>
-
-                            {{-- A score read off a profile is a weaker claim than one
-                                 read off a CV. Saying so is the difference between a
-                                 number a recruiter can act on and one they have to
-                                 take on faith. --}}
-                            @if($parse?->isFromProfile())
-                                <span class="badge bg-light text-dark border ms-1"
-                                      title="{{ __('talents/index.scored_from_profile_help') }}">
-                                    {{ __("talents/index.scored_from_profile") }}
+                            {{-- Colour is a reading aid only — never the only signal.
+                                 The number is always spelled out, and the reasons
+                                 below are what a recruiter should actually act on. --}}
+                            @php($tone = $match->score >= 75 ? 'strong' : ($match->score >= 50 ? 'fair' : 'weak'))
+                            <div class="talent-match-head">
+                                <span class="talent-match-score talent-match-score--{{ $tone }}">
+                                    <span class="talent-match-number">{{ $match->score }}</span><span
+                                          class="talent-match-outof">/100</span>
                                 </span>
-                            @endif
+                                <span class="talent-match-caption">{{ __('talents/index.match_score') }}</span>
 
-                            <ul class="list-unstyled small mb-0 mt-2">
+                                {{-- A score read off a profile is a weaker claim than one
+                                     read off a CV. Saying so is the difference between a
+                                     number a recruiter can act on and one they have to
+                                     take on faith. --}}
+                                @if($parse?->isFromProfile())
+                                    <span class="talent-match-flag"
+                                          title="{{ __('talents/index.scored_from_profile_help') }}">
+                                        {{ __("talents/index.scored_from_profile") }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <ul class="talent-match-reasons">
                                 @foreach($match->reasons() as $reason)
                                     <li>{{ $reason }}</li>
                                 @endforeach
                                 @foreach($match->blockers() as $blocker)
-                                    <li class="text-danger">&#33; {{ $blocker }}</li>
+                                    <li class="is-blocker">&#33; {{ $blocker }}</li>
                                 @endforeach
                                 @foreach($match->unverified() as $unverified)
-                                    <li class="text-muted">? {{ $unverified }}</li>
+                                    <li class="is-unverified">? {{ $unverified }}</li>
                                 @endforeach
                             </ul>
                         @else
@@ -170,10 +191,12 @@
                                  recruiter. Collapsing them into one badge left the
                                  only visible explanation — "not scored yet" — as the
                                  one that was usually wrong. --}}
-                            <span class="badge bg-light text-dark">
-                                {{ __("talents/index.not_scored_yet") }}
-                            </span>
-                            <div class="small text-muted mt-1">
+                            <div class="talent-match-head">
+                                <span class="talent-match-score talent-match-score--none">
+                                    {{ __("talents/index.not_scored_yet") }}
+                                </span>
+                            </div>
+                            <div class="talent-match-note">
                                 @if(! $parse)
                                     {{ __("talents/index.not_scored_no_parse") }}
                                 @else
