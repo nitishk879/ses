@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\InterviewStatus;
 use App\Jobs\ParseProjectJd;
 use App\Jobs\ParseTalentResume;
-use App\Models\AiResumeParse;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Talent;
@@ -123,18 +122,32 @@ class InterviewDashboardController extends Controller
     {
         $this->authorizeProject($project);
 
-        // Candidates whose CV has never been read. Re-parsing the rest would
-        // spend the model's time to arrive at the same answer — the parse jobs
-        // are hash-guarded, but not dispatching them at all is cheaper still.
-        $unparsed = Talent::query()
-            ->whereNotNull('resume')
-            ->where('resume', '!=', '')
-            ->whereNotIn('id', AiResumeParse::query()->select('talent_id'))
-            ->pluck('id');
+        // One hash-guarded job per candidate.
+        //
+        // Deliberately not filtered. The two obvious filters are both wrong:
+        //
+        // * filtering on `resume` skipped every candidate without a CV file,
+        //   which is most of them — and they are parseable from the profile
+        //   they filled in ({@see AiParsingService::resumeSource()}). This is
+        //   why the score column was mostly empty;
+        // * filtering on "has no parse row yet" skips a candidate whose stored
+        //   parse came from a CV that has since been deleted or replaced. Their
+        //   score then stays frozen at an answer derived from a document that
+        //   no longer exists, and no amount of pressing this button fixes it.
+        //
+        // Dispatching for everyone is safe because {@see ParseTalentResume}
+        // compares a content hash before calling the model: an unchanged
+        // candidate costs one cheap hash and returns. The expensive thing is
+        // the language model, and that is guarded where it belongs rather than
+        // by a query here that cannot see whether the source changed.
+        $queued = 0;
 
-        foreach ($unparsed as $talentId) {
-            ParseTalentResume::dispatch($talentId);
-        }
+        Talent::query()->select('id')->chunkById(500, function ($talents) use (&$queued) {
+            foreach ($talents as $talent) {
+                ParseTalentResume::dispatch($talent->id);
+                $queued++;
+            }
+        });
 
         // Parsing the JD chains into scoring on completion, so this is the
         // only other job needed.
@@ -142,14 +155,12 @@ class InterviewDashboardController extends Controller
 
         Log::info('interview.matching_queued', [
             'project_id' => $project->id,
-            'resumes_queued' => $unparsed->count(),
+            'resumes_queued' => $queued,
             'by' => auth()->id(),
         ]);
 
         return back()->with([
-            'message' => __('interview.dashboard.matching_queued', [
-                'count' => $unparsed->count(),
-            ]),
+            'message' => __('interview.dashboard.matching_queued', ['count' => $queued]),
             'type' => 'info',
         ]);
     }

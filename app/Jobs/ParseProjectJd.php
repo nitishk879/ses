@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Models\AiJdParse;
 use App\Models\Project;
 use App\Services\AiParsingService;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -16,7 +17,7 @@ use Throwable;
  * Queued because a parse is a language-model round trip — measured at roughly
  * 5.5s against the H200 — which has no business inside a web request.
  */
-class ParseProjectJd implements ShouldQueue
+class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
 {
     use Queueable;
 

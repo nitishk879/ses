@@ -134,12 +134,25 @@
                 </a>
 
                 @if($matchProject)
+                    @php($parse = $talent->aiResumeParse)
                     <div class="talent-match p-2 mb-2 border rounded">
                         @if($match)
                             {{-- Colour is a reading aid only; the reasons below are
                                  what a recruiter should actually act on. --}}
                             @php($tone = $match->score >= 75 ? 'success' : ($match->score >= 50 ? 'warning' : 'secondary'))
                             <span class="badge bg-{{ $tone }}">{{ $match->score }}/100</span>
+
+                            {{-- A score read off a profile is a weaker claim than one
+                                 read off a CV. Saying so is the difference between a
+                                 number a recruiter can act on and one they have to
+                                 take on faith. --}}
+                            @if($parse?->isFromProfile())
+                                <span class="badge bg-light text-dark border ms-1"
+                                      title="{{ __('talents/index.scored_from_profile_help') }}">
+                                    {{ __("talents/index.scored_from_profile") }}
+                                </span>
+                            @endif
+
                             <ul class="list-unstyled small mb-0 mt-2">
                                 @foreach($match->reasons() as $reason)
                                     <li>{{ $reason }}</li>
@@ -152,11 +165,21 @@
                                 @endforeach
                             </ul>
                         @else
-                            {{-- Absent score is not a zero: this candidate has
-                                 simply not been parsed/scored yet. --}}
+                            {{-- An absent score is not a zero, and the three reasons
+                                 it can be absent need different actions from the
+                                 recruiter. Collapsing them into one badge left the
+                                 only visible explanation — "not scored yet" — as the
+                                 one that was usually wrong. --}}
                             <span class="badge bg-light text-dark">
                                 {{ __("talents/index.not_scored_yet") }}
                             </span>
+                            <div class="small text-muted mt-1">
+                                @if(! $parse)
+                                    {{ __("talents/index.not_scored_no_parse") }}
+                                @else
+                                    {{ __("talents/index.not_scored_run_matching") }}
+                                @endif
+                            </div>
                         @endif
                     </div>
                 @endif

@@ -7,6 +7,7 @@ use App\Models\AiMatch;
 use App\Models\AiResumeParse;
 use App\Models\Talent;
 use App\Services\AiParsingService;
+use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
@@ -24,7 +25,7 @@ use Throwable;
  * Skips work it does not need: a stored score whose two source hashes still
  * match the current parses is already the answer.
  */
-class ScoreProjectMatches implements ShouldQueue
+class ScoreProjectMatches implements ShouldBeUniqueUntilProcessing, ShouldQueue
 {
     use Queueable;
 
@@ -44,6 +45,15 @@ class ScoreProjectMatches implements ShouldQueue
     ) {
     }
 
+    /**
+     * One scoring run per project in flight.
+     *
+     * `UntilProcessing`, not `ShouldBeUnique`: the lock is released when the
+     * job starts rather than when it finishes, so a candidate parsed *during*
+     * a scoring run still queues a re-score instead of being silently dropped
+     * by a lock the running job is still holding. Getting this wrong is how a
+     * newly parsed CV ends up permanently unscored.
+     */
     public function uniqueId(): string
     {
         return (string) $this->projectId;

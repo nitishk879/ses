@@ -50,4 +50,16 @@ class AiResumeParse extends Model
     {
         return $this->payload['total_experience_months'] ?? null;
     }
+
+    /**
+     * True when this was read from the candidate's profile, not from a CV.
+     *
+     * Rows written before provenance was recorded carry no `source_kind` and
+     * are reported as file-derived, which is what they were: at that time a
+     * missing CV produced no row at all.
+     */
+    public function isFromProfile(): bool
+    {
+        return ($this->payload['meta']['source_kind'] ?? 'file') === 'profile';
+    }
 }

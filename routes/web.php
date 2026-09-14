@@ -9,6 +9,7 @@ use App\Http\Controllers\InterviewEvaluationController;
 use App\Http\Controllers\InterviewDashboardController;
 use App\Http\Controllers\InterviewQuestionController;
 use App\Http\Controllers\InterviewSlotController;
+use App\Http\Controllers\TalentResumeParseController;
 use App\Http\Middleware\NoIndexNoStore;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use App\Http\Controllers\MemberRegistration;
@@ -47,6 +48,27 @@ Route::middleware(['auth', 'role:talent'])->group(function () {
 // Admin and user (employer)
 Route::middleware(['auth', 'role:user,admin'])->group(function () {
     Route::resource('project', ProjectController::class)->except(['index', 'show']);
+
+    /*
+     * Read an uploaded CV and return values for the talent form.
+     *
+     * Declared before the resource so `talents/parse-resume` is matched as a
+     * literal path instead of being swallowed by `talents/{talent}`.
+     *
+     * Submitting is throttled because each one is a language-model request
+     * against a shared GPU. Polling is throttled far more loosely — it is a
+     * cache read, and the page issues one every two seconds while it waits,
+     * so the submit limit would cut off a parse that was working.
+     */
+    Route::post('talents/parse-resume', [TalentResumeParseController::class, 'store'])
+        ->middleware('throttle:12,1')
+        ->name('talents.parse-resume');
+
+    Route::get('talents/parse-resume/{token}', [TalentResumeParseController::class, 'show'])
+        ->where('token', '[0-9a-fA-F-]{36}')
+        ->middleware('throttle:120,1')
+        ->name('talents.parse-resume.show');
+
     Route::resource('talents', TalentController::class);
     Route::resource('companies', CompanyController::class);
     Route::get('talent/{talent}', [\App\Http\Controllers\Api\TalentController::class, 'show'])->name('talent.show');

@@ -2,6 +2,7 @@
 
 use App\Console\Commands\DispatchDueInterviews;
 use App\Console\Commands\ExpireInterviewInvitations;
+use App\Console\Commands\PruneResumeUploads;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\LocalMiddleware;
 use Illuminate\Console\Scheduling\Schedule;
@@ -45,6 +46,17 @@ return Application::configure(basePath: dirname(__DIR__))
          * no signal to anyone that a human should follow up.
          */
         $schedule->command(ExpireInterviewInvitations::class)
+            ->hourly()
+            ->withoutOverlapping(10)
+            ->runInBackground();
+
+        /*
+         * The autofill job deletes its own upload, so this normally finds
+         * nothing. It is here for when the job never ran — a stopped queue
+         * worker, a restart mid-queue — because the alternative is strangers'
+         * CVs accumulating on disk from forms nobody submitted.
+         */
+        $schedule->command(PruneResumeUploads::class)
             ->hourly()
             ->withoutOverlapping(10)
             ->runInBackground();

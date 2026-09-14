@@ -80,7 +80,9 @@ class AiMatchProject extends Command
 
         // ── 2. Resumes ────────────────────────────────────────────────────
         if ($this->option('resumes')) {
-            $query = Talent::query()->whereNotNull('resume')->orderBy('id');
+            // Every candidate, not only those with a CV on file: one without
+            // is parsed from their profile instead.
+            $query = Talent::query()->orderBy('id');
             if ($limit = (int) $this->option('limit')) {
                 $query->limit($limit);
             }

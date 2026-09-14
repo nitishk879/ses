@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Talent;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -87,16 +88,67 @@ class AiParsingService
     }
 
     /**
-     * Fingerprint of a candidate's resume file.
+     * What this candidate can actually be parsed from.
      *
-     * Hashes the bytes rather than the path: a re-upload under the same
-     * filename must count as a change, and a rename without an edit must not.
+     * A CV file is the better source and is always preferred. But a missing
+     * file is the common case, not the exceptional one: SES rows seeded or
+     * imported without an upload carry a filename that was never written to
+     * disk, and a candidate can complete their profile without attaching
+     * anything at all. Treating that as "unparseable" is what left most of the
+     * pool with no score — and an empty score column reads to a recruiter as
+     * "this candidate is unranked", which is a different and much worse claim
+     * than "nobody has uploaded their CV yet".
+     *
+     * So the profile the candidate filled in is the second source. It is
+     * thinner than a CV and the result says so ({@see kind}), but it is real
+     * data the recruiter entered, and scoring it is strictly better than
+     * refusing to score at all.
+     *
+     * The profile hash is domain-separated with a prefix so it can never
+     * collide with a file's. The file hash is deliberately left as a bare
+     * hash of the bytes — prefixing it too would be tidier, but it would also
+     * invalidate every stored parse and spend a language-model call per
+     * already-parsed candidate to arrive at the identical answer.
+     *
+     * @return array{kind: 'file'|'profile', hash: string, text: ?string, path: ?string, contents: ?string}|null
+     */
+    public function resumeSource(Talent $talent): ?array
+    {
+        if (filled($talent->resume) && ($located = $this->locateResume($talent)) !== null) {
+            return [
+                'kind' => 'file',
+                'hash' => hash('sha256', $located['contents']),
+                'text' => null,
+                'path' => $located['path'],
+                'contents' => $located['contents'],
+            ];
+        }
+
+        $text = $this->buildProfileText($talent);
+
+        if ($text === '') {
+            return null;
+        }
+
+        return [
+            'kind' => 'profile',
+            'hash' => hash('sha256', 'profile:'.$text),
+            'text' => $text,
+            'path' => null,
+            'contents' => null,
+        ];
+    }
+
+    /**
+     * Fingerprint of whatever this candidate would be parsed from.
+     *
+     * Hashes content rather than the path: a re-upload under the same filename
+     * must count as a change, a rename without an edit must not, and an edited
+     * profile must re-parse.
      */
     public function resumeInputHash(Talent $talent): ?string
     {
-        $located = $this->locateResume($talent);
-
-        return $located === null ? null : hash('sha256', $located['contents']);
+        return $this->resumeSource($talent)['hash'] ?? null;
     }
 
     /**
@@ -104,27 +156,105 @@ class AiParsingService
      *
      * The file is streamed from disk and base64-encoded here rather than
      * giving the parser access to SES storage — one service, one credential.
+     *
+     * @param  array|null  $source  a pre-resolved {@see resumeSource()}, so a
+     *                              caller that already hashed the input does
+     *                              not read the same file off disk twice.
      */
-    public function parseResume(Talent $talent): array
+    public function parseResume(Talent $talent, ?array $source = null): array
     {
-        if (blank($talent->resume)) {
-            throw new RuntimeException("Talent {$talent->id} has no resume on file.");
-        }
+        $source ??= $this->resumeSource($talent);
 
-        $located = $this->locateResume($talent);
-
-        if ($located === null) {
+        if ($source === null) {
             throw new RuntimeException(
-                "Resume file missing for talent {$talent->id} (stored as \"{$talent->resume}\"); "
-                .'looked on the local and public disks, with and without the talents/ prefix.'
+                "Nothing to parse for talent {$talent->id}: no readable CV"
+                .(filled($talent->resume) ? " (stored as \"{$talent->resume}\")" : '')
+                .' and no profile text on the record.'
             );
         }
 
+        // The service takes exactly one of `text` or `file_base64` and rejects
+        // a request carrying both, so this is an either/or by contract.
+        return $this->post('/v1/parse/resume', $source['kind'] === 'file'
+            ? [
+                'talent_id' => (int) $talent->id,
+                'file_base64' => base64_encode($source['contents']),
+                'filename' => basename((string) $source['path']),
+            ]
+            : [
+                'talent_id' => (int) $talent->id,
+                'text' => $source['text'],
+            ]);
+    }
+
+    /**
+     * Structure a resume that has been uploaded but not yet saved.
+     *
+     * Used to pre-fill the talent form from the file the recruiter just
+     * picked, which happens before there is a `talent` row to attach anything
+     * to — hence the file rather than a model, and hence `talent_id: 0`. The
+     * service requires the field but only echoes it back; nothing is stored on
+     * either side, so this call leaves no trace of a candidate who may never
+     * be created.
+     *
+     * @return array<string, mixed>
+     */
+    public function parseUploadedResume(UploadedFile $file): array
+    {
+        $contents = $file->get();
+
+        if ($contents === false || $contents === '') {
+            throw new RuntimeException('The uploaded file is empty.');
+        }
+
         return $this->post('/v1/parse/resume', [
-            'talent_id' => (int) $talent->id,
-            'file_base64' => base64_encode($located['contents']),
-            'filename' => basename($located['path']),
+            'talent_id' => 0,
+            'file_base64' => base64_encode($contents),
+            'filename' => $file->getClientOriginalName(),
         ]);
+    }
+
+    /**
+     * A candidate's profile rendered as the CV they never uploaded.
+     *
+     * Plain prose with section headings rather than JSON, because this is fed
+     * to the same extraction prompt a real CV goes through — handing it a
+     * shape it was not trained on would make the two sources score
+     * differently for reasons that have nothing to do with the candidate.
+     *
+     * Only free-text and human-meaningful fields go in. Taxonomy ids are left
+     * out on purpose: they mean nothing to a language model, and {@see match()}
+     * already sends them as structured, authoritative input.
+     */
+    public function buildProfileText(Talent $talent): string
+    {
+        $talent->loadMissing('user');
+
+        $sections = [];
+
+        if ($name = trim((string) $talent->user?->name)) {
+            $sections[] = $name;
+        }
+
+        $add = function (string $heading, ?string $body) use (&$sections): void {
+            $body = trim((string) $body);
+            if ($body !== '') {
+                $sections[] = $heading."\n".$body;
+            }
+        };
+
+        $add('Experience', $talent->experience_pr);
+        $add('Summary', $talent->cover_letter);
+        $add('Qualifications', $talent->qualifications);
+        $add('Preferences', $talent->other_desire_conditions);
+
+        if ($talent->min_monthly_price !== null || $talent->max_monthly_price !== null) {
+            $sections[] = 'Expected monthly rate'."\n".
+                number_format((int) ($talent->min_monthly_price ?? 0)).' - '.
+                number_format((int) ($talent->max_monthly_price ?? 0)).' JPY';
+        }
+
+        return trim(implode("\n\n", $sections));
     }
 
     /**

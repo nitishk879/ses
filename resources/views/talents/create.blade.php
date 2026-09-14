@@ -224,6 +224,22 @@
                                     @error('resume')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
+
+                                    {{-- Read the CV that was just attached and offer its
+                                         contents as form values. Opt-in rather than automatic
+                                         on file selection: this is a language-model call, and
+                                         a recruiter who is re-picking a file three times
+                                         should not pay for three of them. --}}
+                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
+                                        <button type="button" class="btn btn-sm btn-outline-primary"
+                                                id="autofillFromResume" disabled>
+                                            <span class="spinner-border spinner-border-sm d-none me-1"
+                                                  id="autofillSpinner" role="status" aria-hidden="true"></span>
+                                            {{ __('talents/registration.autofill_button') }}
+                                        </button>
+                                        <span class="small text-muted">{{ __('talents/registration.autofill_hint') }}</span>
+                                    </div>
+                                    <div id="autofillResult" class="small mt-2" role="status" aria-live="polite"></div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
@@ -458,6 +474,205 @@
 {{--@section('editor', true)--}}
 
 @push('scripts')
+    {{-- Pre-fill the form from the attached CV. --}}
+    <script>
+        (function () {
+            const fileInput = document.getElementById('formFile');
+            const button    = document.getElementById('autofillFromResume');
+            const spinner   = document.getElementById('autofillSpinner');
+            const result    = document.getElementById('autofillResult');
+
+            if (!fileInput || !button) {
+                return;
+            }
+
+            const LABELS = @json(__('talents/registration.autofill_labels'));
+
+            // Nothing to read until a file is attached, and a file that has
+            // been swapped deserves a fresh read rather than the last answer.
+            fileInput.addEventListener('change', function () {
+                button.disabled = fileInput.files.length === 0;
+                result.innerHTML = '';
+            });
+
+            /**
+             * Write a value into one field.
+             *
+             * Never overwrites something the user has already typed: they know
+             * things the document does not, and losing their input to a machine
+             * guess is the fastest way to make a feature like this untrusted.
+             *
+             * @returns {boolean} whether the field was actually changed
+             */
+            function fill(name, value) {
+                if (name === 'subcategory') {
+                    let changed = false;
+                    (value || []).forEach(function (id) {
+                        const box = document.querySelector('input[name="subcategory[]"][value="' + id + '"]');
+                        if (box && !box.checked) {
+                            box.checked = true;
+                            changed = true;
+                        }
+                    });
+                    return changed;
+                }
+
+                const field = document.querySelector('[name="' + name + '"]');
+                if (!field) {
+                    return false;
+                }
+
+                // The rich-text fields are Summernote, so their visible content
+                // lives in the editor, not in the textarea being replaced.
+                if (field.classList.contains('tinyEditor') && window.jQuery && jQuery(field).next('.note-editor').length) {
+                    if (jQuery(field).summernote('isEmpty')) {
+                        jQuery(field).summernote('code', value);
+                        return true;
+                    }
+                    return false;
+                }
+
+                if (field.value && field.value.trim() !== '') {
+                    return false;
+                }
+
+                field.value = value;
+                // Let select2 and any other listener see the change.
+                field.dispatchEvent(new Event('change', { bubbles: true }));
+                return true;
+            }
+
+            function busy(on) {
+                button.disabled = on || fileInput.files.length === 0;
+                spinner.classList.toggle('d-none', !on);
+            }
+
+            function notice(cssClass, html) {
+                result.innerHTML = '<div class="alert ' + cssClass + ' py-2 px-3 mb-0">' + html + '</div>';
+            }
+
+            function escapeHtml(text) {
+                const d = document.createElement('div');
+                d.textContent = text;
+                return d.innerHTML;
+            }
+
+            // Parsing runs on the queue and takes tens of seconds, so the
+            // upload only hands back a token; the result is collected by
+            // polling. See App\Jobs\ParseUploadedResume for why it cannot be
+            // done inside the request.
+            const POLL_EVERY_MS = 2000;
+            const GIVE_UP_AFTER_MS = 180000;
+
+            function poll(token, startedAt) {
+                return fetch(@json(url('talents/parse-resume')) + '/' + token, {
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.status === 'done') {
+                            return data;
+                        }
+                        if (data.status === 'failed') {
+                            throw new Error(data.message || '');
+                        }
+                        if (Date.now() - startedAt > GIVE_UP_AFTER_MS) {
+                            throw new Error(@json(__('talents/registration.autofill_timeout')));
+                        }
+                        return new Promise(function (resolve) {
+                            setTimeout(function () { resolve(poll(token, startedAt)); }, POLL_EVERY_MS);
+                        });
+                    });
+            }
+
+            button.addEventListener('click', function () {
+                if (fileInput.files.length === 0) {
+                    return;
+                }
+
+                const body = new FormData();
+                body.append('resume', fileInput.files[0]);
+                // This form's own token — not the first one on the page, which
+                // may belong to the header's sign-out form.
+                body.append('_token', document.querySelector('#progressForm input[name="_token"]').value);
+
+                busy(true);
+                notice('alert-secondary', @json(__('talents/registration.autofill_working')));
+
+                fetch(@json(route('talents.parse-resume')), {
+                    method: 'POST',
+                    body: body,
+                    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                })
+                    .then(function (response) {
+                        return response.json().then(function (data) {
+                            if (!response.ok) {
+                                throw new Error(
+                                    data.message
+                                    || (data.errors && data.errors.resume && data.errors.resume[0])
+                                    || @json(__('talents/registration.autofill_failed'))
+                                );
+                            }
+                            return data;
+                        });
+                    })
+                    .then(function (queued) {
+                        return poll(queued.token, Date.now());
+                    })
+                    .then(function (res) {
+                        const changed = [];
+                        const skipped = [];
+
+                        const fields = res.fields || {};
+
+                        Object.keys(fields).forEach(function (name) {
+                            (fill(name, fields[name]) ? changed : skipped)
+                                .push(LABELS[name] || name);
+                        });
+
+                        if (changed.length === 0) {
+                            notice('alert-secondary', @json(__('talents/registration.autofill_nothing')));
+                            return;
+                        }
+
+                        // Say exactly what was touched. A form that quietly
+                        // changed underneath you is a form you have to re-read
+                        // from the top before you dare submit it.
+                        let html = '<strong>' + @json(__('talents/registration.autofill_done')) + '</strong>'
+                            + '<div class="mt-1">' + escapeHtml(changed.join(', ')) + '</div>';
+
+                        if (skipped.length) {
+                            html += '<div class="text-muted mt-1">'
+                                + @json(__('talents/registration.autofill_kept')) + ' '
+                                + escapeHtml(skipped.join(', ')) + '</div>';
+                        }
+
+                        if ((res.unmapped_skills || []).length) {
+                            html += '<div class="text-muted mt-1">'
+                                + @json(__('talents/registration.autofill_unmapped')) + ' '
+                                + escapeHtml(res.unmapped_skills.join(', ')) + '</div>';
+                        }
+
+                        notice('alert-success', html);
+                    })
+                    .catch(function (err) {
+                        // Every rejection above carries a message written for a
+                        // person — a validation message, the parse failure, or
+                        // the give-up notice. Falling back to the generic text
+                        // only when something threw without one.
+                        notice('alert-warning', escapeHtml(
+                            (err && err.message)
+                                ? err.message
+                                : @json(__('talents/registration.autofill_failed'))
+                        ));
+                    })
+                    .finally(function () {
+                        busy(false);
+                    });
+            });
+        })();
+    </script>
+
     <script>
         $( '#multiple-select-field' ).select2( {
             theme: "bootstrap-5",

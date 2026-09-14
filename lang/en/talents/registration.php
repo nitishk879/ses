@@ -95,4 +95,27 @@ return array(
     'experience_details_placeholder' => '',
     'project_description_placeholder' => '',
     'project_requirements_placeholder' => '',
+
+    // Pre-filling the form from an uploaded CV.
+    'autofill_button' => 'Fill form from this CV',
+    'autofill_hint' => 'Reads the attached file and fills what it can. Nothing you have typed is replaced.',
+    'autofill_working' => 'Reading the CV…',
+    'autofill_done' => 'Filled from the CV — please check these:',
+    'autofill_kept' => 'Left as you had them:',
+    'autofill_nothing' => 'Nothing new to fill — the CV added nothing this form does not already have.',
+    'autofill_unmapped' => 'Skills with no category in SES:',
+    'autofill_timeout' => 'This CV is taking longer than expected. Fill the form in by hand, or try again in a moment.',
+    'autofill_queued' => 'Reading the CV — this takes up to a minute for a long one.',
+    'autofill_failed' => 'Could not read this CV. Fill the form in by hand — the file still uploads normally.',
+    'autofill_labels' => [
+        'firstname' => 'First name',
+        'lastname' => 'Last name',
+        'email' => 'Email',
+        'work_experience' => 'Years of experience',
+        'education' => 'Education',
+        'experience' => 'Work history',
+        'cover_letter' => 'Cover letter',
+        'language' => 'Language',
+        'subcategory' => 'Skill areas',
+    ],
 );

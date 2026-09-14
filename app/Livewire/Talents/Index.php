@@ -280,8 +280,13 @@ class Index extends Component
                 ->orderByRaw('COALESCE(ai_matches.score, -1) DESC')
                 ->orderBy('talent.id')
                 // Carries reasons/blockers for the badge without a second
-                // query per card.
-                ->with(['aiMatches' => fn ($q) => $q->where('project_id', $this->matchProject)]);
+                // query per card, plus the parse so the card can say whether a
+                // score came from a CV or from the candidate's profile — and,
+                // when there is no score, which of the two is missing.
+                ->with([
+                    'aiMatches' => fn ($q) => $q->where('project_id', $this->matchProject),
+                    'aiResumeParse',
+                ]);
         } else {
             $query->orderBy($this->sortBy, $this->sortDirection);
         }

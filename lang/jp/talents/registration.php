@@ -89,4 +89,27 @@ return array(
     'talent_update' => 'Update talent',
     'talent_updated' => 'タレントがに更新されました。',
     'talent_deleted'    => 'タレントを削除されました。',
+
+    // Pre-filling the form from an uploaded CV.
+    'autofill_button' => '履歴書からフォームに入力',
+    'autofill_hint' => '添付されたファイルを読み取り、入力できる項目を埋めます。入力済みの内容は変更されません。',
+    'autofill_working' => '履歴書を読み取っています…',
+    'autofill_done' => '履歴書から入力しました。内容をご確認ください：',
+    'autofill_kept' => '入力済みのため変更しなかった項目：',
+    'autofill_nothing' => '新たに入力できる項目はありませんでした。',
+    'autofill_unmapped' => 'SESの分類に該当しないスキル：',
+    'autofill_timeout' => '読み取りに時間がかかっています。お手数ですが手入力いただくか、少し時間をおいて再度お試しください。',
+    'autofill_queued' => '履歴書を読み取っています。長い書類では1分ほどかかります。',
+    'autofill_failed' => 'この履歴書を読み取れませんでした。お手数ですが手入力してください（ファイルは通常どおり添付されます）。',
+    'autofill_labels' => [
+        'firstname' => '名',
+        'lastname' => '姓',
+        'email' => 'メールアドレス',
+        'work_experience' => '経験年数',
+        'education' => '学歴',
+        'experience' => '職務経歴',
+        'cover_letter' => '自己PR',
+        'language' => '言語',
+        'subcategory' => 'スキル分野',
+    ],
 );
