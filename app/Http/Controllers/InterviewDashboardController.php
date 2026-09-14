@@ -8,6 +8,7 @@ use App\Jobs\ParseTalentResume;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Talent;
+use App\Services\InterviewAiService;
 use App\Services\InterviewInvitationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -82,6 +83,10 @@ class InterviewDashboardController extends Controller
             'statuses' => InterviewStatus::cases(),
             'filters' => $filters,
             'summary' => $this->summary(),
+            // Live from the DenAI dashboard. Empty means the directory was
+            // unreachable, which the view says rather than passing off as
+            // "no bots exist".
+            'bots' => app(InterviewAiService::class)->agents(),
         ]);
     }
 
@@ -162,6 +167,47 @@ class InterviewDashboardController extends Controller
         return back()->with([
             'message' => __('interview.dashboard.matching_queued', ['count' => $queued]),
             'type' => 'info',
+        ]);
+    }
+
+    /**
+     * Choose which bot conducts this project's screening calls.
+     *
+     * The bot itself — its wording, its voice, its name — is authored on the
+     * DenAI dashboard, and stays there. This screen only records *which* one,
+     * because a second place to write prompts would drift from the first
+     * within a week and nobody would know which one the candidate heard.
+     *
+     * The id is accepted even when the bot directory could not be reached. A
+     * recruiter who already knows which bot they want should not be blocked by
+     * a network path between two services that has nothing to do with them,
+     * and the id is validated against the directory at dial time anyway.
+     */
+    public function assignBot(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorizeProject($project);
+
+        $validated = $request->validate([
+            // Loose on purpose: a dashboard ObjectId today, whatever the
+            // dashboard stores tomorrow. Tight enough to reject a pasted URL.
+            'interview_agent_id' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]*$/'],
+        ]);
+
+        $project->update([
+            'interview_agent_id' => $validated['interview_agent_id'] ?: null,
+        ]);
+
+        Log::info('interview.bot_assigned', [
+            'project_id' => $project->id,
+            'agent_id' => $project->interview_agent_id,
+            'by' => auth()->id(),
+        ]);
+
+        return back()->with([
+            'message' => $project->interview_agent_id
+                ? __('interview.dashboard.bot_assigned')
+                : __('interview.dashboard.bot_cleared'),
+            'type' => 'success',
         ]);
     }
 

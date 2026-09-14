@@ -14,6 +14,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
+use Throwable;
 
 /**
  * Client for the interview half of ses-ai-service.
@@ -111,8 +112,12 @@ class InterviewAiService
      * @param  array<string, string>  $metadata
      * @return array<string, mixed>
      */
-    public function call(array $plan, PhoneNumber $to, array $metadata = []): array
-    {
+    public function call(
+        array $plan,
+        PhoneNumber $to,
+        array $metadata = [],
+        ?string $agentId = null,
+    ): array {
         $from = config('services.interview.from_number');
 
         if (blank($from)) {
@@ -126,7 +131,37 @@ class InterviewAiService
             'to_phone' => $to->e164,
             'from_phone' => (string) $from,
             'metadata' => $metadata,
+            // Which dashboard bot conducts this call. Its prompt becomes the
+            // interview's persona, and its id is what attributes the finished
+            // conversation to it on the DenAI dashboard. Null is valid: the
+            // interview runs on the generated script alone.
+            'agent_id' => $agentId,
         ]);
+    }
+
+    /**
+     * The interview bots a recruiter can choose between.
+     *
+     * Read live from the DenAI dashboard rather than mirrored into this
+     * database. A local copy would need syncing, and a stale copy offering a
+     * bot that no longer exists is worse than no list at all.
+     *
+     * Returns an empty array when the directory is unreachable — the UI says
+     * so and still accepts an id typed by hand, because a recruiter who
+     * already knows which bot they want should not be blocked by a network
+     * path that has nothing to do with them.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    public function agents(): array
+    {
+        try {
+            return $this->get('/v1/interview/agents');
+        } catch (Throwable $e) {
+            Log::warning('interview.agents_unavailable', ['error' => $e->getMessage()]);
+
+            return [];
+        }
     }
 
     /**

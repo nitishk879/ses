@@ -33,6 +33,10 @@ class Project extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        // Which DenAI dashboard bot conducts this project's screening calls.
+        // A string, not a relation: the bot lives in the dashboard's own
+        // database, so there is nothing here to join to.
+        "interview_agent_id",
         "title",
         "slug",
         "minimum_price",

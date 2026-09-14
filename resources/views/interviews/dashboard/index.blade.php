@@ -53,6 +53,61 @@
                         </form>
                     </div>
 
+                    {{-- Which bot conducts this project's calls. The bot itself is
+                         authored on the DenAI dashboard; this only records the
+                         choice, so there is exactly one place prompts are written. --}}
+                    <div class="col-12 border-top pt-3">
+                        <h2 class="h6">{{ __('interview.dashboard.interview_bot') }}</h2>
+                        <p class="text-muted small">{{ __('interview.dashboard.interview_bot_help') }}</p>
+                        <form method="POST" action="{{ url('interviews/dashboard/bot') }}/0"
+                              class="row g-2 align-items-end" id="botForm">
+                            @csrf
+                            <div class="col-sm-4">
+                                <label class="form-label small mb-1" for="botProjectSelect">
+                                    {{ __('interview.dashboard.project') }}
+                                </label>
+                                <select class="form-select" id="botProjectSelect" required
+                                        onchange="document.getElementById('botForm').action='{{ url('interviews/dashboard/bot') }}/'+this.value">
+                                    <option value="">{{ __('interview.dashboard.choose_project') }}</option>
+                                    @foreach($projects as $p)
+                                        <option value="{{ $p->id }}"
+                                                @selected(($filters['project'] ?? null) == $p->id)>{{ $p->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <label class="form-label small mb-1" for="interviewAgentId">
+                                    {{ __('interview.dashboard.bot') }}
+                                </label>
+                                @if(! empty($bots))
+                                    <select class="form-select" id="interviewAgentId" name="interview_agent_id">
+                                        <option value="">{{ __('interview.dashboard.no_bot') }}</option>
+                                        @foreach($bots as $bot)
+                                            <option value="{{ $bot['agent_id'] }}">
+                                                {{ $bot['name'] }}@if(! empty($bot['language'])) — {{ $bot['language'] }}@endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    {{-- An unreachable directory is said out loud rather than
+                                         rendered as "no bots exist", which would send a
+                                         recruiter off to create one that already exists. --}}
+                                    <input type="text" class="form-control" id="interviewAgentId"
+                                           name="interview_agent_id" maxlength="64"
+                                           placeholder="{{ __('interview.dashboard.bot_id_placeholder') }}">
+                                    <div class="form-text text-warning">
+                                        {{ __('interview.dashboard.bot_list_unavailable') }}
+                                    </div>
+                                @endif
+                            </div>
+                            <div class="col-sm-3">
+                                <button class="btn btn-outline-primary w-100" type="submit">
+                                    {{ __('interview.dashboard.save_bot') }}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="col-lg-6 border-start-lg">
                         <h2 class="h6">{{ __('interview.dashboard.invite_shortlist') }}</h2>
                         <p class="text-muted small">{{ __('interview.dashboard.invite_help') }}</p>

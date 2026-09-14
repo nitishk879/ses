@@ -189,6 +189,11 @@ Route::middleware(['auth', 'role:admin,user'])
         Route::post('invite/{project:id}', [InterviewDashboardController::class, 'invite'])
             ->whereNumber('project')
             ->name('invite');
+
+        // Which DenAI dashboard bot conducts this project's calls.
+        Route::post('bot/{project:id}', [InterviewDashboardController::class, 'assignBot'])
+            ->whereNumber('project')
+            ->name('bot');
         Route::get('{interview}', [InterviewDashboardController::class, 'show'])
             ->whereNumber('interview')
             ->name('show');

@@ -89,6 +89,17 @@ return [
         'send' => '送信',
 
         'matching_queued' => 'マッチングを登録しました。:count 件の職務経歴書を解析中です。1分ほどで再読み込みしてください。',
+
+        // Choosing which DenAI dashboard bot conducts the calls.
+        'interview_bot' => '面接ボット',
+        'interview_bot_help' => 'このプロジェクトの候補者に電話するボットを選びます。ボットの作成と文言の編集は DenAI ダッシュボードで行います。',
+        'bot' => 'ボット',
+        'no_bot' => '— ボットなし（自動生成のスクリプトのみ）—',
+        'save_bot' => '保存',
+        'bot_assigned' => '面接ボットを保存しました。',
+        'bot_cleared' => '面接ボットを解除しました。自動生成のスクリプトのみで発信します。',
+        'bot_id_placeholder' => 'ダッシュボードURLのボットID',
+        'bot_list_unavailable' => 'DenAI ダッシュボードからボット一覧を取得できませんでした。ボットのURLに含まれるIDを貼り付けてください。',
         'no_shortlist' => 'この案件で :threshold 以上の候補者はまだいません。',
         'invited' => ':count 名を招待しました。',
         'invited_with_failures' => ':count 名を招待しました。一部は送信できませんでした： :failures',

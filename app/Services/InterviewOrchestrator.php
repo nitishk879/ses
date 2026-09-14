@@ -120,12 +120,19 @@ class InterviewOrchestrator
         $this->storePlan($attempt, $plan);
 
         try {
-            $handle = $this->ai->call($plan, $phone, [
-                'ses_interview_id' => (string) $interview->id,
-                'ses_attempt_id' => (string) $attempt->id,
-                'ses_project_id' => (string) $project->id,
-                'ses_talent_id' => (string) $talent->id,
-            ]);
+            $handle = $this->ai->call(
+                $plan,
+                $phone,
+                [
+                    'ses_interview_id' => (string) $interview->id,
+                    'ses_attempt_id' => (string) $attempt->id,
+                    'ses_project_id' => (string) $project->id,
+                    'ses_talent_id' => (string) $talent->id,
+                ],
+                // Read now rather than at plan time, so a bot reassigned or
+                // reworded on the dashboard applies to this call.
+                $project->interview_agent_id,
+            );
         } catch (InterviewCallingNotConfigured $e) {
             // Not retryable: this resolves on a deploy, not on a timer. Fail
             // loudly with the service's own message, which names the missing

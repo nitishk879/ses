@@ -94,6 +94,17 @@ return [
         'send' => 'Send',
 
         'matching_queued' => 'Matching queued. :count CV(s) are being read; refresh in a minute.',
+
+        // Choosing which DenAI dashboard bot conducts the calls.
+        'interview_bot' => 'Interview bot',
+        'interview_bot_help' => 'Which bot calls the candidates for this project. Create and word the bot on the DenAI dashboard; this only chooses one.',
+        'bot' => 'Bot',
+        'no_bot' => '— No bot (use the generated script only) —',
+        'save_bot' => 'Save',
+        'bot_assigned' => 'Interview bot saved for this project.',
+        'bot_cleared' => 'Interview bot cleared. Calls will use the generated script only.',
+        'bot_id_placeholder' => 'Bot id from the dashboard URL',
+        'bot_list_unavailable' => 'The bot list could not be loaded from the DenAI dashboard. Paste the id from the bot URL instead.',
         'no_shortlist' => 'Nobody is at or above :threshold for this project yet.',
         'invited' => 'Invited :count candidate(s).',
         'invited_with_failures' => 'Invited :count candidate(s). Some could not be reached: :failures',
