@@ -55,6 +55,12 @@ return [
     'already_scheduled_notice' => '面接は既に :date に予定されています。',
     'session_expired_retry' => 'ページを開いたままセッションの有効期限が切れました。もう一度日時をお選びください。',
 
+    'slot_time_unreadable' => '「:value」は日時として読み取れません。日付と時刻をお選びください。',
+
+    'slot_time_in_past' => ':value はすでに過ぎています。現在時刻より後の日時をお選びください。',
+
+    'no_slots_chosen' => '提示する日時が選ばれていません。1つ以上入力するか、すべて空欄にして自動選択にしてください。',
+
     'mail' => [
         'subject' => '面接のご案内 — :project',
         'greeting' => ':name 様',
@@ -85,6 +91,8 @@ return [
         'invite_confirm' => '候補者に実際のメールが送信されます。続行しますか？',
         'project' => '案件',
         'choose_project' => '案件を選択…',
+        'slot_times' => '提示する日時（任意）',
+        'slot_times_help' => '空欄のままにすると3つの候補日時を自動で選びます。入力した場合は、その日時のみを提示します（本日も指定できます）。:zone の時刻で、現在時刻より後を指定してください。',
         'threshold' => '基準スコア',
         'run' => '実行',
         'send' => '送信',

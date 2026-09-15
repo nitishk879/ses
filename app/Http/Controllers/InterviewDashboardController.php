@@ -226,7 +226,19 @@ class InterviewDashboardController extends Controller
         $validated = $request->validate([
             'threshold' => ['nullable', 'integer', 'min:0', 'max:100'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
+            // Times the recruiter typed, in the interview timezone. Left
+            // empty they are generated, which is the default and what most
+            // invitations use. Validated as dates only — "not in the past"
+            // is enforced in the generator, against the interview zone, so
+            // one clock decides it rather than two that can disagree.
+            'slot_times' => ['nullable', 'array', 'max:6'],
+            'slot_times.*' => ['nullable', 'string', 'max:32'],
         ]);
+
+        $slotTimes = array_values(array_filter(
+            $validated['slot_times'] ?? [],
+            static fn ($t) => filled($t)
+        ));
 
         $threshold = $validated['threshold']
             ?? (int) config('services.interview.invitation.min_match_score', 70);
@@ -252,8 +264,21 @@ class InterviewDashboardController extends Controller
             }
 
             try {
-                $invitations->invite($project, $talent, (int) $match->score);
+                $invitations->invite(
+                    $project,
+                    $talent,
+                    (int) $match->score,
+                    $slotTimes ?: null,
+                );
                 $sent++;
+            } catch (\InvalidArgumentException $e) {
+                // A bad time is wrong for every candidate in the batch, not
+                // just this one, so it stops here rather than repeating the
+                // same complaint once per person.
+                return back()->withInput()->with([
+                    'message' => $e->getMessage(),
+                    'type' => 'danger',
+                ]);
             } catch (RuntimeException $e) {
                 // One unreachable candidate must not abandon the shortlist;
                 // the recruiter is told which ones need attention.

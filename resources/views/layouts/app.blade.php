@@ -50,7 +50,21 @@
                     </div>
                 </div>
             </div>
-            @yield('content') {{ $slot ?? '' }}
+            {{--
+                `{{ $slot ?? '' }}` used to follow this line, for the
+                component-style layout. It never fired: that layout is a
+                different file (components/layouts/app.blade.php), and this one
+                is only ever reached through @extends — all nineteen views that
+                use it yield into `content`.
+
+                What it did instead was print any variable that happened to be
+                called `$slot`. Blade leaves a @foreach variable in scope after
+                the loop, so a view looping `@foreach($interview->slots as $slot)`
+                left an Eloquent model behind, and echoing a model calls
+                __toString() — which dumped that row's JSON, primary key and
+                timestamps included, at the bottom of the rendered page.
+            --}}
+            @yield('content')
         </main>
         <button id="backToTop" title="Back to Top">↑</button>
         <x-footer />

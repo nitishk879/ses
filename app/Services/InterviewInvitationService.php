@@ -89,9 +89,16 @@ class InterviewInvitationService
      * Idempotent by construction — an interview that already carries an
      * invitation token is returned untouched. A queue retry after a successful
      * send must not put a second email in a candidate's inbox.
+     *
+     * @param  array<int, string>|null  $slotTimes  naive local times the recruiter
+     *         chose, or null to fall back to generated windows
      */
-    public function invite(Project $project, Talent $talent, ?int $matchScore = null): Interview
-    {
+    public function invite(
+        Project $project,
+        Talent $talent,
+        ?int $matchScore = null,
+        ?array $slotTimes = null,
+    ): Interview {
         $talent->loadMissing('user');
 
         if (blank($talent->user?->email)) {
@@ -149,15 +156,24 @@ class InterviewInvitationService
         $timezone = $this->timezoneFor($interview);
         $count = (int) config('services.interview.invitation.slots_offered', 3);
 
-        $windows = $this->slots->generate($timezone, $count);
+        // Times the recruiter chose win over generated ones. They know
+        // things the scheduler cannot: that this candidate asked for an
+        // evening, that the client wants them seen today, that Monday is
+        // a holiday. The generator remains the default because most
+        // invitations do not need that knowledge.
+        $windows = filled($slotTimes)
+            ? $this->slots->fromExplicit($slotTimes, $timezone)
+            : $this->slots->generate($timezone, $count);
 
         if ($windows->isEmpty()) {
-            // Loud, not silent. An empty offer means the calendar is full or
-            // the horizon is misconfigured, and an email listing no times is
-            // worse than no email at all.
-            throw new RuntimeException(
-                'No interview slots are available within the configured horizon; '
-                .'widen INTERVIEW_HORIZON_DAYS or check for a booked-out calendar.'
+            // Loud, not silent. An email listing no times is worse than no
+            // email at all, and the two ways of getting here need different
+            // fixes — one is a recruiter who left every box blank, the
+            // other a calendar that is full or a misconfigured horizon.
+            throw new RuntimeException(filled($slotTimes)
+                ? __('interview.no_slots_chosen')
+                : 'No interview slots are available within the configured horizon; '
+                  .'widen INTERVIEW_HORIZON_DAYS or check for a booked-out calendar.'
             );
         }
 

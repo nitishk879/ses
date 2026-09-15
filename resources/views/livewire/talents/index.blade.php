@@ -268,7 +268,14 @@
                                     </div>
                                     <div class="row align-items-center">
                                         <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.nearest_station") }}: </div>
-                                        <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->user->nearest_station_prefecture ?? 'Maihama Station on the Keiyo Line (Chiba Prefecture)' }}</div>
+                                        {{-- The same fake station the resume modal used to
+                                             print. `??` only catches null, and the column
+                                             holds '' far more often, so most cards showed a
+                                             blank — but any candidate whose column was null
+                                             was given a real station in Chiba as if they had
+                                             said so. A recruiter filtering by location would
+                                             have acted on it. --}}
+                                        <div class="col-lg-6 col-xl-7 feature-text">{{ filled($talent->user->nearest_station_prefecture) ? $talent->user->nearest_station_prefecture : '—' }}</div>
                                     </div>
                                     <div class="row align-items-center">
                                         <div class="col-lg-6 col-xl-5 feature-head">{{ __('talents/index.operations') }}: </div>

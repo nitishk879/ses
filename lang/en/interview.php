@@ -60,6 +60,12 @@ return [
     'already_scheduled_notice' => 'Your interview is already scheduled for :date.',
     'session_expired_retry' => 'Your session timed out while the page was open. Please choose a time again.',
 
+    'slot_time_unreadable' => '\x27:value\x27 is not a time this can read. Please pick a date and time.',
+
+    'slot_time_in_past' => ':value has already passed. Please choose a time in the future.',
+
+    'no_slots_chosen' => 'No interview times were chosen. Fill in at least one, or leave them all empty to have them chosen automatically.',
+
     'mail' => [
         'subject' => 'Interview invitation — :project',
         'greeting' => 'Hello :name,',
@@ -90,6 +96,8 @@ return [
         'invite_confirm' => 'This sends real email to candidates. Continue?',
         'project' => 'Project',
         'choose_project' => 'Choose a project…',
+        'slot_times' => 'Times to offer (optional)',
+        'slot_times_help' => 'Leave empty and three times are chosen automatically. Fill any of them in and exactly those are offered — including today. Times are in :zone and must be in the future.',
         'threshold' => 'Min score',
         'run' => 'Run',
         'send' => 'Send',

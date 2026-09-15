@@ -135,12 +135,59 @@
                                        min="0" max="100"
                                        value="{{ config('services.interview.invitation.min_match_score', 70) }}">
                             </div>
+                            {{-- Times to offer. Left empty they are generated from
+                                 business hours and the free calendar, which is the
+                                 default. Filled in, exactly these go in the email.
+
+                                 `min` is the recruiter's own clock and is only a
+                                 convenience — the real "not in the past" check runs
+                                 on the server, in the interview timezone, because a
+                                 browser clock is neither trustworthy nor the one the
+                                 candidate reads. --}}
+                            <div class="col-12">
+                                <label class="form-label small mb-1">
+                                    {{ __('interview.dashboard.slot_times') }}
+                                </label>
+                                <div class="row g-2">
+                                    @for($i = 0; $i < 3; $i++)
+                                        <div class="col-md-4">
+                                            <input type="datetime-local" class="form-control"
+                                                   name="slot_times[]"
+                                                   id="slotTime{{ $i }}"
+                                                   value="{{ old('slot_times.'.$i) }}">
+                                        </div>
+                                    @endfor
+                                </div>
+                                <div class="form-text">
+                                    {{ __('interview.dashboard.slot_times_help', [
+                                        'zone' => config('services.interview.invitation.timezone', 'Asia/Tokyo'),
+                                    ]) }}
+                                </div>
+                            </div>
+
                             <div class="col-sm-3">
                                 <button class="btn btn-success w-100" type="submit">
                                     {{ __('interview.dashboard.send') }}
                                 </button>
                             </div>
                         </form>
+
+                        <script>
+                            // No past times in the picker. Recomputed on focus, not
+                            // only at page load, so a form left open over lunch does
+                            // not still offer this morning.
+                            (function () {
+                                function stampNow() {
+                                    const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+                                    const min = now.toISOString().slice(0, 16);
+                                    document.querySelectorAll('input[name="slot_times[]"]')
+                                        .forEach(el => el.min = min);
+                                }
+                                stampNow();
+                                document.querySelectorAll('input[name="slot_times[]"]')
+                                    .forEach(el => el.addEventListener('focus', stampNow));
+                            })();
+                        </script>
                     </div>
                 </div>
             </div>
