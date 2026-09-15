@@ -66,9 +66,18 @@ return [
 
     'no_slots_chosen' => 'No interview times were chosen. Fill in at least one, or leave them all empty to have them chosen automatically.',
 
+    'not_reschedulable' => 'This interview cannot be rescheduled — it is :status.',
+
+    'no_email_to_reschedule' => 'This candidate has no email address, so a new invitation cannot be sent.',
+
+    'no_slots_available' => 'No interview times are available within the configured horizon.',
+
     'mail' => [
         'subject' => 'Interview invitation — :project',
         'greeting' => 'Hello :name,',
+        'subject_rescheduled' => 'Interview rescheduled — :project',
+        'heading_rescheduled' => 'Your interview has been rescheduled',
+        'intro_rescheduled' => 'The times we offered for :project are no longer available, so here are new ones. Any time you chose earlier has been cancelled.',
         'heading' => 'You have been shortlisted',
         'intro' => 'We would like to invite you to a short screening interview for :project.',
         'about' => 'The interview is automated and takes about :minutes minutes. You will receive a phone call at the time you choose.',
@@ -98,6 +107,11 @@ return [
         'choose_project' => 'Choose a project…',
         'slot_times' => 'Times to offer (optional)',
         'slot_times_help' => 'Leave empty and three times are chosen automatically. Fill any of them in and exactly those are offered — including today. Times are in :zone and must be in the future.',
+        'reschedule' => 'Reschedule',
+        'reschedule_help' => 'Cancels the times already offered — including one the candidate has chosen — and emails them new ones. Leave the boxes empty to have three chosen automatically.',
+        'reschedule_confirm' => 'This cancels the current booking and emails the candidate new times. Continue?',
+        'rescheduled' => 'Rescheduled. The candidate has been emailed the new times.',
+        'project_applies_to_all' => 'This project is used by all three actions below.',
         'threshold' => 'Min score',
         'run' => 'Run',
         'send' => 'Send',

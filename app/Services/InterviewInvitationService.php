@@ -84,6 +84,131 @@ class InterviewInvitationService
     }
 
     /**
+     * States a reschedule must refuse.
+     *
+     * The interview is happening, or has happened. Rescheduling one of these
+     * would mint a fresh token, wipe the slots and put the status back to
+     * "choose a time" — erasing the record of a call that actually took place,
+     * and in the two live states, cutting off a candidate mid-sentence.
+     *
+     * @var array<int, InterviewStatus>
+     */
+    private const NOT_RESCHEDULABLE = [
+        InterviewStatus::STARTING,
+        InterviewStatus::IN_PROGRESS,
+        InterviewStatus::COMPLETED,
+        InterviewStatus::EVALUATING,
+        InterviewStatus::EVALUATED,
+    ];
+
+    /**
+     * Withdraw the times already offered and put new ones in front of the
+     * candidate.
+     *
+     * Separate from {@see invite()} rather than a flag on it, because the two
+     * have opposite safety rules. `invite()` is idempotent and deliberately
+     * does nothing when a live invitation exists — that is what stops a queue
+     * retry from emailing somebody twice. Rescheduling is the case where the
+     * recruiter *means* to replace a live invitation, so it has to do exactly
+     * what `invite()` refuses to.
+     *
+     * The old slots are deleted, including one the candidate had already
+     * chosen. That is the point: their booking is being withdrawn. The time
+     * they had picked goes into the log line, because deleting the row removes
+     * the only other record of it, and `(interview_id, position)` is unique —
+     * so keeping the old rows around would collide with the new ones rather
+     * than preserving anything.
+     *
+     * @param  array<int, string>  $slotTimes  naive local times; empty means generate
+     *
+     * @throws RuntimeException when the interview has already happened
+     */
+    public function reschedule(Interview $interview, array $slotTimes = []): Interview
+    {
+        $interview->loadMissing(['talent.user', 'project']);
+
+        if (in_array($interview->status, self::NOT_RESCHEDULABLE, true)) {
+            throw new RuntimeException(__('interview.not_reschedulable', [
+                'status' => InterviewStatus::toName($interview->status),
+            ]));
+        }
+
+        $talent = $interview->talent;
+
+        if (blank($talent?->user?->email)) {
+            throw new RuntimeException(__('interview.no_email_to_reschedule'));
+        }
+
+        // Same gate as a first invitation: the email promises a phone call.
+        if ($talent->interviewPhone() === null) {
+            throw new RuntimeException(__('interview.phone_not_dialable', [
+                'talent' => $talent->user?->name ?: "#{$talent->id}",
+            ]));
+        }
+
+        $timezone = $this->timezoneFor($interview);
+        $count = (int) config('services.interview.invitation.slots_offered', 3);
+
+        $windows = filled($slotTimes)
+            ? $this->slots->fromExplicit($slotTimes, $timezone)
+            : $this->slots->generate($timezone, $count);
+
+        if ($windows->isEmpty()) {
+            throw new RuntimeException(filled($slotTimes)
+                ? __('interview.no_slots_chosen')
+                : __('interview.no_slots_available'));
+        }
+
+        $previous = $interview->scheduled_at;
+        $validHours = (int) config('services.interview.invitation.offer_valid_hours', 72);
+
+        DB::transaction(function () use ($interview, $timezone, $windows, $validHours) {
+            $interview->fill([
+                'status' => InterviewStatus::SLOT_SELECTION,
+                'timezone' => $timezone,
+                'invitation_token' => bin2hex(random_bytes(32)),
+                'invitation_sent_at' => now(),
+                'invitation_expires_at' => now()->addHours($validHours),
+                // The old booking is gone. Left set, the scheduler that runs
+                // every minute would dial the withdrawn time.
+                'scheduled_at' => null,
+                'slot_selected_at' => null,
+                'failure_reason' => null,
+            ])->save();
+
+            $interview->slots()->delete();
+
+            foreach ($windows as $index => $window) {
+                $interview->slots()->create([
+                    'starts_at' => $window['starts_at']->utc(),
+                    'ends_at' => $window['ends_at']->utc(),
+                    'status' => InterviewSlotStatus::OFFERED,
+                    'position' => $index + 1,
+                ]);
+            }
+        });
+
+        $interview->load('slots', 'project');
+
+        // Outside the transaction, for the same reason as the first invitation:
+        // a mail failure must not roll back a withdrawal the candidate may
+        // already have been told about.
+        $talent->user->notify(new InterviewInvitation($interview, rescheduled: true));
+
+        Log::info('interview.rescheduled', [
+            'interview_id' => $interview->id,
+            // The withdrawn booking, recorded here because deleting the slot
+            // row removes the only other trace of it.
+            'previous_scheduled_at' => $previous?->toIso8601String(),
+            'slots_offered' => $windows->count(),
+            'chosen_by_recruiter' => filled($slotTimes),
+            'by' => auth()->id(),
+        ]);
+
+        return $interview;
+    }
+
+    /**
      * Invite one candidate: create the interview, offer slots, send the email.
      *
      * Idempotent by construction — an interview that already carries an

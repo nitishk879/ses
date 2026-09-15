@@ -9,6 +9,67 @@
         <i class="fa-solid fa-arrow-left me-1"></i>{{ __('interview.dashboard.back') }}
     </a>
 
+    {{-- ── reschedule ─────────────────────────────────────────────────────
+         Hidden once the call has happened: rescheduling then would mint a new
+         token, wipe the slots and put the status back to "choose a time",
+         erasing the record of an interview that actually took place. The
+         service refuses it too — this only keeps the button off a screen where
+         pressing it can do nothing useful. --}}
+    @php
+        $reschedulable = ! in_array($interview->status, [
+            \App\Enums\InterviewStatus::STARTING,
+            \App\Enums\InterviewStatus::IN_PROGRESS,
+            \App\Enums\InterviewStatus::COMPLETED,
+            \App\Enums\InterviewStatus::EVALUATING,
+            \App\Enums\InterviewStatus::EVALUATED,
+        ], true);
+    @endphp
+
+    @if($reschedulable)
+        <div class="card mb-3">
+            <div class="card-header py-2"><strong>{{ __('interview.dashboard.reschedule') }}</strong></div>
+            <div class="card-body">
+                <p class="text-muted small">{{ __('interview.dashboard.reschedule_help') }}</p>
+
+                <form method="POST" action="{{ route('interview-dashboard.reschedule', $interview) }}"
+                      onsubmit="return confirm(@js(__('interview.dashboard.reschedule_confirm')))">
+                    @csrf
+                    <label class="form-label small mb-1">{{ __('interview.dashboard.slot_times') }}</label>
+                    <div class="row g-2 mb-1">
+                        @for($i = 0; $i < 3; $i++)
+                            <div class="col-md-4">
+                                <input type="datetime-local" class="form-control"
+                                       name="slot_times[]" value="{{ old('slot_times.'.$i) }}">
+                            </div>
+                        @endfor
+                    </div>
+                    <div class="form-text mb-3">
+                        {{ __('interview.dashboard.slot_times_help', ['zone' => $timezone]) }}
+                    </div>
+                    <button class="btn btn-warning" type="submit">
+                        <i class="fa-solid fa-calendar-days me-1"></i>{{ __('interview.dashboard.reschedule') }}
+                    </button>
+                </form>
+
+                <script>
+                    // Same rule as the invite form: no past times in the picker,
+                    // recomputed on focus so a page left open does not still
+                    // offer this morning. The server checks it again regardless.
+                    (function () {
+                        const boxes = document.querySelectorAll('input[name="slot_times[]"]');
+                        function stampNow() {
+                            const now = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+                            const min = now.toISOString().slice(0, 16);
+                            boxes.forEach(el => el.min = min);
+                        }
+                        stampNow();
+                        boxes.forEach(el => el.addEventListener('focus', stampNow));
+                    })();
+                </script>
+            </div>
+        </div>
+    @endif
+
     {{-- ── header ─────────────────────────────────────────────────────── --}}
     <div class="card mb-3">
         <div class="card-body">

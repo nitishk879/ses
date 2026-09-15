@@ -304,6 +304,55 @@ class InterviewDashboardController extends Controller
         ]);
     }
 
+    /**
+     * Withdraw the times offered to one candidate and send them new ones.
+     *
+     * Scoped through authorizeInterview(), not through the project: the thing
+     * being changed is this candidate's booking, and an employer who can reach
+     * a project they do not own must not be able to cancel an appointment
+     * inside it.
+     */
+    public function reschedule(
+        Request $request,
+        Interview $interview,
+        InterviewInvitationService $invitations,
+    ): RedirectResponse {
+        $this->authorizeInterview($interview);
+
+        $validated = $request->validate([
+            'slot_times' => ['nullable', 'array', 'max:6'],
+            'slot_times.*' => ['nullable', 'string', 'max:32'],
+        ]);
+
+        $slotTimes = array_values(array_filter(
+            $validated['slot_times'] ?? [],
+            static fn ($t) => filled($t)
+        ));
+
+        try {
+            $invitations->reschedule($interview, $slotTimes);
+        } catch (\InvalidArgumentException|RuntimeException $e) {
+            // A past time, or an interview that has already happened. Both are
+            // things the recruiter can see and fix; neither is a 500.
+            return back()->withInput()->with([
+                'message' => $e->getMessage(),
+                'type' => 'danger',
+            ]);
+        } catch (Throwable $e) {
+            Log::error('interview.reschedule_failed', [
+                'interview_id' => $interview->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with(['message' => $e->getMessage(), 'type' => 'danger']);
+        }
+
+        return back()->with([
+            'message' => __('interview.dashboard.rescheduled'),
+            'type' => 'success',
+        ]);
+    }
+
     // ── scoping ──────────────────────────────────────────────────────────── #
 
     /**

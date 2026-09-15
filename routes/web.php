@@ -194,6 +194,11 @@ Route::middleware(['auth', 'role:admin,user'])
         Route::post('bot/{project:id}', [InterviewDashboardController::class, 'assignBot'])
             ->whereNumber('project')
             ->name('bot');
+        // Withdraw the times already offered and email new ones.
+        Route::post('{interview}/reschedule', [InterviewDashboardController::class, 'reschedule'])
+            ->whereNumber('interview')
+            ->name('reschedule');
+
         Route::get('{interview}', [InterviewDashboardController::class, 'show'])
             ->whereNumber('interview')
             ->name('show');

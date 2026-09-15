@@ -10,13 +10,13 @@
     options work, without clicking anything.
 --}}
 <x-mail::message>
-# {{ __('interview.mail.heading') }}
+# {{ __(($rescheduled ?? false) ? 'interview.mail.heading_rescheduled' : 'interview.mail.heading') }}
 
 @if(filled($candidateName ?? null))
 {{ __('interview.mail.greeting', ['name' => $candidateName]) }}
 @endif
 
-{{ __('interview.mail.intro', ['project' => $project?->title ?? '']) }}
+{{ __(($rescheduled ?? false) ? 'interview.mail.intro_rescheduled' : 'interview.mail.intro', ['project' => $project?->title ?? '']) }}
 
 {{ __('interview.mail.about', ['minutes' => $minutes]) }}
 

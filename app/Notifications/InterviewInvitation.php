@@ -27,6 +27,16 @@ class InterviewInvitation extends Notification implements ShouldQueue
 
     public function __construct(
         public readonly Interview $interview,
+        /**
+         * Whether this replaces times already offered.
+         *
+         * One notification rather than two, because the body is
+         * identical — the same three slots, the same link, the same
+         * recorded-call notice — and only the opening changes. Two
+         * classes would mean two templates to keep in step, and the one
+         * that drifts is the one nobody is testing.
+         */
+        public readonly bool $rescheduled = false,
     ) {
     }
 
@@ -53,7 +63,7 @@ class InterviewInvitation extends Notification implements ShouldQueue
         ));
 
         return (new MailMessage)
-            ->subject(__('interview.mail.subject', [
+            ->subject(__($this->rescheduled ? 'interview.mail.subject_rescheduled' : 'interview.mail.subject', [
                 'project' => $this->interview->project?->title ?? '',
             ]))
             ->markdown('mail.interviews.invitation', [
@@ -68,6 +78,7 @@ class InterviewInvitation extends Notification implements ShouldQueue
                 'minutes' => $minutes,
                 'expiresAt' => $this->interview->invitation_expires_at,
                 'url' => $this->interview->invitationUrl(),
+                'rescheduled' => $this->rescheduled,
             ]);
     }
 
