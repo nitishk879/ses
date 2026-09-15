@@ -12,5 +12,7 @@ return array(
     'japanese' => 'Japanese',
     'other' => 'Other',
     // Oct 25, 2024
-    'check' => 'Select'
+    'check' => 'Select',
+    'no_phone' => 'No phone number — cannot be invited to a call',
+    'work_mode' => 'Work mode',
 );

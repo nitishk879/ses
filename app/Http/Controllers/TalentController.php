@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Enums\LangEnum;
 use App\Enums\WorkLocationEnum;
 use App\Models\Talent;
+use App\Rules\DialablePhone;
+use Illuminate\Validation\Rule;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -38,6 +40,11 @@ class TalentController extends Controller
             'firstname' => 'required|max:255',
             'lastname' => 'required|max:255',
             'email' => 'required|email|unique:users|max:255',
+            // Required, and validated as dialable rather than merely present.
+            // An interview invitation promises a phone call; a number that
+            // cannot be parsed to E.164 produces a candidate who books a slot
+            // for a call nobody can place. See App\Rules\DialablePhone.
+            'phone' => ['required', 'string', 'max:32', 'unique:users,phone', new DialablePhone],
             'affiliation' => 'required|int',
             'contract_type' => 'required|max:255',
             'nationality' => 'required|max:255',
@@ -80,6 +87,7 @@ class TalentController extends Controller
         ], [
             'firstname' => $validated['firstname'],
             'lastname' => $validated['lastname'],
+            'phone' => $validated['phone'],
             'password' => 'password',
             'username' => strstr($validated['email'], '@', true),
             'date_of_birth' => $validated['date_of_birth'] ?? today()->subYears(18),
@@ -148,6 +156,16 @@ class TalentController extends Controller
      */
     public function update(Request $request, Talent $talent)
     {
+        // Validated ignoring this user: re-saving a talent without
+        // changing their number must not fail against their own row.
+        $validated = $request->validate([
+            'phone' => [
+                'required', 'string', 'max:32',
+                Rule::unique('users', 'phone')->ignore($talent->user_id),
+                new DialablePhone,
+            ],
+        ]);
+
 //        $request->validate([
 //            'language' => 'required|array',
 //            'language.*' => 'integer|in:' . implode(',', array_keys(LangEnum::cases())),
@@ -166,6 +184,7 @@ class TalentController extends Controller
         ], [
             'firstname' => $talent->user->firstname,
             'lastname' => $talent->user->lastname,
+            'phone' => $validated['phone'],
             'password' => 'password',
             'username' => strstr($talent->user->email, '@', true),
             'date_of_birth' => $talent->user->date_of_birth ?? today()->subYears(18),

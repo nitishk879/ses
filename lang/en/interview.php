@@ -62,6 +62,7 @@ return [
 
     'mail' => [
         'subject' => 'Interview invitation — :project',
+        'greeting' => 'Hello :name,',
         'heading' => 'You have been shortlisted',
         'intro' => 'We would like to invite you to a short screening interview for :project.',
         'about' => 'The interview is automated and takes about :minutes minutes. You will receive a phone call at the time you choose.',

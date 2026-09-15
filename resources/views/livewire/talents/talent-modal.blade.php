@@ -17,6 +17,34 @@
                                             <div class="">{{ __("talents/index.gender") }}: <strong>{{ \App\Enums\GenderEnum::toName($talent->user->gender->value) }}</strong></div>
                                             <div class="">{{ __("talents/index.age") }}: <strong>{{ $talent->user->age }}</strong></div>
                                         </div>
+
+                                        {{-- Contact details, up here rather than buried in the
+                                             grid below: they are the two things a recruiter
+                                             opens this modal to act on. Rendered as links so
+                                             the number can be dialled and the address mailed
+                                             without retyping either — retyping a phone number
+                                             is how a digit gets lost. --}}
+                                        <div class="d-flex flex-wrap gap-3 talent-data mt-2">
+                                            <div>
+                                                {{ __("talents/registration.email") }}:
+                                                @if(filled($talent->user->email))
+                                                    <a href="mailto:{{ $talent->user->email }}"><strong>{{ $talent->user->email }}</strong></a>
+                                                @else
+                                                    <strong class="text-muted">—</strong>
+                                                @endif
+                                            </div>
+                                            <div>
+                                                {{ __("talents/registration.phone") }}:
+                                                @if(filled($talent->user->phone))
+                                                    <a href="tel:{{ $talent->user->phone }}"><strong>{{ $talent->user->phone }}</strong></a>
+                                                @else
+                                                    {{-- Said plainly, because a blank here is
+                                                         the reason this candidate cannot be
+                                                         invited to a screening call. --}}
+                                                    <strong class="text-danger">{{ __("talents/show.no_phone") }}</strong>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="col-md-12 talent-feature py-3 mb-3">
                                         <div class="row align-items-center">
@@ -32,7 +60,7 @@
                                                 </div>
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.nearest_station") }}: </div>
-                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->user->nearest_station_prefecture ?? 'Maihama Station on the Keiyo Line (Chiba Prefecture)' }}</div>
+                                                    <div class="col-6 col-md-7 feature-text">{{ filled($talent->user->nearest_station_prefecture) ? $talent->user->nearest_station_prefecture : '—' }}</div>
                                                 </div>
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __('talents/index.operations') }}: </div>
@@ -89,7 +117,7 @@
                                                     <li class="list-group-item">{{ $location->title }}</li>
                                                 @endforeach
                                             </ul>
-                                            <div class="p-head py-2"> {{ __("projects/form.work_mode") }}</div>
+                                            <div class="p-head py-2"> {{ __("talents/show.work_mode") }}</div>
                                             <ul class="list-group list-group-flush">
                                                 @foreach($talent->work_location as $wLocation)
                                                     <li class="list-group-item">{{ $wLocation }}</li>

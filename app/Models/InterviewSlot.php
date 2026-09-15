@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\InterviewTime;
 
 /**
  * One time option presented to a candidate.
@@ -74,10 +75,7 @@ class InterviewSlot extends Model
      */
     public function presentIn(string $timezone): string
     {
-        return $this->starts_at
-            ->copy()
-            ->setTimezone($timezone)
-            ->translatedFormat('D, j M Y — H:i (T)');
+        return InterviewTime::full($this->starts_at, $timezone);
     }
 
     public function startsAtIn(string $timezone): CarbonInterface

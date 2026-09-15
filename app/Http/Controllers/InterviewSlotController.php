@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use App\Support\InterviewTime;
 
 /**
  * The page a candidate lands on from the invitation email (task 7).
@@ -51,8 +52,10 @@ class InterviewSlotController extends Controller
             return $this->page('interviews.slots.unavailable', [
                 'reason' => $interview->slot_selected_at
                     ? __('interview.already_scheduled_notice', [
-                        'date' => $interview->scheduled_at?->setTimezone($interview->timezone)
-                            ->translatedFormat('D, j M Y H:i (T)') ?? '',
+                        'date' => InterviewTime::full(
+                            $interview->scheduled_at,
+                            $interview->timezone ?: config('services.interview.invitation.timezone', 'Asia/Tokyo')
+                        ),
                     ])
                     : __('interview.invitation_expired'),
             ]);

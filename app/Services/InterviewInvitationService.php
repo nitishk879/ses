@@ -100,6 +100,25 @@ class InterviewInvitationService
             );
         }
 
+        // Checked here, before anything is written or sent.
+        //
+        // The invitation is not an email, it is a promise: it offers three
+        // times and says the candidate will receive a phone call at the one
+        // they choose. Sending it to somebody with no dialable number means
+        // they read it, pick a slot, and then sit waiting for a call that was
+        // never possible — and the recruiter finds out at dial time, after the
+        // window has passed.
+        //
+        // The same parse the orchestrator runs before dialling, so what passes
+        // here is exactly what will dial later. Failing at the invitation is a
+        // recruiter fixing one field; failing at dial time is a candidate
+        // stood up.
+        if ($talent->interviewPhone() === null) {
+            throw new RuntimeException(__('interview.phone_not_dialable', [
+                'talent' => $talent->user?->name ?: "#{$talent->id}",
+            ]));
+        }
+
         $interview = Interview::firstOrNew([
             'project_id' => $project->id,
             'talent_id' => $talent->id,

@@ -4,7 +4,7 @@
     <h1>{{ __('interview.page.confirmed_title') }}</h1>
 
     <div class="notice notice-ok">
-        {{ $interview->scheduled_at?->setTimezone($timezone)->translatedFormat('D, j M Y — H:i (T)') }}
+        {{ \App\Support\InterviewTime::full($interview->scheduled_at, $timezone) }}
     </div>
 
     <p>{{ __('interview.page.confirmed_intro', ['project' => $interview->project?->title ?? '']) }}</p>

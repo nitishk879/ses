@@ -12,6 +12,10 @@
 <x-mail::message>
 # {{ __('interview.mail.heading') }}
 
+@if(filled($candidateName ?? null))
+{{ __('interview.mail.greeting', ['name' => $candidateName]) }}
+@endif
+
 {{ __('interview.mail.intro', ['project' => $project?->title ?? '']) }}
 
 {{ __('interview.mail.about', ['minutes' => $minutes]) }}
@@ -29,7 +33,7 @@
 </x-mail::button>
 
 @if($expiresAt)
-{{ __('interview.mail.expires', ['date' => $expiresAt->setTimezone($timezone)->translatedFormat('D, j M Y H:i (T)')]) }}
+{{ __('interview.mail.expires', ['date' => \App\Support\InterviewTime::full($expiresAt, $timezone)]) }}
 @endif
 
 {{ __('interview.mail.none_suitable') }}

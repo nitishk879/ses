@@ -34,6 +34,10 @@ class ResumeFormSuggestions
             'firstname' => self::givenName($parsed),
             'lastname' => self::familyName($parsed),
             'email' => self::text($parsed, 'contact.email'),
+            // The number the screening call gets placed to. Extracted and
+            // verified against the document by the parser, so what arrives
+            // here occurs verbatim on the CV — it is not a reconstruction.
+            'phone' => self::text($parsed, 'contact.phone'),
             'work_experience' => self::experienceYears($parsed),
             'education' => self::educationHtml($parsed),
             'experience' => self::experienceHtml($parsed),

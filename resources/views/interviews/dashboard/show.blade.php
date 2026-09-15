@@ -31,7 +31,7 @@
                     <div class="fw-semibold">{{ $interview->project?->title }}</div>
                     @if($interview->scheduled_at)
                         <div class="text-muted">
-                            {{ $interview->scheduled_at->setTimezone($timezone)->translatedFormat('D, j M Y H:i') }}
+                            {{ \App\Support\InterviewTime::full($interview->scheduled_at, $timezone) }}
                             ({{ $timezone }})
                         </div>
                     @endif
@@ -240,7 +240,7 @@
                                 <div class="d-flex justify-content-between">
                                     <span>#{{ $a->attempt_number }} · {{ \App\Enums\InterviewAttemptStatus::toName($a->status) }}</span>
                                     <span class="text-muted">
-                                        {{ $a->ended_at?->setTimezone($timezone)->translatedFormat('j M H:i') ?? '—' }}
+                                        {{ \App\Support\InterviewTime::short($a->ended_at, $timezone) }}
                                     </span>
                                 </div>
                                 @if($a->failure_reason)

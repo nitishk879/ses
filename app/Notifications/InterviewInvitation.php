@@ -58,6 +58,10 @@ class InterviewInvitation extends Notification implements ShouldQueue
             ]))
             ->markdown('mail.interviews.invitation', [
                 'interview' => $this->interview,
+                // Addressed by name. An unaddressed "You have been
+                // shortlisted" reads as a mailshot, and a candidate who
+                // decides it is one never opens the slot picker.
+                'candidateName' => trim((string) ($notifiable->name ?? '')),
                 'project' => $this->interview->project,
                 'slots' => $this->interview->slots,
                 'timezone' => $timezone,

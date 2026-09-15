@@ -281,8 +281,22 @@ class Talent extends Model
     {
         return Attribute::make(
             get: function () {
-                // Decode the JSON and map to enum names
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $this->work_location_prefer);
+                // Tolerant of what is actually in the column, not only of what
+                // the form posts. `work_location_prefer` is cast to array, but
+                // rows exist holding a bare scalar (the factory writes one, and
+                // so did an older form), and array_map over an int is a
+                // TypeError — which took out the whole profile modal, not just
+                // this one line of it.
+                $values = $this->work_location_prefer;
+
+                if (blank($values)) {
+                    return [];
+                }
+
+                return array_values(array_filter(array_map(
+                    fn ($val) => WorkLocationEnum::toName($val),
+                    is_array($values) ? $values : [$values]
+                )));
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON

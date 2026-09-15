@@ -70,6 +70,25 @@
                                         @enderror
                                     </div>
                                 </div>
+                                {{-- The number the screening call is placed to.
+                                     Required, because an interview invitation
+                                     promises a phone call: without this the
+                                     candidate picks a time for a call that can
+                                     never be dialled. --}}
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="phoneNumber"
+                                               class="form-label required">{{ __('talents/registration.phone') }}</label>
+                                        <input type="tel" class="form-control @error('phone') is-invalid @enderror"
+                                               name="phone" id="phoneNumber"
+                                               value="{{ old('phone') ?? '' }}"
+                                               placeholder="090-1234-5678" maxlength="32" required>
+                                        <div class="form-text">{{ __('talents/registration.phone_help') }}</div>
+                                        @error('phone')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
                                 <div class="row mb-3">
                                     <div class="col-md-6 mb-3">
                                         <label for="affiliation"

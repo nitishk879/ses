@@ -12,5 +12,7 @@ return array(
     'japanese' => '日本人',
     'other' => '他の',
     // Oct 25, 2024
-    'check' => '選択'
+    'check' => '選択',
+    'no_phone' => '電話番号が未登録のため、面接のご案内ができません',
+    'work_mode' => '勤務形態',
 );

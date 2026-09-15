@@ -57,6 +57,7 @@ return [
 
     'mail' => [
         'subject' => '面接のご案内 — :project',
+        'greeting' => ':name 様',
         'heading' => '書類選考を通過されました',
         'intro' => ':project の一次スクリーニング面接にご案内いたします。',
         'about' => '面接は自動化されており、所要時間は約 :minutes 分です。ご選択いただいた日時にお電話いたします。',
