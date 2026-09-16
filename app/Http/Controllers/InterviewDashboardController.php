@@ -247,10 +247,22 @@ class InterviewDashboardController extends Controller
             ->take($validated['limit'] ?? 25);
 
         if ($shortlist->isEmpty()) {
-            return back()->with([
-                'message' => __('interview.dashboard.no_shortlist', ['threshold' => $threshold]),
-                'type' => 'warning',
-            ]);
+            // Which of the three empty-shortlist reasons applies. Saying
+            // "nobody is at or above N" when in fact everyone qualifying was
+            // invited last week sends a recruiter round a loop of lowering the
+            // threshold, which cannot possibly help.
+            $breakdown = $invitations->shortlistBreakdown($project, $threshold);
+
+            $message = match (true) {
+                $breakdown['scored'] === 0 => __('interview.dashboard.no_matching_yet'),
+                $breakdown['qualifying'] > 0 => __('interview.dashboard.all_already_invited', [
+                    'count' => $breakdown['qualifying'],
+                    'threshold' => $threshold,
+                ]),
+                default => __('interview.dashboard.no_shortlist', ['threshold' => $threshold]),
+            };
+
+            return back()->with(['message' => $message, 'type' => 'warning']);
         }
 
         $sent = 0;

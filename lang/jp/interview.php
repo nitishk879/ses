@@ -100,6 +100,7 @@ return [
         'invite_confirm' => '候補者に実際のメールが送信されます。続行しますか？',
         'project' => '案件',
         'choose_project' => '案件を選択…',
+        'choose_project_first' => '先に案件を選択してください。以下の操作はその案件の候補者に対して実行されます。',
         'slot_times' => '提示する日時（任意）',
         'slot_times_help' => '空欄のままにすると3つの候補日時を自動で選びます。入力した場合は、その日時のみを提示します（本日も指定できます）。:zone の時刻で、現在時刻より後を指定してください。',
         'reschedule' => '日時を再調整',
@@ -124,6 +125,8 @@ return [
         'bot_id_placeholder' => 'ダッシュボードURLのボットID',
         'bot_list_unavailable' => 'DenAI ダッシュボードからボット一覧を取得できませんでした。ボットのURLに含まれるIDを貼り付けてください。',
         'no_shortlist' => 'この案件で :threshold 以上の候補者はまだいません。',
+        'no_matching_yet' => 'この案件はまだスコアリングされていません。先にマッチングを実行してから招待してください。',
+        'all_already_invited' => ':threshold点以上の候補者が:count名いますが、全員すでに招待済みです。',
         'invited' => ':count 名を招待しました。',
         'invited_with_failures' => ':count 名を招待しました。一部は送信できませんでした： :failures',
 

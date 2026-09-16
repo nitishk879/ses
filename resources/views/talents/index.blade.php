@@ -56,66 +56,106 @@
             background: #FFFFFF;
         }
 
+        /*
+         * The score used to be a tinted pill with the caption floating beside
+         * it: two boxes competing for the same job, the number framed twice,
+         * and "64" sitting in mid-air with nothing to say how full 64 is.
+         *
+         * Now it reads top-down the way a figure should — label, then value,
+         * then a meter that gives the value its scale — so one glance answers
+         * "how good is this" and the reasons underneath answer "why".
+         */
         .talent-match-head {
             display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        /*
-         * The score is the reason this screen exists when a project is picked,
-         * so it is set as a number to be read, not a chip to be glanced at.
-         * "/100" is always present: a bare "64" invites the reader to supply
-         * their own scale.
-         */
-        .talent-match-score {
-            display: inline-flex;
-            align-items: baseline;
-            padding: 0.2rem 0.65rem;
-            border-radius: 0.5rem;
-            border: 1px solid transparent;
-            font-family: "Mulish", sans-serif;
-            white-space: nowrap;
-        }
-
-        .talent-match-number {
-            font-size: 1.5rem;
-            font-weight: 800;
-            line-height: 1.25;
-        }
-
-        .talent-match-outof {
-            font-size: 0.9rem;
-            font-weight: 600;
-            opacity: 0.7;
-            margin-left: 0.1rem;
-        }
-
-        /*
-         * Colour is a second signal, never the only one — the number itself
-         * carries the meaning, so these stay legible in greyscale and none of
-         * them relies on white-on-yellow.
-         */
-        .talent-match-score--strong { background: #E3F6EA; border-color: #9BD9B2; color: #12653A; }
-        .talent-match-score--fair   { background: #FFF4DC; border-color: #F0C475; color: #7A4E00; }
-        .talent-match-score--weak   { background: #F1F2F4; border-color: #D6D8DC; color: #4A4D55; }
-        .talent-match-score--none   {
-            background: #F1F2F4;
-            border-color: #D6D8DC;
-            color: #4A4D55;
-            font-size: 0.875rem;
-            font-weight: 600;
-            padding: 0.35rem 0.65rem;
+            flex-direction: column;
+            gap: 0.35rem;
         }
 
         .talent-match-caption {
             font-family: "Mulish", sans-serif;
-            font-size: 0.8125rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
+            font-size: 0.6875rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #767F8C;
+            color: #8A9099;
+        }
+
+        .talent-match-figure {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .talent-match-score {
+            display: inline-flex;
+            align-items: baseline;
+            font-family: "Mulish", sans-serif;
+            white-space: nowrap;
+            /* No background. The number is the element, not a chip on top of one. */
+        }
+
+        .talent-match-number {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /*
+         * Always present, and deliberately not faded into illegibility: a bare
+         * "64" invites the reader to supply their own scale.
+         */
+        .talent-match-outof {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #8A9099;
+            margin-left: 0.15rem;
+        }
+
+        /*
+         * The meter is what makes the number mean something at a glance. It is
+         * decoration only — the figure beside it carries the same information,
+         * so nothing is lost in greyscale or to a screen reader.
+         */
+        .talent-match-meter {
+            flex: 1 1 8rem;
+            max-width: 12rem;
+            height: 6px;
+            border-radius: 999px;
+            background: #ECEEF1;
+            overflow: hidden;
+        }
+
+        .talent-match-meter-fill {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+        }
+
+        /*
+         * Colour is a second signal, never the only one — the number itself
+         * carries the meaning, so these stay legible in greyscale.
+         */
+        .talent-match-score--strong .talent-match-number { color: #12653A; }
+        .talent-match-score--fair   .talent-match-number { color: #8A5A00; }
+        .talent-match-score--weak   .talent-match-number { color: #4A4D55; }
+
+        .talent-match-meter-fill--strong { background: #2E9E63; }
+        .talent-match-meter-fill--fair   { background: #E0A32E; }
+        .talent-match-meter-fill--weak   { background: #A9AEB6; }
+
+        .talent-match-score--none {
+            display: inline-flex;
+            background: #F1F2F4;
+            border: 1px solid #D6D8DC;
+            border-radius: 0.5rem;
+            color: #4A4D55;
+            font-family: "Mulish", sans-serif;
+            font-size: 0.875rem;
+            font-weight: 600;
+            padding: 0.35rem 0.65rem;
         }
 
         .talent-match-flag {
@@ -154,7 +194,8 @@
            has to be too — only the right-hand gutter tightens. */
         @media (max-width: 575.98px) {
             .talent-match { padding-right: 1rem; }
-            .talent-match-number { font-size: 1.35rem; }
+            .talent-match-number { font-size: 1.6rem; }
+            .talent-match-meter { max-width: none; }
         }
     </style>
 @endpush

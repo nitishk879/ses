@@ -306,21 +306,29 @@ class Talent extends Model
     }
 
     /**
-     * Let's get work location from array
+     * Always an array of location ids, whatever the row happens to hold.
      *
-     * @return Attribute
+     * Older rows store a bare scalar (`'3'`) rather than a list (`'[3]'`), so
+     * the `array` cast alone hands callers an int. `in_array()` and `foreach`
+     * over an int are fatal, which is what took out the talent edit form.
+     *
+     * Read-only on purpose: the cast still encodes on write, and this replaces
+     * a snake_case `work_location_prefer(): Attribute` that Eloquent could
+     * never call — it looks accessors up by camelCase, so toArray() reached for
+     * `workLocationPrefer()` and died. Naming it correctly both fixes that and
+     * gives every caller the same shape.
      */
-    public function work_location_prefer(): Attribute
+    public function workLocationPrefer(): Attribute
     {
-        return Attribute::make(
-            get: function ($value) {
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
-            },
-            set: function ($value){
-                return json_encode($value);
+        return Attribute::get(function (mixed $value): array {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+            if (blank($decoded)) {
+                return [];
             }
-        );
+
+            return array_values(is_array($decoded) ? $decoded : [$decoded]);
+        });
     }
 
 //    /**

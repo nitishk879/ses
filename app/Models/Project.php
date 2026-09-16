@@ -344,10 +344,22 @@ class Project extends Model
     public function workLocation(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => WorkLocationEnum::toName($val), $decoded);
+            get: function () {
+                // Reads `work_location_prefer`, not `$value`: there is no
+                // `work_location` column, so `$value` was always null and
+                // array_map(..., null) killed projects/show.blade.php for every
+                // project. Tolerant of a bare scalar too — the factory writes
+                // one, and so did an older form.
+                $values = $this->work_location_prefer;
+
+                if (blank($values)) {
+                    return [];
+                }
+
+                return array_values(array_filter(array_map(
+                    fn ($val) => WorkLocationEnum::toName($val),
+                    is_array($values) ? $values : [$values]
+                )));
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
@@ -356,6 +368,25 @@ class Project extends Model
         );
     }
 
+    /**
+     * Always an array of location ids, whatever the row happens to hold.
+     *
+     * Mirrors Talent: some rows store a bare scalar rather than a list, and the
+     * `array` cast alone then hands callers an int, which `foreach` refuses.
+     * Read-only — the cast still encodes on write.
+     */
+    public function workLocationPrefer(): Attribute
+    {
+        return Attribute::get(function (mixed $value): array {
+            $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+            if (blank($decoded)) {
+                return [];
+            }
+
+            return array_values(is_array($decoded) ? $decoded : [$decoded]);
+        });
+    }
 
     /**
      * Let's fetch salary range min-max

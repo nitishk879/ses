@@ -59,12 +59,22 @@ class TalentController extends Controller
             'resume' => 'required|file|mimes:pdf,docx,doc|max:2048',
             'education' => 'required|min:3',
             'experience' => 'required|min:3',
-            'work_experience' => 'required',
+            // Whole years. Unbounded `required` accepted "500", which then reads
+            // on the profile as five centuries of experience.
+            'work_experience' => 'required|integer|min:0|max:70',
             'workLocations' => 'array',
             'work_location.*' => 'integer|in:' . implode(',', array_keys(WorkLocationEnum::cases())),
             'subcategory' => 'required|array',
-            'min_monthly_price' => 'required',
-            'max_monthly_price' => 'required',
+            // A MONTHLY rate (単価), not an annual salary — the column is
+            // `min_monthly_price` and the listing card labels it "Monthly Rate".
+            //
+            // Both were bare `required`, so a reversed range (min above max) or
+            // an annual figure typed into a monthly box saved without complaint
+            // and went straight into the budget dimension of the match score,
+            // where it quietly excludes the candidate from every project.
+            // `lte`/`gte` tie the two together so neither can be read alone.
+            'min_monthly_price' => 'required|integer|min:0|max:10000000|lte:max_monthly_price',
+            'max_monthly_price' => 'required|integer|min:0|max:10000000|gte:min_monthly_price',
             'nearest_station_prefecture' => 'nullable',
             'nearest_station_line' => 'nullable',
             'nearest_station_name' => 'nullable',

@@ -40,7 +40,8 @@
                 <label class="form-label fw-semibold mb-1" for="actionProject">
                     {{ __('interview.dashboard.project') }}
                 </label>
-                <select class="form-select" id="actionProject" required>
+                <select class="form-select" id="actionProject" required
+                        data-required-hint="{{ __('interview.dashboard.choose_project_first') }}">
                     <option value="">{{ __('interview.dashboard.choose_project') }}</option>
                     @foreach($projects as $p)
                         <option value="{{ $p->id }}" @selected((int) ($filters['project'] ?? 0) === $p->id)>
@@ -49,6 +50,11 @@
                     @endforeach
                 </select>
                 <div class="form-text">{{ __('interview.dashboard.project_applies_to_all') }}</div>
+                {{-- Says why the buttons below are dead, rather than leaving a
+                     recruiter to work it out from three greyed-out cards. --}}
+                <div class="form-text text-warning" data-needs-project>
+                    {{ __('interview.dashboard.choose_project_first') }}
+                </div>
             </div>
 
             {{-- Two columns, not three.
@@ -172,6 +178,7 @@
                     </div>
                 </div>
             </div>
+        </div>{{-- /#runActions --}}
 
         <script>
             (function () {
@@ -182,8 +189,29 @@
 
                 // Every form posts to the same project, so one selector drives
                 // all three action URLs.
+                //
+                // The three buttons are also held shut until a project is
+                // picked. The selector carries `required`, but it sits outside
+                // all three forms, so the browser never validates it — pressing
+                // Send with nothing chosen posted to `.../invite/0` and route
+                // model binding answered with a bare 404. A 404 does not tell a
+                // recruiter they forgot to choose a project; it reads as the
+                // feature being broken.
                 function syncProject() {
-                    forms.forEach(f => f.action = f.dataset.actionBase + '/' + (project.value || '0'));
+                    const chosen = project.value !== '';
+
+                    forms.forEach(function (f) {
+                        f.action = f.dataset.actionBase + '/' + (project.value || '0');
+
+                        const submit = f.querySelector('[type="submit"]');
+                        if (submit) {
+                            submit.disabled = ! chosen;
+                            submit.title = chosen ? '' : project.dataset.requiredHint || '';
+                        }
+                    });
+
+                    document.querySelectorAll('[data-needs-project]')
+                        .forEach(el => el.hidden = chosen);
 
                     // Show the bot this project already has, so opening the
                     // panel to change one thing does not save a blank over it.

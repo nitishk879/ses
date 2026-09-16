@@ -84,6 +84,33 @@ class InterviewInvitationService
     }
 
     /**
+     * Why a shortlist came back empty — there are three different reasons.
+     *
+     * An empty shortlist used to be reported one way: "nobody is at or above
+     * N". That is true in only one of the three cases, and it is actively
+     * misleading in the other two. A recruiter whose candidates had all been
+     * invited last week, or who had never pressed Run matching, was told their
+     * threshold was too high and lowered it repeatedly, which changed nothing.
+     *
+     * @return array{scored: int, qualifying: int, available: int}
+     */
+    public function shortlistBreakdown(Project $project, ?int $threshold = null): array
+    {
+        $threshold ??= (int) config('services.interview.invitation.min_match_score', 70);
+
+        $scored = AiMatch::where('project_id', $project->id);
+
+        return [
+            // Has matching ever run for this project at all?
+            'scored' => (clone $scored)->count(),
+            // Of those, how many clear the threshold, invited or not?
+            'qualifying' => (clone $scored)->where('score', '>=', $threshold)->count(),
+            // And how many of those have not already been invited?
+            'available' => $this->shortlistFor($project, $threshold)->count(),
+        ];
+    }
+
+    /**
      * States a reschedule must refuse.
      *
      * The interview is happening, or has happened. Rescheduling one of these

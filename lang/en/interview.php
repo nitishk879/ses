@@ -105,6 +105,7 @@ return [
         'invite_confirm' => 'This sends real email to candidates. Continue?',
         'project' => 'Project',
         'choose_project' => 'Choose a project…',
+        'choose_project_first' => 'Choose a project first — it decides which candidates these actions apply to.',
         'slot_times' => 'Times to offer (optional)',
         'slot_times_help' => 'Leave empty and three times are chosen automatically. Fill any of them in and exactly those are offered — including today. Times are in :zone and must be in the future.',
         'reschedule' => 'Reschedule',
@@ -129,6 +130,8 @@ return [
         'bot_id_placeholder' => 'Bot id from the dashboard URL',
         'bot_list_unavailable' => 'The bot list could not be loaded from the DenAI dashboard. Paste the id from the bot URL instead.',
         'no_shortlist' => 'Nobody is at or above :threshold for this project yet.',
+        'no_matching_yet' => 'No candidate has been scored for this project yet. Run matching first, then invite.',
+        'all_already_invited' => ':count candidate(s) are at or above :threshold, but every one of them has already been invited.',
         'invited' => 'Invited :count candidate(s).',
         'invited_with_failures' => 'Invited :count candidate(s). Some could not be reached: :failures',
 

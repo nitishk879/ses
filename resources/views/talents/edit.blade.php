@@ -15,7 +15,7 @@
                 </div>
             </div>
         </div>
-        <form action="{{ route("talents.update", $talent) }}" method="post" id="progressForm" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
+        <form action="{{ route("talents.update", $talent) }}" method="post" id="progressForm" class="col-md-12 needs-validation" data-invalid-message="{{ __('talents/registration.form_has_errors') }}" enctype="multipart/form-data" novalidate>
             @csrf @method('PUT')
             <div class="row">
                 <div class="col-md-6">

@@ -4,23 +4,83 @@ document.addEventListener('focusin', (e) => {
         e.stopImmediatePropagation();
     }
 });
-// Example starter JavaScript for disabling form submissions if there are invalid fields
+// Client-side validation for the long registration forms.
+//
+// This was the Bootstrap docs' starter snippet: block the submit, add
+// .was-validated, done. On a short demo form that is enough, because the red
+// field is on screen. These forms are several screens tall, so the first
+// invalid control — Affiliation, say — sits far above the Submit button the
+// person just clicked. Nothing moved, nothing was said, and the form appeared
+// to be broken rather than incomplete.
+//
+// So a failed submit now has to answer "what is wrong and where": say how many
+// fields need attention, then take the person to the first one.
 (() => {
     'use strict'
 
-    // Fetch all the forms we want to apply custom Bootstrap validation styles to
-    const forms = document.querySelectorAll('.needs-validation')
+    /** Controls the browser considers invalid, in document order. */
+    const invalidControls = (form) =>
+        Array.from(form.querySelectorAll('input, select, textarea'))
+            .filter(el => !el.disabled && el.willValidate && !el.checkValidity())
 
-    // Loop over them and prevent submission
-    Array.from(forms).forEach(form => {
+    /**
+     * The message lives on the form as a data attribute because this file is a
+     * compiled bundle with no access to the translation catalogue, and the app
+     * is served in both English and Japanese.
+     */
+    const announce = (form, count) => {
+        const template = form.dataset.invalidMessage
+        if (!template) return null
+
+        let box = form.querySelector('[data-validation-summary]')
+        if (!box) {
+            box = document.createElement('div')
+            box.setAttribute('data-validation-summary', '')
+            box.className = 'alert alert-danger mt-3'
+            box.setAttribute('role', 'alert')
+            box.setAttribute('aria-live', 'assertive')
+            const submit = form.querySelector('[type="submit"]')
+            // Next to the button that was just pressed, which is where the
+            // person is looking, not at the top of a page they cannot see.
+            ;(submit?.parentElement ?? form).appendChild(box)
+        }
+        box.textContent = template.replace(':count', String(count))
+        return box
+    }
+
+    Array.from(document.querySelectorAll('.needs-validation')).forEach(form => {
         form.addEventListener('submit', event => {
-            if (!form.checkValidity()) {
-                event.preventDefault()
-                event.stopPropagation()
+            form.classList.add('was-validated')
+
+            if (form.checkValidity()) {
+                form.querySelector('[data-validation-summary]')?.remove()
+                return
             }
 
-            form.classList.add('was-validated')
+            event.preventDefault()
+            event.stopPropagation()
+
+            const invalid = invalidControls(form)
+            announce(form, invalid.length)
+
+            const first = invalid[0]
+            if (!first) return
+
+            // Scroll before focus: focus() alone jumps the page with no sense of
+            // movement, and on a form this long that reads as a glitch.
+            first.scrollIntoView({ behavior: 'smooth', block: 'center' })
+            // A select2-hidden original cannot take focus; focus its visible proxy.
+            const visible = first.offsetParent !== null
+                ? first
+                : first.closest('.mb-3, .col-md-6, .col-md-12')?.querySelector('input, button, [tabindex]')
+            setTimeout(() => (visible ?? first).focus({ preventScroll: true }), 300)
         }, false)
+
+        // Once a person starts fixing things, the count is stale. Drop it and
+        // let the next submit recount rather than showing an old number.
+        form.addEventListener('input', () => {
+            form.querySelector('[data-validation-summary]')?.remove()
+        })
     })
 })()
 

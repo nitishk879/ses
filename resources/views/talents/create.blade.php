@@ -6,17 +6,65 @@
     <div class="container-fluid container-lg" id="dashboard">
         <div class="row">
             <div class="col-md-12 text-center">
-                <h1 class="page-heading">{{ __('talents/registration.registration') }}</h1>
+                {{-- .page-heading carries margin-top 3.75rem + margin-bottom 2.25rem
+                     globally, and the wrapper below added py-3 on top of the
+                     progress bar's own mb-4. Three spacers stacked to roughly
+                     200px of empty page above the first field. Overridden here
+                     with utilities rather than by editing .page-heading, which
+                     every other page also uses. --}}
+                <h1 class="page-heading mt-4 mb-3">{{ __('talents/registration.registration') }}</h1>
             </div>
-            <div class="col-md-12 py-3">
+            <div class="col-md-12">
                 <!-- Progress Bar -->
                 <div class="progress mb-4">
                     <div id="progressBar" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
                 </div>
             </div>
         </div>
-        <form action="{{ route("talents.store") }}" method="post" id="progressForm" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
+        <form action="{{ route("talents.store") }}" method="post" id="progressForm" class="col-md-12 needs-validation" data-invalid-message="{{ __('talents/registration.form_has_errors') }}" enctype="multipart/form-data" novalidate>
             @csrf
+            {{-- Step one, and deliberately the whole width of the page. The CV is
+                 the input that produces most of what follows — name, contact,
+                 education, history, skill areas — so it is asked for before the
+                 fields it fills, not after them. Everything below this card is
+                 then a review pass over extracted values rather than typing. --}}
+            <div class="row">
+                <div class="col-md-12 bg-light mb-4">
+                    <div class="bg-light p-3">
+                        <h2>{{ __('talents/registration.start_with_cv') }}</h2>
+                        <p class="text-muted small mb-3">{{ __('talents/registration.start_with_cv_hint') }}</p>
+                        <div class="row align-items-start">
+                            <div class="col-md-6 mb-3">
+                                <label for="formFile" class="form-label required">{{ __("talents/registration.upload_resume") }}</label>
+                                <input class="form-control @error('resume') is-invalid @enderror"
+                                       type="file"
+                                       name="resume"
+                                       id="formFile"
+                                       accept=".pdf,.doc,.docx">
+                                <div class="form-text">{{ __('talents/registration.file_acceptance') }}</div>
+                                @error('resume')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            {{-- Opt-in rather than automatic on file selection: this is a
+                                 language-model call, and someone re-picking a file three
+                                 times should not pay for three of them. --}}
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <button type="button" class="btn btn-primary"
+                                            id="autofillFromResume" disabled>
+                                        <span class="spinner-border spinner-border-sm d-none me-1"
+                                              id="autofillSpinner" role="status" aria-hidden="true"></span>
+                                        {{ __('talents/registration.autofill_button') }}
+                                    </button>
+                                    <span class="small text-muted">{{ __('talents/registration.autofill_hint') }}</span>
+                                </div>
+                                <div id="autofillResult" class="small mt-2" role="status" aria-live="polite"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <div class="row">
                 <div class="col-md-6">
                     <div class="row px-2">
@@ -60,10 +108,13 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="emailAddress"
+                                        {{-- Both this field and the email input carried
+                                             id="emailAddress", so clicking "Date of birth"
+                                             focused the email box. --}}
+                                        <label for="dateOfBirth"
                                                class="form-label required">{{ __('talents/registration.date_of_birth') }}</label>
                                         <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror" name="date_of_birth"
-                                               id="emailAddress" value="{{ old('date_of_birth') ?? '' }}" placeholder="10/02/2000"
+                                               id="dateOfBirth" value="{{ old('date_of_birth') ?? '' }}"
                                                required>
                                         @error('date_of_birth')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -120,7 +171,7 @@
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="gender" class="form-label">{{ __("talents/registration.gender") }}</label>
-                                        <select class="form-select @error('gender') is-invalid @enderror" name="gender"
+                                        <select class="form-select @error('gender') is-invalid @enderror" name="gender" id="gender"
                                                 aria-label="gender">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\GenderEnum::cases() as $gender)
@@ -169,51 +220,12 @@
                             </div>
                         </div>
                         <!-- Basic detail --->
-                        <!-- Station detail Block --->
-                        <div class="col-md-12 bg-light mb-4">
-                            <div class="bg-light p-3">
-                                <h2>{{ __("talents/registration.nearest_station") }}</h2>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="preferredLocation"
-                                               class="form-label">{{ __('talents/registration.prefectures') }}</label>
-                                        <input type="text" class="form-control @error('nearest_station_prefecture') is-invalid @enderror"
-                                               name="nearest_station_prefecture" id="preferredLocation"
-                                               placeholder="{{ __('talents/registration.prefectures') }}"
-                                               value="{{ old("nearest_station_prefecture") ?? '' }}"
-                                        >
-                                        @error('nearest_station_prefecture')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="otherDesiredLocation"
-                                               class="form-label">{{ __('talents/registration.route_name') }}</label>
-                                        <input type="text"
-                                               class="form-control @error('nearest_station_line') is-invalid @enderror"
-                                               name="nearest_station_line" id="otherDesiredLocation"
-                                               value="{{ old("nearest_station_line") ?? "" }}"
-                                               placeholder="{{ __('talents/registration.route_name') }}">
-                                        @error('nearest_station_line')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="col-md-12 mb-3">
-                                        <label for="otherDesiredLocation"
-                                               class="form-label">{{ __('talents/registration.station_name') }}</label>
-                                        <input type="text"
-                                               class="form-control @error('nearest_station_name') is-invalid @enderror"
-                                               name="nearest_station_name" id="otherDesiredLocation"
-                                               value="{{ old("nearest_station_name") ?? "" }}"
-                                               placeholder="{{ __('talents/registration.station_name') }}">
-                                        @error('nearest_station_name')
-                                        <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Station detail Block --->
+                        {{-- The Nearest Station block was here. Dropped from this
+                             form on request: it is registration, and a station is
+                             not needed to create a talent. The column and the field
+                             still exist on the edit form, the public registration
+                             form and the profile page, so the listing card's
+                             "Nearest Station" row is still fed from there. --}}
                         <!-- Cover Latter block --->
                         <div class="col-md-12 bg-light mb-4">
                             <div class="bg-light p-3">
@@ -225,45 +237,24 @@
                                               id="targetTextarea1"
                                               name="cover_letter" rows="3"
                                               placeholder="{{ __('talents/registration.cover_letter_placeholder') }}">{!! old("cover_letter") !!}</textarea>
-                                    @error('address')
+                                    {{-- Was @error('address'): the address field's error message
+                                         was being printed under the cover letter. --}}
+                                    @error('cover_letter')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
                                         <a href="" onclick="openDynamicModal(1)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                                     </div>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="formFile" class="form-label">{{ __("talents/registration.upload_resume") }}
-                                        ({{ __('talents/registration.file_acceptance') }})</label>
-                                    <input class="form-control @error('resume') is-invalid @enderror"
-                                           type="file"
-                                           name="resume"
-                                           value="{{ old("resume") ?? '' }}"
-                                           id="formFile">
-                                    @error('resume')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                    @enderror
-
-                                    {{-- Read the CV that was just attached and offer its
-                                         contents as form values. Opt-in rather than automatic
-                                         on file selection: this is a language-model call, and
-                                         a recruiter who is re-picking a file three times
-                                         should not pay for three of them. --}}
-                                    <div class="d-flex flex-wrap align-items-center gap-2 mt-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary"
-                                                id="autofillFromResume" disabled>
-                                            <span class="spinner-border spinner-border-sm d-none me-1"
-                                                  id="autofillSpinner" role="status" aria-hidden="true"></span>
-                                            {{ __('talents/registration.autofill_button') }}
-                                        </button>
-                                        <span class="small text-muted">{{ __('talents/registration.autofill_hint') }}</span>
-                                    </div>
-                                    <div id="autofillResult" class="small mt-2" role="status" aria-live="polite"></div>
-                                </div>
+                                {{-- The CV upload and its "fill from this CV" button used to
+                                     live here, at the bottom of the form. They are now the
+                                     first thing on the page: reading the document is what
+                                     fills most of these fields, so asking for it last meant
+                                     everyone typed the form out by hand first. --}}
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="exampleFormControlInput1" class="form-label">{{ __("talents/registration.resume_privacy") }}</label>
-                                        <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" aria-label="Default select example">
+                                        <label for="resumePrivacy" class="form-label">{{ __("talents/registration.resume_privacy") }}</label>
+                                        <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" id="resumePrivacy">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             <option value="1">{{ __("talents/registration.release") }}</option>
                                             <option value="0">{{ __("talents/registration.private") }}</option>
@@ -333,7 +324,7 @@
                                     <label for="expectedMinSalary" class="form-label required">{{ __('talents/registration.expected_salary') }}</label>
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
-                                            <label for="minSalary" class="form-label">{{ __("common/sidebar.min_salary") }}</label>
+                                            <label for="expectedMinSalary" class="form-label">{{ __("common/sidebar.min_salary") }}</label>
                                             <input type="number" class="form-control @error('min_monthly_price') is-invalid @enderror"
                                                    name="min_monthly_price"
                                                    id="expectedMinSalary"
@@ -343,7 +334,7 @@
                                             @error('min_monthly_price')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="maxSalary" class="form-label">{{ __("common/sidebar.max_salary") }}</label>
+                                            <label for="expectedMaxSalary" class="form-label">{{ __("common/sidebar.max_salary") }}</label>
                                             <input type="number" class="form-control @error('max_monthly_price') is-invalid @enderror"
                                                    name="max_monthly_price"
                                                    id="expectedMaxSalary"
@@ -356,13 +347,14 @@
                                 </div>
                                 <div class="row justify-content-around">
                                     <div class="col-md-12">
-                                        <label for="locations" class="form-label">{{ __("projects/form.locations") }}</label>
+                                        <label for="multiple-select-field" class="form-label">{{ __("projects/form.locations") }}</label>
                                     </div>
                                     <div class="mb-3 col-md-12">
                                         <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                                <option value="{{ $location->id }}">{{ $location->title }}</option>
+                                                <option value="{{ $location->id }}"
+                                                    @selected(in_array($location->id, (array) old('locations', [])))>{{ $location->title }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -381,13 +373,14 @@
 {{--                                        </div>--}}
 {{--                                    @endforeach--}}
                                     <div class="col-md-12">
-                                        <label for="locations" class="form-label">{{ __("projects/form.work_mode") }}</label>
+                                        <span class="form-label d-block">{{ __("projects/form.work_mode") }}</span>
                                     </div>
                                     @foreach(\App\Enums\WorkLocationEnum::cases() as $workLocation)
                                             <div class="mb-3 col-md-4">
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="checkbox"
                                                            name="workLocations[]"
+                                                           @checked(in_array($workLocation->value, (array) old('workLocations', [])))
                                                            id="{{ "work_location_".$workLocation->value }}"
                                                            value="{{ $workLocation->value }}">
                                                     <label class="form-check-label"
@@ -448,9 +441,18 @@
                                     <div class="mb-3">
                                         @foreach($category->subcategories as $subcategory)
                                             <div class="form-check form-check-inline">
+                                                {{-- Was @selected(old('subcategory[]') == $subcategory->id):
+                                                     two bugs in one line. @selected renders
+                                                     selected="selected", which does nothing to a
+                                                     checkbox, and old('subcategory[]') is not a
+                                                     key — the value is under 'subcategory' and is
+                                                     an array. So every ticked skill area was lost
+                                                     on a failed submit, and since `subcategory` is
+                                                     itself required, that is precisely when the
+                                                     form comes back. --}}
                                                 <input class="form-check-input" type="checkbox"
                                                        name="subcategory[]"
-                                                       @selected(old('subcategory[]') == $subcategory->id)
+                                                       @checked(in_array($subcategory->id, (array) old('subcategory', [])))
                                                        id="{{ $subcategory->slug."_".$subcategory->id }}"
                                                        value="{{ $subcategory->id }}"
                                                 >
@@ -523,8 +525,53 @@
              *
              * @returns {boolean} whether the field was actually changed
              */
+            function looksLikeHtml(value) {
+                return typeof value === 'string' && /<[a-z][\s\S]*>/i.test(value);
+            }
+
+            /**
+             * Markup the server generated, rendered as text a person can read.
+             *
+             * Parsed, not regex-stripped: the values come from somebody's CV by
+             * way of a language model, and "<" in a job title is not a tag.
+             * Handing it to the browser's own parser is both correct and the
+             * only version that decodes &amp; back to "&".
+             *
+             * List items and line breaks become newlines rather than being
+             * dropped, because the structure is the information — three roles
+             * run together on one line is a worse answer than three lines.
+             */
+            function htmlToText(html) {
+                const doc = new DOMParser().parseFromString(html, 'text/html');
+
+                doc.querySelectorAll('br').forEach(function (br) {
+                    br.replaceWith(doc.createTextNode('\n'));
+                });
+                doc.querySelectorAll('li, p, div').forEach(function (block) {
+                    block.append(doc.createTextNode('\n'));
+                });
+
+                return (doc.body.textContent || '')
+                    .split('\n')
+                    .map(function (line) { return line.trim(); })
+                    .filter(function (line, i, all) {
+                        // Collapse the blank runs the block handling leaves behind.
+                        return line !== '' || (i > 0 && all[i - 1] !== '');
+                    })
+                    .join('\n')
+                    .trim();
+            }
+
+            const FILLED = 'filled';   // we wrote it
+            const KEPT   = 'kept';     // the person had already answered
+            const ABSENT = 'absent';   // this form has no such field
+
             function fill(name, value) {
                 if (name === 'subcategory') {
+                    const boxes = document.querySelectorAll('input[name="subcategory[]"]');
+                    if (boxes.length === 0) {
+                        return ABSENT;
+                    }
                     let changed = false;
                     (value || []).forEach(function (id) {
                         const box = document.querySelector('input[name="subcategory[]"][value="' + id + '"]');
@@ -533,32 +580,46 @@
                             changed = true;
                         }
                     });
-                    return changed;
+                    return changed ? FILLED : KEPT;
                 }
 
                 const field = document.querySelector('[name="' + name + '"]');
                 if (!field) {
-                    return false;
+                    return ABSENT;
                 }
 
-                // The rich-text fields are Summernote, so their visible content
-                // lives in the editor, not in the textarea being replaced.
+                // The rich-text fields are Summernote *when the editor is
+                // loaded*, and their visible content then lives in the editor
+                // rather than in the textarea underneath it.
                 if (field.classList.contains('tinyEditor') && window.jQuery && jQuery(field).next('.note-editor').length) {
                     if (jQuery(field).summernote('isEmpty')) {
                         jQuery(field).summernote('code', value);
-                        return true;
+                        return FILLED;
                     }
-                    return false;
+                    return KEPT;
                 }
 
                 if (field.value && field.value.trim() !== '') {
-                    return false;
+                    return KEPT;
                 }
 
-                field.value = value;
+                // No rich-text editor on this page — the editor section is
+                // commented out near the top of this view — so these are plain
+                // textareas. The server sends HTML because that is what the
+                // field stores and what the profile modal renders, but writing
+                // markup straight into a plain textarea shows the reader
+                // "<ul><li>…" instead of their own work history. Flatten it to
+                // readable lines.
+                //
+                // (Do not name a Blade directive in this comment. Blade
+                // compiles the whole file, script blocks and JS comments
+                // included: an `@`-directive written here opens a real section
+                // mid-push, and the page's entire <head> — stylesheet link and
+                // all — ends up emitted inside this <script> tag.)
+                field.value = looksLikeHtml(value) ? htmlToText(value) : value;
                 // Let select2 and any other listener see the change.
                 field.dispatchEvent(new Event('change', { bubbles: true }));
-                return true;
+                return FILLED;
             }
 
             function busy(on) {
@@ -641,12 +702,13 @@
                     .then(function (res) {
                         const changed = [];
                         const skipped = [];
+                        const absent  = [];
 
                         const fields = res.fields || {};
+                        const bucket = { filled: changed, kept: skipped, absent: absent };
 
                         Object.keys(fields).forEach(function (name) {
-                            (fill(name, fields[name]) ? changed : skipped)
-                                .push(LABELS[name] || name);
+                            bucket[fill(name, fields[name])].push(LABELS[name] || name);
                         });
 
                         if (changed.length === 0) {
@@ -664,6 +726,16 @@
                             html += '<div class="text-muted mt-1">'
                                 + @json(__('talents/registration.autofill_kept')) + ' '
                                 + escapeHtml(skipped.join(', ')) + '</div>';
+                        }
+
+                        // Distinct from "kept": the CV answered these and this
+                        // form has nowhere to put the answer. Reporting that as
+                        // "left as you had them" claimed the person had made a
+                        // choice they were never offered.
+                        if (absent.length) {
+                            html += '<div class="text-muted mt-1">'
+                                + @json(__('talents/registration.autofill_absent')) + ' '
+                                + escapeHtml(absent.join(', ')) + '</div>';
                         }
 
                         if ((res.unmapped_skills || []).length) {

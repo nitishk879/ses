@@ -38,6 +38,14 @@ class ResumeFormSuggestions
             // verified against the document by the parser, so what arrives
             // here occurs verbatim on the CV — it is not a reconstruction.
             'phone' => self::text($parsed, 'contact.phone'),
+            // The rest of the 履歴書 header. A Japanese resume prints date of
+            // birth, gender and address every time, so leaving them out meant
+            // the recruiter still retyped half the identity block from a
+            // document the parser had already read.
+            'date_of_birth' => self::text($parsed, 'contact.date_of_birth'),
+            'gender' => self::gender($parsed),
+            'nationality' => self::nationality($parsed),
+            'address' => self::text($parsed, 'contact.address'),
             'work_experience' => self::experienceYears($parsed),
             'education' => self::educationHtml($parsed),
             'experience' => self::experienceHtml($parsed),
@@ -177,9 +185,24 @@ class ResumeFormSuggestions
     /**
      * A first draft of the profile blurb, built from what the CV actually says.
      *
-     * Not a written summary — the model is not asked to compose one, because a
-     * generated paragraph in a candidate's voice is a claim nobody made. This
-     * is the same extracted facts in a sentence the recruiter then edits.
+     * Three paragraphs, in descending order of how much of the candidate is in
+     * them:
+     *
+     * 1. The resume's own profile section (職務要約 / 自己PR / Summary), verbatim.
+     *    A CV that has one has already written this blurb, in the candidate's
+     *    voice, better than any rearrangement of extracted fields — and the
+     *    parser has verified it occurs in the document.
+     * 2. The description of the most recent role, again the CV's own wording.
+     *    This is what makes the draft say something concrete; without it a CV
+     *    with no profile section produced nothing but a list of skill names.
+     * 3. The extracted facts: current title, years, skills, certifications,
+     *    languages.
+     *
+     * Still nothing composed. The model is never asked to *write* a summary,
+     * because a generated paragraph in a candidate's voice is a claim nobody
+     * made — it is asked to copy the one the candidate wrote, or return
+     * nothing. Every sentence below is either quoted from the document or
+     * assembled from fields already shown elsewhere on the form.
      */
     private static function coverLetterHtml(array $parsed): ?string
     {
@@ -200,11 +223,31 @@ class ResumeFormSuggestions
             }
         }
 
-        $latestRole = null;
+        // The experiences arrive newest first, so the first row with a role is
+        // the current one — and its description is what the candidate is
+        // actually doing today, which is the single most useful line in a blurb.
+        $latestRole = $latestWork = null;
         foreach ((array) ($parsed['experiences'] ?? []) as $row) {
             if (($latestRole = self::clean($row['role'] ?? null)) !== null) {
+                $latestWork = self::clean($row['summary'] ?? null);
                 break;
             }
+        }
+
+        $paragraphs = [];
+
+        // The candidate's own profile section, when the CV has one.
+        $summary = self::clean($parsed['summary'] ?? null);
+        if ($summary !== null) {
+            $paragraphs[] = e($summary);
+        }
+
+        // Skipped when the profile section already contains it — some resumes
+        // open with a summary that is the current role's description repeated,
+        // and printing it twice makes the draft look automated, which is
+        // exactly the thing that stops a recruiter from trusting the rest.
+        if ($latestWork !== null && ($summary === null || ! self::contains($summary, $latestWork))) {
+            $paragraphs[] = e($latestWork);
         }
 
         $sentences = [];
@@ -238,7 +281,72 @@ class ResumeFormSuggestions
             $sentences[] = 'Language: '.e($language).($level !== null ? ' ('.e($level).')' : '').'.';
         }
 
-        return $sentences === [] ? null : '<p>'.implode(' ', $sentences).'</p>';
+        if ($sentences !== []) {
+            $paragraphs[] = implode(' ', $sentences);
+        }
+
+        return $paragraphs === []
+            ? null
+            : '<p>'.implode('</p><p>', $paragraphs).'</p>';
+    }
+
+    /**
+     * Whether one passage already says what another says.
+     *
+     * Compared with case, whitespace and the full-width/half-width difference
+     * folded away, because the same sentence lifted from a Japanese resume into
+     * its own summary is routinely re-typed with different spacing.
+     */
+    private static function contains(string $haystack, string $needle): bool
+    {
+        // mb_convert_kana over Normalizer::FORM_KC on purpose: mbstring is a
+        // Laravel requirement, intl is not declared in composer.json, and this
+        // is not worth an undeclared extension. 'a' folds full-width latin and
+        // digits down to half-width, which is the difference that actually
+        // shows up between a Japanese resume's body and its summary.
+        $fold = static fn (string $s): string => preg_replace(
+            '/[\s\x{3000}]+/u', '', mb_strtolower(mb_convert_kana($s, 'a'))
+        ) ?? '';
+
+        $needle = $fold($needle);
+
+        return $needle !== '' && str_contains($fold($haystack), $needle);
+    }
+
+    /**
+     * The parser returns a closed set, so this only has to guard the contract.
+     *
+     * Anything outside it is dropped rather than coerced: a gender the form
+     * cannot represent is better left for the person to answer than mapped to
+     * whichever option happens to be nearest.
+     */
+    private static function gender(array $parsed): ?string
+    {
+        $value = mb_strtolower((string) self::text($parsed, 'contact.gender'));
+
+        return in_array($value, ['male', 'female', 'other'], true) ? $value : null;
+    }
+
+    /**
+     * The form offers exactly two nationalities, so everything else is "other".
+     *
+     * Note that "other" is a real answer here, not a fallback for "unknown" —
+     * a CV stating Vietnamese nationality genuinely means the non-Japanese
+     * option. A CV that states nothing returns null and leaves the field alone.
+     */
+    private static function nationality(array $parsed): ?string
+    {
+        $value = self::text($parsed, 'contact.nationality');
+
+        if ($value === null) {
+            return null;
+        }
+
+        $value = mb_strtolower($value);
+
+        return (str_contains($value, 'japan') || str_contains($value, '日本'))
+            ? 'japanese'
+            : 'other';
     }
 
     /**

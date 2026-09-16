@@ -155,23 +155,33 @@
                                  The number is always spelled out, and the reasons
                                  below are what a recruiter should actually act on. --}}
                             @php($tone = $match->score >= 75 ? 'strong' : ($match->score >= 50 ? 'fair' : 'weak'))
+                            @php($width = max(0, min(100, (int) round($match->score))))
                             <div class="talent-match-head">
-                                <span class="talent-match-score talent-match-score--{{ $tone }}">
-                                    <span class="talent-match-number">{{ $match->score }}</span><span
-                                          class="talent-match-outof">/100</span>
-                                </span>
                                 <span class="talent-match-caption">{{ __('talents/index.match_score') }}</span>
-
-                                {{-- A score read off a profile is a weaker claim than one
-                                     read off a CV. Saying so is the difference between a
-                                     number a recruiter can act on and one they have to
-                                     take on faith. --}}
-                                @if($parse?->isFromProfile())
-                                    <span class="talent-match-flag"
-                                          title="{{ __('talents/index.scored_from_profile_help') }}">
-                                        {{ __("talents/index.scored_from_profile") }}
+                                <div class="talent-match-figure">
+                                    <span class="talent-match-score talent-match-score--{{ $tone }}">
+                                        <span class="talent-match-number">{{ $match->score }}</span><span
+                                              class="talent-match-outof">/100</span>
                                     </span>
-                                @endif
+                                    {{-- aria-hidden on purpose: the figure to its left already
+                                         states the same number, and a screen reader announcing
+                                         it twice is noise, not access. --}}
+                                    <span class="talent-match-meter" aria-hidden="true">
+                                        <span class="talent-match-meter-fill talent-match-meter-fill--{{ $tone }}"
+                                              style="width: {{ $width }}%"></span>
+                                    </span>
+
+                                    {{-- A score read off a profile is a weaker claim than one
+                                         read off a CV. Saying so is the difference between a
+                                         number a recruiter can act on and one they have to
+                                         take on faith. --}}
+                                    @if($parse?->isFromProfile())
+                                        <span class="talent-match-flag"
+                                              title="{{ __('talents/index.scored_from_profile_help') }}">
+                                            {{ __("talents/index.scored_from_profile") }}
+                                        </span>
+                                    @endif
+                                </div>
                             </div>
 
                             <ul class="talent-match-reasons">
@@ -277,10 +287,11 @@
                                              have acted on it. --}}
                                         <div class="col-lg-6 col-xl-7 feature-text">{{ filled($talent->user->nearest_station_prefecture) ? $talent->user->nearest_station_prefecture : '—' }}</div>
                                     </div>
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __('talents/index.operations') }}: </div>
-                                        <div class="col-lg-6 col-xl-7 feature-text">{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) ?? __("talents/index.{$talent->availability}") }}</div>
-                                    </div>
+                                    {{-- An "Operations" row used to sit here printing exactly the
+                                         expression the Availability heading above already prints.
+                                         The same value under two labels, one of them wrong —
+                                         運用 is not availability — and there is no operations
+                                         column on talents to put here instead. --}}
                                 </div>
                                 <div class="col-md-6 col-lg-5">
                                     <div class="row align-items-center">
@@ -288,7 +299,7 @@
                                         <div class="col-lg-6 col-xl-7 feature-text">{{ $talent->affiliation }}</div>
                                     </div>
                                     <div class="row align-items-center">
-                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.type_of_contract") }}</div>
+                                        <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.type_of_contract") }}: </div>
                                         <div class="col-lg-6 col-xl-7 feature-text">
                                             {{ $talent->myContract!==null ? __("talents/index.{$talent->myContract}"): '' }}
                                         </div>
@@ -296,9 +307,14 @@
                                     <div class="row align-items-center">
                                         <div class="col-lg-6 col-xl-5 feature-head">{{ __("talents/index.preferred_location") }}: </div>
                                         <div class="col-lg-6 col-xl-7 feature-text">
-                                            @foreach($talent->locations as $location)
-                                                {{ $location->title ?? '' }} @if(!$loop->last), @endif
-                                            @endforeach
+                                            {{-- An em dash rather than nothing, as the station
+                                                 row does: a label with empty space beside it
+                                                 reads as a rendering fault, not as "unstated". --}}
+                                            @forelse($talent->locations as $location)
+                                                {{ $location->title ?? '' }}@if(!$loop->last), @endif
+                                            @empty
+                                                —
+                                            @endforelse
                                         </div>
                                     </div>
                                 </div>

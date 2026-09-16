@@ -90,4 +90,6 @@ return array(
     "interview_4"   => "Three or More time",
     "commercial_flow" => "Commercial flow",
     "commercial_flow_placeholder" => "--",
+    'locations' => 'Preferred locations',
+    'work_mode' => 'Work mode',
 );

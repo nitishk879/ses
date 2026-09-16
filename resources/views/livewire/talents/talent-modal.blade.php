@@ -51,8 +51,11 @@
                                             <div class="col-md-6">
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.monthly_income") }}: </div>
-                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->min_monthly_price ?? '' }} -
-                                                        {{ $talent->max_monthly_price ?? '' }} {{ __('talents/index.currency_text') }}</div>
+                                                    {{-- `salary_range`, as the listing card uses:
+                                                         the raw columns printed "700000 - 900000"
+                                                         next to a listing that said "700K - 900K"
+                                                         for the same candidate. --}}
+                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->salary_range ?? '' }} {{ __('talents/index.currency_text') }}</div>
                                                 </div>
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.nationality") }}: </div>
@@ -63,8 +66,18 @@
                                                     <div class="col-6 col-md-7 feature-text">{{ filled($talent->user->nearest_station_prefecture) ? $talent->user->nearest_station_prefecture : '—' }}</div>
                                                 </div>
                                                 <div class="row align-items-center">
-                                                    <div class="col-6 col-md-5 feature-head">{{ __('talents/index.operations') }}: </div>
-                                                    <div class="col-6 col-md-7 feature-text">{{ $talent->availability ? 'Available Immediately': '--' }}</div>
+                                                    {{-- Was labelled "Operations" and read
+                                                         `$talent->availability ? 'Available
+                                                         Immediately' : '--'`. There is no
+                                                         operations column on talents, and an enum
+                                                         is never falsy, so every candidate was
+                                                         shown as immediately available — including
+                                                         one whose record says "Inquire About
+                                                         Participation". Same fabrication as the
+                                                         station: a claim the record does not make,
+                                                         which a recruiter would staff against. --}}
+                                                    <div class="col-6 col-md-5 feature-head">{{ __('talents/index.availability') }}: </div>
+                                                    <div class="col-6 col-md-7 feature-text">{{ \App\Enums\ParticipationEnum::toName($talent->availability->value) }}</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
@@ -81,9 +94,11 @@
                                                 <div class="row align-items-center">
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.preferred_location") }}: </div>
                                                     <div class="col-6 col-md-7 feature-text">
-                                                        @foreach($talent->locations as $location)
-                                                            {{ $location->title ?? '' }} @if(!$loop->last), @endif
-                                                        @endforeach
+                                                        @forelse($talent->locations as $location)
+                                                            {{ $location->title ?? '' }}@if(!$loop->last), @endif
+                                                        @empty
+                                                            —
+                                                        @endforelse
                                                     </div>
                                                 </div>
                                             </div>

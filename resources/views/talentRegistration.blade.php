@@ -12,7 +12,7 @@
                         {{--                                {{ __('Login') }}--}}
                     </div>
                     <div class="card-body text-start">
-                        <form action="{{ route("talent.registration") }}" id="progressForm" method="post" class="col-md-12 needs-validation" enctype="multipart/form-data" novalidate>
+                        <form action="{{ route("talent.registration") }}" id="progressForm" method="post" class="col-md-12 needs-validation" data-invalid-message="{{ __('talents/registration.form_has_errors') }}" enctype="multipart/form-data" novalidate>
                             @csrf
                             <div class="row justify-content-around">
                                 <div class="col-md-6">
