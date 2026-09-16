@@ -10,6 +10,7 @@ use Illuminate\Validation\Rule;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class TalentController extends Controller
 {
@@ -91,7 +92,11 @@ class TalentController extends Controller
             'lastname' => $validated['lastname'],
             'phone' => $validated['phone'],
             'password' => 'password',
-            'username' => strstr($validated['email'], '@', true),
+            // The email's local part is NOT unique — neha.pal@gmail.com and
+            // neha.pal@dcodingx.co.jp both yield "neha.pal" — but the column
+            // is, so the second such candidate used to fail on
+            // `users_username_unique`. Suffixed until free.
+            'username' => $this->availableUsername($validated['email']),
             'date_of_birth' => $validated['date_of_birth'] ?? today()->subYears(18),
             'gender' => $validated['gender'],
             'nationality' => $validated['nationality'],
@@ -156,6 +161,37 @@ class TalentController extends Controller
         $talent->locations()->attach($request->input(['locations']));
 
         return redirect()->route('talents.index');
+    }
+
+    /**
+     * A username derived from the email that is not already taken.
+     *
+     * `users.username` is unique but the value it was derived from is not: the
+     * part before the "@" is shared by anyone with the same handle at a
+     * different domain. Rather than fail the whole registration on a collision
+     * nobody can see coming, the first free "name", "name-2", "name-3" wins.
+     *
+     * Bounded, and falls back to something unique by construction — a loop that
+     * can spin forever on a busy table is not an improvement on a 500.
+     */
+    private function availableUsername(string $email): string
+    {
+        $base = strstr($email, '@', true) ?: $email;
+        $base = mb_substr($base, 0, 40);
+
+        if (! User::where('username', $base)->exists()) {
+            return $base;
+        }
+
+        for ($suffix = 2; $suffix <= 50; $suffix++) {
+            $candidate = "{$base}-{$suffix}";
+
+            if (! User::where('username', $candidate)->exists()) {
+                return $candidate;
+            }
+        }
+
+        return $base.'-'.Str::random(8);
     }
 
     /**
@@ -288,7 +324,17 @@ class TalentController extends Controller
             'lastname' => $validated['lastname'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
-            'username' => strstr($validated['email'], '@', true),
+            /*
+             * `username` is deliberately absent.
+             *
+             * It used to be re-derived here as `strstr($email, '@', true)`,
+             * copied from store(). That is wrong twice over: the column is not
+             * on this form and is read nowhere in the application, so an email
+             * correction silently rewrote an identity handle nobody asked to
+             * change — and the derived value is not unique. Two people can hold
+             * neha.pal@gmail.com and neha.pal@dcodingx.co.jp, and the second
+             * one saved hit `users_username_unique` and 500'd the edit.
+             */
             'date_of_birth' => $validated['date_of_birth'],
             'gender' => $validated['gender'],
             'nationality' => $validated['nationality'],

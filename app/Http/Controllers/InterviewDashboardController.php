@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\InterviewStatus;
 use App\Jobs\ParseProjectJd;
 use App\Jobs\ParseTalentResume;
+use App\Models\AiMatch;
 use App\Models\Interview;
 use App\Models\Project;
 use App\Models\Talent;
@@ -83,6 +84,13 @@ class InterviewDashboardController extends Controller
             'statuses' => InterviewStatus::cases(),
             'filters' => $filters,
             'summary' => $this->summary(),
+            // How many candidates each project has scores for, so the panel can
+            // keep "Invite shortlist" shut until matching has actually produced
+            // something to invite from. One grouped query, not one per project.
+            'scoredCounts' => AiMatch::query()
+                ->selectRaw('project_id, COUNT(*) as total')
+                ->groupBy('project_id')
+                ->pluck('total', 'project_id'),
             // Live from the DenAI dashboard. Empty means the directory was
             // unreachable, which the view says rather than passing off as
             // "no bots exist".
@@ -223,16 +231,48 @@ class InterviewDashboardController extends Controller
     {
         $this->authorizeProject($project);
 
+        /*
+         * No bot, no invitations.
+         *
+         * The AI service will happily run an interview without one — it falls
+         * back to questions SES generates — but this product does not want that
+         * path: the questions live in the bot's prompt on the DenAI dashboard,
+         * and an interview conducted on generated questions instead is a call
+         * that asked the wrong things.
+         *
+         * Enforced here and not only by disabling the button, because the
+         * button is a hint and this is a rule: a page left open from before the
+         * bot was cleared would otherwise still post.
+         */
+        if (blank($project->interview_agent_id)) {
+            return back()->with([
+                'message' => __('interview.dashboard.bot_required'),
+                'type' => 'warning',
+            ]);
+        }
+
         $validated = $request->validate([
             'threshold' => ['nullable', 'integer', 'min:0', 'max:100'],
             'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
-            // Times the recruiter typed, in the interview timezone. Left
-            // empty they are generated, which is the default and what most
-            // invitations use. Validated as dates only — "not in the past"
-            // is enforced in the generator, against the interview zone, so
-            // one clock decides it rather than two that can disagree.
-            'slot_times' => ['nullable', 'array', 'max:6'],
-            'slot_times.*' => ['nullable', 'string', 'max:32'],
+            /*
+             * All three times, every time.
+             *
+             * These used to be optional: left empty, the generator picked three
+             * itself. The generator still does that for `reschedule()`, but an
+             * invitation sent from this panel must offer times a recruiter
+             * actually chose — nobody should learn which slots went out by
+             * reading the email a candidate received.
+             *
+             * `required` on the members rather than `size:3` alone: the form
+             * always posts three inputs, and an empty one arrives as null
+             * (ConvertEmptyStringsToNull), which `size:3` would happily accept.
+             *
+             * Still validated as strings only — "not in the past" is enforced
+             * in the generator against the interview timezone, so one clock
+             * decides it rather than two that can disagree.
+             */
+            'slot_times' => ['required', 'array', 'size:3'],
+            'slot_times.*' => ['required', 'string', 'max:32'],
         ]);
 
         $slotTimes = array_values(array_filter(
@@ -438,7 +478,12 @@ class InterviewDashboardController extends Controller
             $query->where('company_id', $companyId);
         }
 
-        return $query->get(['id', 'title', 'company_id']);
+        // `interview_agent_id` is part of this list's job: the actions panel
+        // reads it to show which bot a project already has. Without it the
+        // picker rendered blank for a project that did have one, and saving any
+        // other change wrote that blank back over it — the exact thing the
+        // panel's "show the current bot" comment was there to prevent.
+        return $query->get(['id', 'title', 'company_id', 'interview_agent_id']);
     }
 
     /**

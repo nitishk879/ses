@@ -150,6 +150,23 @@ class InterviewOrchestrator
             'call_sid' => $handle['twilio_sid'] ?? null,
             'call_config_id' => $handle['call_config_id'] ?? null,
             'channel' => $attempt->channel ?: 'phone',
+            /*
+             * Which bot actually conducted this call.
+             *
+             * Nothing recorded it before, and the bot is deliberately read at
+             * dial time so it can be changed on the dashboard between calls —
+             * which means that after any reassignment there was no way to tell
+             * which prompt a past interview had been run on. With the bot
+             * owning the questions (see build_bot_led_prompt in the AI service),
+             * that is the difference between a transcript you can explain and
+             * one you cannot.
+             *
+             * Null is a real answer here: it says the interview ran on the
+             * questions SES generated rather than on a recruiter's prompt.
+             */
+            'metadata' => array_merge($attempt->metadata ?? [], [
+                'conducted_by_agent_id' => $project->interview_agent_id,
+            ]),
         ])->save();
 
         // STARTING -> IN_PROGRESS. The candidate's phone is ringing, so the

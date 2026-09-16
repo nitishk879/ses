@@ -109,6 +109,24 @@
                             @endif
                         </div>
                     @endif
+
+                    {{-- Which bot conducted this call, recorded at dial time.
+                         The project's bot can be reassigned between interviews,
+                         so reading it off the project now would name whichever
+                         bot is current rather than the one that actually asked
+                         these questions. Absent on attempts placed before this
+                         was recorded; null means the interview ran on the
+                         questions SES generated. --}}
+                    @if($attempt && array_key_exists('conducted_by_agent_id', $attempt->metadata ?? []))
+                        <div class="text-muted">
+                            {{ __('interview.dashboard.conducted_by') }}:
+                            @if(filled($attempt->metadata['conducted_by_agent_id']))
+                                <code>{{ $attempt->metadata['conducted_by_agent_id'] }}</code>
+                            @else
+                                {{ __('interview.dashboard.conducted_by_generated') }}
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 

@@ -25,9 +25,13 @@
 
     @if($projects->isNotEmpty())
         @php
-            // One map, read by the bot picker when the project changes.
+            // One map, read when the project changes: which bot it already has,
+            // and whether matching has produced anything to invite from.
             $interviewSettings = $projects->mapWithKeys(fn ($p) => [
-                $p->id => ['agent' => $p->interview_agent_id],
+                $p->id => [
+                    'agent' => $p->interview_agent_id,
+                    'scored' => (int) ($scoredCounts[$p->id] ?? 0),
+                ],
             ]);
         @endphp
 
@@ -41,7 +45,11 @@
                     {{ __('interview.dashboard.project') }}
                 </label>
                 <select class="form-select" id="actionProject" required
-                        data-required-hint="{{ __('interview.dashboard.choose_project_first') }}">
+                        data-required-hint="{{ __('interview.dashboard.choose_project_first') }}"
+                        data-scores-hint="{{ __('interview.dashboard.run_matching_first') }}"
+                        data-bot-hint="{{ __('interview.dashboard.bot_required') }}"
+                        data-unsaved-hint="{{ __('interview.dashboard.bot_unsaved') }}"
+                        data-slots-hint="{{ __('interview.dashboard.slot_times_required') }}">
                     <option value="">{{ __('interview.dashboard.choose_project') }}</option>
                     @foreach($projects as $p)
                         <option value="{{ $p->id }}" @selected((int) ($filters['project'] ?? 0) === $p->id)>
@@ -121,6 +129,20 @@
                                 <button class="btn btn-outline-primary w-100" type="submit">
                                     {{ __('interview.dashboard.save_bot') }}
                                 </button>
+                                {{-- With a bot assigned, the bot's prompt IS the
+                                     interview: SES supplies only the recorded-call
+                                     opening, the candidate's facts and the closing,
+                                     and every question comes from the dashboard.
+                                     The AI service can fall back to generated
+                                     questions, but this product does not want that
+                                     — so no bot means no invitations, and this says
+                                     so where the bot is chosen. --}}
+                                <div class="form-text text-warning mt-2" data-no-bot-hint hidden>
+                                    {{ __('interview.dashboard.no_bot_warning') }}
+                                </div>
+                                <div class="form-text text-warning mt-2" data-unsaved-bot-hint hidden>
+                                    {{ __('interview.dashboard.bot_unsaved') }}
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -135,7 +157,7 @@
                         <div class="card-body">
                             <h2 class="h6">{{ __('interview.dashboard.invite_shortlist') }}</h2>
                             <p class="text-muted small mb-3">{{ __('interview.dashboard.invite_help') }}</p>
-                            <form method="POST" data-project-form
+                            <form method="POST" data-project-form data-needs-scores
                                   data-action-base="{{ url('interviews/dashboard/invite') }}"
                                   action="{{ url('interviews/dashboard/invite') }}/0"
                                   onsubmit="return confirm(@js(__('interview.dashboard.invite_confirm')))">
@@ -160,7 +182,8 @@
                                     @for($i = 0; $i < 3; $i++)
                                         <div class="col-md-4">
                                             <input type="datetime-local" class="form-control"
-                                                   name="slot_times[]" value="{{ old('slot_times.'.$i) }}">
+                                                   name="slot_times[]" required
+                                                   value="{{ old('slot_times.'.$i) }}">
                                         </div>
                                     @endfor
                                 </div>
@@ -173,6 +196,20 @@
                                 <button class="btn btn-success w-100" type="submit">
                                     {{ __('interview.dashboard.send') }}
                                 </button>
+                                {{-- Sits under the button it explains. Hidden the
+                                     moment the chosen project has scores. --}}
+                                <div class="form-text text-warning mt-2" data-needs-scores-hint hidden>
+                                    {{ __('interview.dashboard.run_matching_first') }}
+                                </div>
+                                <div class="form-text text-warning mt-2" data-no-bot-hint hidden>
+                                    {{ __('interview.dashboard.bot_required') }}
+                                </div>
+                                <div class="form-text text-warning mt-2" data-unsaved-bot-hint hidden>
+                                    {{ __('interview.dashboard.bot_unsaved') }}
+                                </div>
+                                <div class="form-text text-warning mt-2" data-needs-slots-hint hidden>
+                                    {{ __('interview.dashboard.slot_times_required') }}
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -198,30 +235,107 @@
                 // recruiter they forgot to choose a project; it reads as the
                 // feature being broken.
                 function syncProject() {
-                    const chosen = project.value !== '';
+                    const chosen   = project.value !== '';
+                    const settings = SETTINGS[project.value] || {};
+                    // Send needs two things, and they are different in kind.
+                    //
+                    // Scores: Invite filters on them, so without matching there is
+                    // nobody to choose from.
+                    //
+                    // A bot: a product rule rather than a technical one. The AI
+                    // service would run the interview on questions SES generates,
+                    // but the questions that matter are the ones written in the
+                    // bot's prompt — so an interview without a bot asks the wrong
+                    // things. The server refuses it too; this only saves the trip.
+                    const scored = chosen && (settings.scored || 0) > 0;
+
+                    // What is SAVED on the project, not what happens to be showing
+                    // in the picker. A selection nobody pressed Save on is not the
+                    // bot that will conduct the call.
+                    const savedAgent = settings.agent || '';
+                    const hasBot     = chosen && savedAgent !== '';
+
+                    // ...but a picker showing something different from what is
+                    // saved is its own problem: the screen would be promising one
+                    // bot while Send used another. The panel read this box and
+                    // never listened to it, so choosing "No bot" and not saving
+                    // left Send enabled under a dropdown that said there was none.
+                    const pending = chosen && agentBox && agentBox.value !== savedAgent;
+
+                    // All three offered times. They used to be optional — empty
+                    // meant "generate three" — but an invitation from this panel
+                    // now goes out only on slots the recruiter picked, so a blank
+                    // one is a missing answer rather than a default.
+                    const slots = Array.from(
+                        document.querySelectorAll('input[name="slot_times[]"]')
+                    );
+                    const slotsFilled = slots.length > 0 && slots.every(el => el.value !== '');
 
                     forms.forEach(function (f) {
                         f.action = f.dataset.actionBase + '/' + (project.value || '0');
 
                         const submit = f.querySelector('[type="submit"]');
-                        if (submit) {
-                            submit.disabled = ! chosen;
-                            submit.title = chosen ? '' : project.dataset.requiredHint || '';
-                        }
+                        if (! submit) return;
+
+                        const needsScores = f.hasAttribute('data-needs-scores');
+                        const ok = chosen
+                            && (! needsScores || (scored && hasBot && ! pending && slotsFilled));
+
+                        submit.disabled = ! ok;
+                        // Name the step that is actually missing. Telling someone
+                        // to run matching when what they lack is a bot sends them
+                        // to press a button that changes nothing.
+                        submit.title = ok ? ''
+                            : ! chosen ? (project.dataset.requiredHint || '')
+                            : ! scored ? (project.dataset.scoresHint || '')
+                            : ! hasBot ? (project.dataset.botHint || '')
+                            : pending ? (project.dataset.unsavedHint || '')
+                            : (project.dataset.slotsHint || '');
                     });
 
                     document.querySelectorAll('[data-needs-project]')
                         .forEach(el => el.hidden = chosen);
 
-                    // Show the bot this project already has, so opening the
-                    // panel to change one thing does not save a blank over it.
-                    if (agentBox) {
-                        agentBox.value = (SETTINGS[project.value] || {}).agent || '';
-                    }
+                    // Said where the disabled button is, not at the top of the
+                    // panel: "why can I not press Send" is asked at the button.
+                    document.querySelectorAll('[data-needs-scores-hint]')
+                        .forEach(el => el.hidden = ! chosen || scored);
+
+                    // Shown on both cards while the bot is missing: beside Save
+                    // Bot, which is where it gets fixed, and under Send, which is
+                    // where it is noticed.
+                    document.querySelectorAll('[data-no-bot-hint]')
+                        .forEach(el => el.hidden = ! chosen || hasBot);
+
+                    document.querySelectorAll('[data-unsaved-bot-hint]')
+                        .forEach(el => el.hidden = ! pending);
+
+                    document.querySelectorAll('[data-needs-slots-hint]')
+                        .forEach(el => el.hidden = ! chosen || slotsFilled);
                 }
 
-                project.addEventListener('change', syncProject);
-                syncProject();
+                // Two entry points, because they mean different things: changing
+                // the project reloads the picker from what that project has saved,
+                // while changing the picker only re-judges the gates.
+                function selectProject() {
+                    if (agentBox) {
+                        // Show the bot this project already has, so opening the
+                        // panel to change one thing does not save a blank over it.
+                        agentBox.value = (SETTINGS[project.value] || {}).agent || '';
+                    }
+                    syncProject();
+                }
+
+                project.addEventListener('change', selectProject);
+                agentBox?.addEventListener('change', syncProject);
+                // `input` as well as `change`: a datetime-local fires `change`
+                // only once the whole value is valid, so clearing one field
+                // would otherwise leave Send enabled until focus moved.
+                document.querySelectorAll('input[name="slot_times[]"]').forEach(function (el) {
+                    el.addEventListener('change', syncProject);
+                    el.addEventListener('input', syncProject);
+                });
+                selectProject();
 
                 // No past times in the picker. Recomputed on focus, not only at
                 // page load, so a form left open over lunch does not still
