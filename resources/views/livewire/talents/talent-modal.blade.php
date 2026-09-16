@@ -148,6 +148,16 @@
                     </div>
                     <div class="d-flex w-100 gap-2 justify-content-center px-6 py-3">
                         <button type="button" class="btn btn-primary print-window" wire:click="download">{{ __("talents/show.download") }}</button>
+                        {{-- This modal is where a recruiter reads the email and phone, so it is
+                             also where they notice one is wrong. Sending them back to the list to
+                             hunt for an Edit button is how wrong contact details survive. --}}
+                        @if($talent)
+                            @can('update', $talent)
+                                <a href="{{ route('talents.edit', $talent) }}" class="btn btn-outline-secondary">
+                                    {{ __("talents/index.edit_profile") }}
+                                </a>
+                            @endcan
+                        @endif
                         <button type="button" class="btn btn-outline-primary" wire:click="close">{{ __("talents/show.close") }}</button>
                     </div>
                 </div>

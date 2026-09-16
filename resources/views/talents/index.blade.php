@@ -51,10 +51,54 @@
          * leaves the star clickable, which raising z-index here would not.
          */
         .talent-match {
-            padding: 0.85rem 1.5rem 0.85rem 3rem;
+            /* Right padding leaves room for the actions kebab pinned in the
+               corner, so a long reason line does not run underneath it. */
+            padding: 0.85rem 3.25rem 0.85rem 3rem;
             border-bottom: 1px solid #E4E5E8;
             background: #FFFFFF;
         }
+
+        /*
+         * The card's actions, in its top-right corner.
+         *
+         * Absolute rather than a flex child of the match band: that band only
+         * renders when a project is selected, so anything inside it disappears
+         * on the plain Find Talent screen. Pinned to the card instead, it sits
+         * level with the score row when there is one and in the same place when
+         * there is not.
+         *
+         * z-index 2 clears `.add-to-favourite`, which is z-index 1 — the same
+         * stacking fight that once hid the leading digits of the score.
+         */
+        .talent-actions {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            z-index: 2;
+        }
+
+        .talent-actions-toggle {
+            border: 1px solid transparent;
+            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            line-height: 1;
+            color: #767F8C;
+            background: transparent;
+        }
+
+        .talent-actions-toggle:hover,
+        .talent-actions-toggle:focus-visible,
+        .talent-actions.show .talent-actions-toggle {
+            color: #1F2430;
+            background: #F1F2F4;
+            border-color: #D6D8DC;
+        }
+
+        /* Bootstrap draws no caret when the toggle carries no .dropdown-toggle,
+           but be explicit: the icon is the affordance. */
+        .talent-actions-toggle::after { display: none; }
 
         /*
          * The score used to be a tinted pill with the caption floating beside

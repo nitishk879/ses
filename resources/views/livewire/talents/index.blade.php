@@ -133,6 +133,64 @@
                     <i class="fa-solid fa-star"></i>
                 </a>
 
+                {{-- One kebab, not a stack of three full-width buttons at the foot
+                     of the card. Those made every card taller than its own content
+                     and gave equal weight to three things a recruiter does
+                     occasionally.
+
+                     Pinned to the card corner rather than dropped into the match
+                     band, because that band only renders when a project is
+                     selected — inside it, the actions would vanish on the plain
+                     Find Talent screen. Positioned absolutely, so it lines up with
+                     the score row without depending on it existing.
+
+                     `data-bs-strategy="fixed"` is load-bearing: `.talent-card` sets
+                     `overflow: hidden` to clip its header to the rounded corners,
+                     which would otherwise cut the open menu off at the card edge.
+                     The fixed strategy positions against the viewport instead, and
+                     nothing in this card's ancestry sets a transform, so it really
+                     does escape the clip.
+
+                     The old `id="openTalentModal"` is gone: it was repeated on every
+                     card on the page and referenced by nothing. --}}
+                <div class="dropdown talent-actions">
+                    <button type="button"
+                            class="btn btn-sm talent-actions-toggle"
+                            id="talentActions{{ $talent->id }}"
+                            data-bs-toggle="dropdown"
+                            data-bs-strategy="fixed"
+                            aria-expanded="false"
+                            aria-label="{{ __('talents/index.actions') }}"
+                            title="{{ __('talents/index.actions') }}">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end"
+                        aria-labelledby="talentActions{{ $talent->id }}">
+                        {{-- "View resume" used to sit above this and dispatched the
+                             identical event to the identical modal — two labels for
+                             one action, which only made a reader wonder what the
+                             difference was. --}}
+                        <li>
+                            <button type="button" class="dropdown-item"
+                                    wire:click="$dispatch('confirmingOenModal', { id:{{ $talent->id }} })">
+                                {{ __("talents/index.view_profile") }}
+                            </button>
+                        </li>
+
+                        {{-- Gated on the policy, so it is shown only to someone who
+                             may actually save it — an item that 403s is worse than
+                             no item. --}}
+                        @can('update', $talent)
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ route('talents.edit', $talent) }}">
+                                    {{ __("talents/index.edit_profile") }}
+                                </a>
+                            </li>
+                        @endcan
+                    </ul>
+                </div>
+
                 {{-- The match block sits in the card's top-left corner, which is
                      already occupied: `.add-to-favourite` is absolutely positioned
                      at top:-1rem / left:-1rem with a 3.5rem circle and z-index 1,
@@ -318,22 +376,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-lg-2">
-                                    <div class="d-grid gap-2 my-3">
-                                        <button type="button"
-                                                wire:click="$dispatch('confirmingOenModal', { id:{{ $talent->id }} })"
-                                                id="openTalentModal"
-                                                class="btn btn-outline-primary">
-                                            {{ __("talents/index.view_resume") }}
-                                        </button>
-                                        <button type="button"
-                                                id="openTalentModal"
-                                                wire:click="$dispatch('confirmingOenModal', { id:{{ $talent->id }} })"
-                                                class="btn btn-outline-primary">
-                                            {{ __("talents/index.view_profile") }}
-                                        </button>
-                                    </div>
-                                </div>
+                                {{-- The actions moved to the kebab in the card's top-right
+                                     corner; nothing is left to put in this column. --}}
                             </div>
                         </div>
                     </div>

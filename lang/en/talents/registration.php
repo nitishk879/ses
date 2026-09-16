@@ -27,6 +27,8 @@ return array(
     "upload_resume" => "Upload Profile", //Oct 30, 2024
     "write_bio" => "Write your professional biography here, highlighting your background, skills. Let employers know who you are by emphasizing your career goals, values, and what makes you a standout candidate.",
     "file_acceptance" => "PDF, DOC or DOCX, up to 2 MB",
+    'current_resume' => 'On file:',
+    'replace_resume_help' => 'Leave empty to keep the CV already on file.',
     "start_with_cv" => "Start with the CV",
     "start_with_cv_hint" => "Attach the resume first and let it fill the form below. Every value it suggests is editable, and nothing is saved until you submit.",
     "autofill_absent" => "In the CV but not on this form, so not saved:",

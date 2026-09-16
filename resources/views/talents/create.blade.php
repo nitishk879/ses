@@ -305,7 +305,8 @@
                                     @foreach(\App\Enums\TalentCharEnum::cases() as $case)
                                         <div class="form-check form-check-inline">
                                             <input class="form-check-input @error('experience_in_2') is-invalid @enderror"
-                                                   type="checkbox" id="experience_in_{{$case->value}}" name="characteristics[]" value="{{ $case->value }}">
+                                                   type="checkbox" id="experience_in_{{$case->value}}" name="characteristics[]" value="{{ $case->value }}"
+                                                   @checked(in_array($case->value, (array) old('characteristics', [])))>
                                             <label class="form-check-label"
                                                    for="experience_in_{{$case->value}}">{{ __("talents/registration.experience_in_{$case->value}") }}</label>
                                         </div>

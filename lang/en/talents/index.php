@@ -42,6 +42,8 @@ return array(
     "from_date" => "Please inquire about participation date",
     "view_resume" => "View resume",
     "view_profile" => "View profile",
+    "edit_profile" => "Edit",
+    "actions" => "Actions",
     "application_deadline"  => "Application deadline",
     "favourite" => "Favourite",
     "last_logged_in" => "Last logged in",

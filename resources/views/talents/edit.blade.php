@@ -39,7 +39,7 @@
                                     <div class="col-md-6">
                                         <label for="lastName"
                                                class="col-form-label required">{{ __("talents/registration.lastname") }}</label>
-                                        <input type="text" class="form-control @error('firstname') is-invalid @enderror"
+                                        <input type="text" class="form-control @error('lastname') is-invalid @enderror"
                                                id="lastName" name="lastname"
                                                placeholder="{{ __("talents/registration.lastname") }}"
                                                value="{{ $talent->user->lastname ?? old('lastname') ?? '' }}" aria-label="Last name" required>
@@ -62,8 +62,12 @@
                                     <div class="col-md-6">
                                         <label for="dateOfBirth"
                                                class="form-label required">{{ __('talents/registration.date_of_birth') }}</label>
+                                        {{-- `->format()` on a null column threw "Call to a member
+                                             function format() on null" and 500'd the whole edit page
+                                             for any candidate without a date of birth. `??` could not
+                                             save it: the call happens before the coalesce. --}}
                                         <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror" name="date_of_birth"
-                                               id="dateOfBirth" value="{{ $talent->user->date_of_birth->format('Y-m-d') ?? old('date_of_birth') ?? '' }}" placeholder="10/02/2000"
+                                               id="dateOfBirth" value="{{ old('date_of_birth', $talent->user->date_of_birth?->format('Y-m-d')) }}"
                                                required>
                                         @error('date_of_birth')
                                         <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -97,8 +101,13 @@
                                                 name="affiliation" id="affiliation" aria-label="affiliation" required>
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\AffiliationEnum::cases() as $case)
-                                                <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}
-                                                    @selected($talent->affiliation == $case->name ?? old('affiliation', $talent->affiliation) == $case->value)
+                                                {{-- getRawOriginal: the `affiliation` cast returns a
+                                                     translated label ("Company employees"), which never
+                                                     equals an enum name. And `$loop->first` forced the
+                                                     first option selected as well, so two options
+                                                     carried `selected`. --}}
+                                                <option value="{{ $case->value }}"
+                                                    @selected((int) old('affiliation', $talent->getRawOriginal('affiliation')) === $case->value)
                                                 >{{ \App\Enums\AffiliationEnum::toName($case->value) ?? __("talents/index.{$case->name}") ?? __('One') }}</option>
                                             @endforeach
                                         </select>
@@ -112,9 +121,12 @@
                                                 name="contract_type" id="contractType" aria-label="contractType">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\ContractClassificationEnum::cases() as $contract)
-                                                <option
-                                                    value="{{ $contract->value }}" {{ $loop->first ? 'selected' : '' }}
-                                                    @selected($talent->contract_type == $case->name ?? old('contract_type', $talent->contract_type) == $case->value)
+                                                {{-- Was `$case`, the previous loop's variable, undefined
+                                                     here, compared against `$talent->contract_type`, which
+                                                     is not a column. `myContract` is the accessor that
+                                                     derives it from the three booleans. --}}
+                                                <option value="{{ $contract->value }}"
+                                                    @selected(old('contract_type', $talent->myContract) === $contract->value)
                                                 >{{ \App\Enums\ContractClassificationEnum::toName($contract) ?? __("talents/index.{$contract->toName($contract)}") }}</option>
                                             @endforeach
                                         </select>
@@ -125,7 +137,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="gender" class="form-label">{{ __("talents/registration.gender") }}</label>
                                         <select class="form-select @error('gender') is-invalid @enderror" name="gender"
-                                                aria-label="gender">
+                                                id="gender" aria-label="gender">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\GenderEnum::cases() as $gender)
                                                 <option value="{{ $gender->value }}"
@@ -147,7 +159,7 @@
                                                 @selected(old('nationality', $talent->user->nationality) == 'japanese')
                                             > {{ __("talents/registration.japanese") }}</option>
                                             <option value="other"
-                                                @selected(old('nationality', $talent->user->nationality) != 'japanese')
+                                                @selected(old('nationality', $talent->user->nationality) === 'other')
                                             >{{ __("talents/registration.english") }}</option>
                                         </select>
                                         @error('nationality')
@@ -161,8 +173,12 @@
                                                 name="language" id="language" aria-label="language">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Enums\LangEnum::cases() as $lang)
+                                                {{-- `languages` is a display accessor returning
+                                                     translated labels (["Bilingual"]), not ids, so it
+                                                     could never match an option value. `languageIds()`
+                                                     reads the stored ids. --}}
                                                 <option value="{{ $lang->value }}"
-                                                    @selected(in_array($lang->value, old('language', $talent->user->languages ?? [])))
+                                                    @selected(in_array((int) old('language', $talent->user->languageIds()[0] ?? null), [$lang->value], true))
                                                 > {{ \App\Enums\LangEnum::toName($lang->value) ?? __("talents/registration.japanese") }}</option>
                                             @endforeach
                                         </select>
@@ -197,11 +213,11 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="otherDesiredLocation"
+                                        <label for="stationLine"
                                                class="form-label">{{ __('talents/registration.route_name') }}</label>
                                         <input type="text"
                                                class="form-control @error('nearest_station_line') is-invalid @enderror"
-                                               name="nearest_station_line" id="otherDesiredLocation"
+                                               name="nearest_station_line" id="stationLine"
                                                value="{{ $talent->user->nearest_station_line ?? old("nearest_station_line") ?? "" }}"
                                                placeholder="{{ __('talents/registration.route_name') }}">
                                         @error('nearest_station_line')
@@ -209,11 +225,11 @@
                                         @enderror
                                     </div>
                                     <div class="col-md-12 mb-3">
-                                        <label for="otherDesiredLocation"
+                                        <label for="stationName"
                                                class="form-label">{{ __('talents/registration.station_name') }}</label>
                                         <input type="text"
                                                class="form-control @error('nearest_station_name') is-invalid @enderror"
-                                               name="nearest_station_name" id="otherDesiredLocation"
+                                               name="nearest_station_name" id="stationName"
                                                value="{{ $talent->user->nearest_station_name ?? old("nearest_station_name") ?? "" }}"
                                                placeholder="{{ __('talents/registration.station_name') }}">
                                         @error('nearest_station_name')
@@ -233,8 +249,8 @@
                                            class="form-label">{{ __('talents/registration.cover_letter') }}</label>
                                     <textarea class="form-control tinyEditor @error('cover_letter') is-invalid @enderror" id="targetTextarea1"
                                               name="cover_letter" rows="3"
-                                              placeholder="{{ __('talents/registration.cover_letter_placeholder') }}">{!! $talent->cover_letter ?? old("cover_letter") !!}</textarea>
-                                    @error('address')
+                                              placeholder="{{ __('talents/registration.cover_letter_placeholder') }}">{!! old('cover_letter', $talent->cover_letter) !!}</textarea>
+                                    @error('cover_letter')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                     <div class="ms-auto text-end mt-2">
@@ -242,30 +258,37 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <!-- Display Existing File -->
-{{--                                    @if($talent->resume)--}}
-{{--                                        <div class="mb-3">--}}
-{{--                                            <label for="existingFile" class="form-label">Existing File:</label>--}}
-{{--                                            <a href="{{ asset("storage/{$talent->resume}") }}" target="_blank" class="btn btn-link">--}}
-{{--                                                View File--}}
-{{--                                            </a>--}}
-{{--                                        </div>--}}
-{{--                                    @endif--}}
-                                    <label for="formFile" class="form-label">{{ __("talents/registration.upload_resume") }}
-                                        ({{ __('talents/registration.file_acceptance') }})</label>
+                                    {{-- Which CV is on file right now. This link was commented
+                                         out, so a recruiter could not tell which document the
+                                         match score had been computed from, and re-uploading
+                                         was the only way to be sure. `default-image.jpg` is the
+                                         placeholder `store()` writes when nothing was attached,
+                                         so it is not offered as a document. --}}
+                                    @if(filled($talent->resume) && $talent->resume !== 'default-image.jpg')
+                                        <div class="mb-2 small">
+                                            {{ __('talents/registration.current_resume') }}
+                                            <a href="{{ asset("storage/talents/{$talent->resume}") }}" target="_blank" rel="noopener">
+                                                {{ $talent->resume }}
+                                            </a>
+                                        </div>
+                                    @endif
+                                    <label for="formFile" class="form-label">{{ __("talents/registration.upload_resume") }}</label>
+                                    {{-- No `value` on a file input: browsers ignore it, and the
+                                         one that was here pointed at an asset URL. --}}
                                     <input class="form-control @error('resume') is-invalid @enderror"
                                            type="file"
                                            name="resume"
-                                           value="{{ asset("storage/{$talent->resume}") ?? old("resume") ?? '' }}"
+                                           accept=".pdf,.doc,.docx"
                                            id="formFile">
+                                    <div class="form-text">{{ __('talents/registration.replace_resume_help') }}</div>
                                     @error('resume')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
                                 </div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="exampleFormControlInput1" class="form-label">{{ __("talents/registration.resume_privacy") }}</label>
-                                        <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" aria-label="Default select example">
+                                        <label for="resumePrivacy" class="form-label">{{ __("talents/registration.resume_privacy") }}</label>
+                                        <select class="form-select @error('privacy') is-invalid @enderror" name="privacy" id="resumePrivacy">
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             <option value="1" @selected(old('privacy', $talent->privacy) == 1)>{{ __("talents/registration.release") }}</option>
                                             <option value="0" @selected(old('privacy', $talent->privacy) == 0)>{{ __("talents/registration.private") }}</option>
@@ -291,22 +314,27 @@
                                         <input type="date" class="form-control @error('joining_date') is-invalid @enderror"
                                                name="joining_date"
                                                id="joiningDate"
-                                               value="{{ $talent->joining_date->format('Y-m-d') ?? old("joining_date") ?? '' }}"
-                                               placeholder="{{ __('talents/registration.joining_date') }}" required
+                                               value="{{ old('joining_date', $talent->joining_date?->format('Y-m-d')) }}"
+                                               placeholder="{{ __('talents/registration.joining_date') }}"
                                         />
                                         @error('joining_date')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                     </div>
-{{--                                    <div class="col-md-6 mb-3" >--}}
-{{--                                        <label class="form-label" for="workExperience">{{ __("talents/registration.work_experience") }}</label>--}}
-{{--                                        <input type="number" class="form-control @errors('work_experience') is-invalid @enderror"--}}
-{{--                                               name="work_experience"--}}
-{{--                                               id="workExperience"--}}
-{{--                                               min="0"--}}
-{{--                                               value="{{ old("work_experience") ?? '' }}"--}}
-{{--                                               placeholder="{{ __('talents/registration.work_experience_placeholder') }}"--}}
-{{--                                        />--}}
-{{--                                        @errors('work_experience')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror--}}
-{{--                                    </div>--}}
+                                    {{-- Restored. This was commented out, so years of experience
+                                         could be set when the candidate was registered and never
+                                         corrected — and it is what the experience dimension of the
+                                         match score reads. (The commented version also used
+                                         `@errors`, which is not a Blade directive.) --}}
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label" for="workExperience">{{ __("talents/registration.work_experience") }}</label>
+                                        <input type="number" class="form-control @error('work_experience') is-invalid @enderror"
+                                               name="work_experience"
+                                               id="workExperience"
+                                               min="0" max="70"
+                                               value="{{ old('work_experience', $talent->experience_years) }}"
+                                               placeholder="{{ __('talents/registration.work_experience_placeholder') }}"
+                                        />
+                                        @error('work_experience')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -319,7 +347,12 @@
                                         <div class="form-check form-check-inline" data-bs-popper="{{ $case->name }}">
                                             <input class="form-check-input @error('characteristics') is-invalid @enderror"
                                                    type="checkbox" id="char_{{$case->value}}" name="characteristics[]" value="{{ $case->value }}"
-                                                @checked((collect($talent->characteristics)->contains('id', $case->value)) || in_array($case->value, old('characteristics', [])))
+                                                {{-- Was `collect($talent->characteristics)->contains('id', ...)`.
+                                                     That accessor returns a flat list of translated
+                                                     names, not objects with an `id`, so the check never
+                                                     matched and every box rendered unticked — editing a
+                                                     candidate silently cleared their characteristics. --}}
+                                                @checked(in_array($case->value, old('characteristics', $talent->characteristicIds())))
 {{--                                                @checked($talent->characteristics->contains('id', $case->value) ?? old('characteristics', $case->value))--}}
                                             >
                                             <label class="form-check-label"
@@ -340,7 +373,7 @@
                                     <label for="expectedMinSalary" class="form-label required">{{ __('talents/registration.expected_salary') }}</label>
                                     <div class="row align-items-center">
                                         <div class="col-md-6 mb-3">
-                                            <label for="minSalary" class="form-label">{{ __("common/sidebar.min_salary") }}</label>
+                                            <label for="expectedMinSalary" class="form-label">{{ __("common/sidebar.min_salary") }}</label>
                                             <input type="number" class="form-control @error('min_monthly_price') is-invalid @enderror"
                                                    name="min_monthly_price"
                                                    id="expectedMinSalary"
@@ -350,7 +383,7 @@
                                             @error('min_monthly_price')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                         </div>
                                         <div class="col-md-6 mb-3">
-                                            <label for="maxSalary" class="form-label">{{ __("common/sidebar.max_salary") }}</label>
+                                            <label for="expectedMaxSalary" class="form-label">{{ __("common/sidebar.max_salary") }}</label>
                                             <input type="number" class="form-control @error('max_monthly_price') is-invalid @enderror"
                                                    name="max_monthly_price"
                                                    id="expectedMaxSalary"

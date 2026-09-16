@@ -84,14 +84,6 @@ class TalentController extends Controller
             'characteristics' => 'nullable|array'
         ]);
 
-        if ($request->hasFile('resume')) {
-            $fileExt = $request->file('resume')->getClientOriginalExtension();
-            $fileNameToStore = "{$validated['firstname']}-{$validated['lastname']}.{$fileExt}";
-            $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
-        } else {
-            $fileNameToStore = 'default-image.jpg';
-        }
-
         $user = User::updateOrCreate([
             'email' => $validated['email'],
         ], [
@@ -112,6 +104,22 @@ class TalentController extends Controller
 
         $user->roles()->attach(3);
 
+        /*
+         * Stored after the user exists, and named with the user id.
+         *
+         * `"{firstname}-{lastname}.pdf"` collides: a second candidate with the
+         * same name overwrote the first one's CV on disk, and both records then
+         * pointed at one document — the wrong CV would be read, parsed and
+         * scored for one of them.
+         */
+        if ($request->hasFile('resume')) {
+            $extension = $request->file('resume')->getClientOriginalExtension();
+            $fileNameToStore = "talent-u{$user->id}-{$validated['firstname']}-{$validated['lastname']}.{$extension}";
+            $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
+        } else {
+            $fileNameToStore = 'default-image.jpg';
+        }
+
         $talent = $user->talent()->updateOrCreate([
             'user_id' => $user->id,
         ],
@@ -126,6 +134,11 @@ class TalentController extends Controller
                 'address' => $validated['address'],
                 'qualifications' => $validated['education'],
                 'experience_pr' => $validated['experience'],
+                // `work_experience` was validated and then dropped — the line
+                // that saved it was commented out, and the column it named did
+                // not exist — so "years of experience" was asked for on the form
+                // and never stored. See the add_experience_years migration.
+                'experience_years' => $validated['work_experience'] ?? null,
                 'subcategory' => $validated['subcategory'],
                 'min_monthly_price' => $validated['min_monthly_price'],
                 'max_monthly_price' => $validated['max_monthly_price'],
@@ -158,6 +171,10 @@ class TalentController extends Controller
      */
     public function edit(Talent $talent)
     {
+        $this->authorize('update', $talent);
+
+        $talent->load('user', 'locations:id', 'subcategories:id');
+
         return view('talents.edit', compact('talent'));
     }
 
@@ -166,83 +183,171 @@ class TalentController extends Controller
      */
     public function update(Request $request, Talent $talent)
     {
-        // Validated ignoring this user: re-saving a talent without
-        // changing their number must not fail against their own row.
+        $this->authorize('update', $talent);
+
+        /*
+         * This method used to validate one field — `phone` — and then write the
+         * record's OWN existing values back over itself for everything else:
+         *
+         *     'firstname' => $talent->user->firstname,   // not $request
+         *     'email'     => matched on, never assigned
+         *
+         * So a recruiter could correct a misspelled name or a wrong email
+         * address, press Submit, get "Talent updated successfully", and have
+         * nothing change. Measured: sending a new email and a new first name
+         * altered neither, while the phone — the one validated field — saved.
+         *
+         * Silent data loss reported as success is the worst shape a bug can
+         * take, so the whole method now works the way `store()` does: validate
+         * everything, then assign what was validated.
+         */
         $validated = $request->validate([
+            'firstname' => 'required|max:255',
+            'lastname' => 'required|max:255',
+            // Unique "except this candidate's own row" — re-saving without
+            // touching the field must not collide with itself.
+            'email' => [
+                'required', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($talent->user_id),
+            ],
             'phone' => [
                 'required', 'string', 'max:32',
                 Rule::unique('users', 'phone')->ignore($talent->user_id),
                 new DialablePhone,
             ],
+            'affiliation' => 'required|int',
+            'contract_type' => 'nullable|max:255',
+            'nationality' => 'required|max:255',
+            'gender' => 'required|max:255',
+            'date_of_birth' => 'required|date|before:today',
+            'language' => 'required',
+            'address' => 'required|max:255',
+            'cover_letter' => 'required|min:64',
+            // Optional here, unlike on create: the candidate already has a CV
+            // on file, and requiring a re-upload to fix a phone number is why
+            // records go uncorrected.
+            'resume' => 'nullable|file|mimes:pdf,docx,doc|max:2048',
+            'education' => 'required|min:3',
+            'experience' => 'required|min:3',
+            'work_experience' => 'nullable|integer|min:0|max:70',
+            'workLocations' => 'nullable|array',
+            'workLocations.*' => 'integer|in:' . implode(',', array_keys(WorkLocationEnum::cases())),
+            'locations' => 'nullable|array',
+            'locations.*' => 'integer|exists:locations,id',
+            'subcategory' => 'required|array',
+            'subcategory.*' => 'integer|exists:sub_categories,id',
+            // Same monthly-rate rules as create: a reversed range feeds the
+            // budget dimension of the match score and quietly excludes the
+            // candidate from every project.
+            'min_monthly_price' => 'required|integer|min:0|max:10000000|lte:max_monthly_price',
+            'max_monthly_price' => 'required|integer|min:0|max:10000000|gte:min_monthly_price',
+            'nearest_station_prefecture' => 'nullable|max:255',
+            'nearest_station_line' => 'nullable|max:255',
+            'nearest_station_name' => 'nullable|max:255',
+            'privacy' => 'required',
+            'participation' => 'required',
+            'joining_date' => 'nullable|required_if:participation,future|required_if:participation,from_date|date',
+            'characteristics' => 'nullable|array',
         ]);
 
-//        $request->validate([
-//            'language' => 'required|array',
-//            'language.*' => 'integer|in:' . implode(',', array_keys(LangEnum::cases())),
-//        ]);
+        $user = $talent->user;
 
+        /*
+         * Named with the talent id, not just the person's name.
+         *
+         * `"{firstname}-{lastname}.pdf"` is not unique: a second Kenji Yamamoto
+         * silently overwrote the first one's CV on disk, and both records then
+         * pointed at one document. The id makes the name collision-proof, and
+         * renaming on every save would orphan the old file, so it is stable.
+         */
         if ($request->hasFile('resume')) {
-            $fileExt = $request->file('resume')->getClientOriginalExtension();
-            $fileNameToStore = "{$talent->user->firstname}-{$talent->user->lastname}.{$fileExt}";
-            $request->file('resume')->storeAs('public/talents/', $fileNameToStore);
+            $extension = $request->file('resume')->getClientOriginalExtension();
+            $resume = "talent-{$talent->id}-{$validated['firstname']}-{$validated['lastname']}.{$extension}";
+            $request->file('resume')->storeAs('public/talents/', $resume);
         } else {
-            $fileNameToStore = $talent->resume ?? 'default-image.jpg';
+            $resume = $talent->resume;
         }
 
-        $user = User::updateOrCreate([
-            'email' => $talent->user->email,
-        ], [
-            'firstname' => $talent->user->firstname,
-            'lastname' => $talent->user->lastname,
+        /*
+         * `update()` on the record we already hold, not `User::updateOrCreate`
+         * keyed on the old email — which could not change the email by
+         * construction, since the value it matched on was the value it was
+         * meant to replace.
+         *
+         * `password` is deliberately absent. It used to be set to the literal
+         * string 'password' on every save, and with the model's `hashed` cast
+         * that silently reset the candidate's credentials each time a recruiter
+         * corrected a typo. Verified: after one update the original password no
+         * longer worked. Editing a profile must not touch authentication.
+         *
+         * `roles()->sync([3])` is gone for the same reason: a hardcoded id that
+         * wiped every other role the account held.
+         */
+        $user->update([
+            'firstname' => $validated['firstname'],
+            'lastname' => $validated['lastname'],
+            'email' => $validated['email'],
             'phone' => $validated['phone'],
-            'password' => 'password',
-            'username' => strstr($talent->user->email, '@', true),
-            'date_of_birth' => $talent->user->date_of_birth ?? today()->subYears(18),
-            'gender' => $talent->user->gender,
-            'address' => $request['address'] ?? '',
-            'nationality' => $talent->user->nationality,
-            'nearest_station_prefecture' => $talent->user->nearest_station_prefecture ?? '',
-            'nearest_station_line' => $talent->user->nearest_station_line ?? '',
-            'nearest_station_name' => $talent->user->nearest_station_name ?? '',
-            'languages' => [$request->language] ?? $talent->user->languages,
+            'username' => strstr($validated['email'], '@', true),
+            'date_of_birth' => $validated['date_of_birth'],
+            'gender' => $validated['gender'],
+            'nationality' => $validated['nationality'],
+            'address' => $validated['address'],
+            'nearest_station_prefecture' => $validated['nearest_station_prefecture'] ?? '',
+            'nearest_station_line' => $validated['nearest_station_line'] ?? '',
+            'nearest_station_name' => $validated['nearest_station_name'] ?? '',
+            'languages' => [$validated['language']],
         ]);
 
-        $user->roles()->sync([3]);
+        /*
+         * `$talent->update(...)`, not `$user->talent->updateOrCreate([...,
+         * 'company_id' => Auth::user()->company->id], ...)`. That older form
+         * matched on the signed-in recruiter's company, so a recruiter from a
+         * different company editing this record would not have updated it — it
+         * would have INSERTED a second talent row for the same user.
+         *
+         * `company_id` is not reassigned at all: editing a record must not move
+         * a candidate between companies as a side effect of who pressed Save.
+         */
+        $contractType = $validated['contract_type'] ?? null;
 
-        $talent = $user->talent->updateOrCreate([
-            'user_id' => $user->id,
-            'company_id' => Auth::user()->company->id
-        ],
-            [
-                'affiliation' => $request['affiliation'] ?? $talent->affiliation,
-                'availability' => $request['participation'] ?? $talent->availability,
-                'quasi_delegation_possible' => $request['contract_type'] == 'quasi_delegation_possible',
-                'available_for_contract' => $request['contract_type'] == 'available_for_contract',
-                'available_for_dispatch' => $request['contract_type'] == 'available_for_dispatch',
-                'resume' => $fileNameToStore,
-                'cover_letter' => $request['cover_letter'] ?? $talent->cover_letter,
-                'qualifications' => $request['education'] ?? $talent->qualifications,
-                'experience_pr' => $request['experience'] ?? $talent->experience_pr,
-                'subcategory' => $request['subcategory'] ?? $talent->subcategory,
-                'min_monthly_price' => $request['min_monthly_price'] ?? $talent->min_monthly_price,
-                'max_monthly_price' => $request['max_monthly_price'] ?? $talent->max_monthly_price,
-                'work_location_prefer' => $request['workLocations'] ?? $talent->work_location_prefer, //[1, 2] / [1,3]
-                'other_desire_conditions' => $request['other_desired_location'] ?? $talent->other_desire_conditions,
-                'privacy' => $request['privacy'] ?? $talent->privacy,
-                'participation' => $request['participation'] ?? $talent->participation,
-                'joining_date' => $request['joining_date'] ?? $talent->joining_date,
-                'characteristics' => $request['characteristics'] ?? $talent->characteristics,
-                'company_id' => $request['company_id'] ?? Auth::user()->company->id
+        $talent->update([
+            'affiliation' => $validated['affiliation'],
+            'availability' => $validated['participation'],
+            'quasi_delegation_possible' => $contractType === 'quasi_delegation_possible',
+            'available_for_contract' => $contractType === 'available_for_contract',
+            'available_for_dispatch' => $contractType === 'available_for_dispatch',
+            'resume' => $resume,
+            'cover_letter' => $validated['cover_letter'],
+            'qualifications' => $validated['education'],
+            'experience_pr' => $validated['experience'],
+            'experience_years' => $validated['work_experience'] ?? $talent->experience_years,
+            'min_monthly_price' => $validated['min_monthly_price'],
+            'max_monthly_price' => $validated['max_monthly_price'],
+            'work_location_prefer' => $validated['workLocations'] ?? [],
+            'privacy' => $validated['privacy'],
+            'joining_date' => $validated['joining_date'] ?? null,
+            'characteristics' => $validated['characteristics'] ?? [],
+        ]);
+
+        /*
+         * Unconditional sync, both of them.
+         *
+         * These were guarded by `!empty($request->input('subcategories'))` —
+         * note the plural, a field the form has never posted — so the guard was
+         * never true and neither relation was ever synced. Clearing the last
+         * skill area or the last preferred location has to persist, which an
+         * `if (!empty(...))` around a sync cannot do.
+         */
+        $talent->subcategories()->sync($validated['subcategory']);
+        $talent->locations()->sync($validated['locations'] ?? []);
+
+        return redirect()
+            ->route('talents.index')
+            ->with([
+                'message' => __('talents/registration.talent_updated'),
+                'type' => 'success',
             ]);
-
-        if (!empty($request->input('subcategories'))) {
-            $talent->subcategories()->sync($request['subcategory']);
-        }
-        if (!empty($request->input('locations'))) {
-            $talent->locations()->sync($request->input(['locations']));
-        }
-
-        return redirect()->route('talents.index')->with('success', __("talents/registration.talent_updated"));
     }
 
     /**
@@ -250,7 +355,17 @@ class TalentController extends Controller
      */
     public function destroy(Talent $talent)
     {
+        // Was unauthorised: any signed-in recruiter could delete any company's
+        // candidate by posting to the route.
+        $this->authorize('delete', $talent);
+
         $talent->delete();
-        return redirect()->route('job-applicants')->with('success', __('talents/registration.talent_deleted'));
+
+        return redirect()
+            ->route('talents.index')
+            ->with([
+                'message' => __('talents/registration.talent_deleted'),
+                'type' => 'success',
+            ]);
     }
 }

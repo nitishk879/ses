@@ -201,15 +201,48 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function ($value) {
-                // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
-                return array_map(fn($val) => LangEnum::toName($val), $decoded);
+                // Tolerant of what the column actually holds, not only of what
+                // the form posts. `json_decode(null)` is null and array_map over
+                // null is a TypeError, so a user who never chose a language took
+                // out every page that renders one. Rows holding a bare scalar
+                // exist too, and those are not an array either.
+                $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+                if (blank($decoded)) {
+                    return [];
+                }
+
+                return array_values(array_filter(array_map(
+                    fn ($val) => LangEnum::toName($val),
+                    is_array($decoded) ? $decoded : [$decoded]
+                )));
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
                 return json_encode($value);
             }
         );
+    }
+
+    /**
+     * The language ids as stored, rather than the translated labels.
+     *
+     * `languages` is a display accessor: it hands back ["Bilingual"], which is
+     * the right answer for a profile page and useless for a <select>, whose
+     * options are keyed by id. Reading the raw column is the only way to know
+     * which option to mark selected.
+     *
+     * @return array<int, int>
+     */
+    public function languageIds(): array
+    {
+        $decoded = json_decode((string) $this->getRawOriginal('languages'), true);
+
+        if (blank($decoded)) {
+            return [];
+        }
+
+        return array_map('intval', is_array($decoded) ? $decoded : [$decoded]);
     }
 
     /**

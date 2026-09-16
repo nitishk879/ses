@@ -34,7 +34,37 @@ class TalentPolicy
      */
     public function view(?User $user, Talent $talent): bool
     {
-        return $user->id === $talent->user_id;
+        return $user !== null && $this->owns($user, $talent);
+    }
+
+    /**
+     * Who may act on a talent record.
+     *
+     * Two kinds of people, and the old `$user->id === $talent->user_id` only
+     * described the first:
+     *
+     *  * the candidate themselves, editing their own profile;
+     *  * the recruiter whose company the record belongs to — which is how every
+     *    talent is actually created (`store()` stamps `company_id` from the
+     *    signed-in recruiter). Under the old rule a recruiter failed their own
+     *    records, so nothing could be authorised and the checks were simply
+     *    left out of the controller instead.
+     *
+     * Admins never reach here; `before()` answers for them.
+     */
+    private function owns(User $user, Talent $talent): bool
+    {
+        if ($user->id === $talent->user_id) {
+            return true;
+        }
+
+        // `company` is a HasOne, so a recruiter without one owns nothing —
+        // and `null === null` must not read as a match.
+        $company = $user->company;
+
+        return $company !== null
+            && $talent->company_id !== null
+            && (int) $company->id === (int) $talent->company_id;
     }
 
     /**
@@ -66,7 +96,7 @@ class TalentPolicy
      */
     public function update(User $user, Talent $talent): bool
     {
-        return $user->id === $talent->user_id;
+        return $this->owns($user, $talent);
     }
 
     /**
@@ -74,7 +104,7 @@ class TalentPolicy
      */
     public function delete(User $user, Talent $talent): bool
     {
-        return $user->id === $talent->user_id;
+        return $this->owns($user, $talent);
     }
 
     /**

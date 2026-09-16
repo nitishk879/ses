@@ -44,7 +44,9 @@ class Talent extends Model
         'remote_work_preferred',
         'work_location_prefer',
         'experience_pr',
-        'experience',
+        // Was 'experience' — a column that does not exist on this table, so any
+        // write to it threw "no such column". The real one is below.
+        'experience_years',
         'qualifications',
         'min_monthly_price',
         'max_monthly_price',
@@ -261,15 +263,63 @@ class Talent extends Model
     {
         return Attribute::make(
             get: function ($value) {
-                // Decode the JSON and map to enum names
-                $decoded = json_decode($value, true);
-                return array_map(fn(int $val) => TalentCharEnum::toName($val), $decoded);
+                /*
+                 * Tolerant of every shape this column is actually in.
+                 *
+                 * The old body was `array_map(fn(int $val) => ..., json_decode($value, true))`,
+                 * which has three ways to fail on real rows: null decodes to null
+                 * and array_map over null is a TypeError; some rows hold the
+                 * translated LABELS rather than ids, and a string against an
+                 * `int` type hint is a TypeError too — that one 500'd the edit
+                 * page for the very first candidate in the table.
+                 *
+                 * Ids map to names; anything already a name is passed through.
+                 */
+                $decoded = is_string($value) ? json_decode($value, true) : $value;
+
+                if (blank($decoded)) {
+                    return [];
+                }
+
+                return array_values(array_filter(array_map(
+                    fn ($val) => is_numeric($val) ? TalentCharEnum::toName((int) $val) : $val,
+                    is_array($decoded) ? $decoded : [$decoded]
+                )));
             },
             set: function ($value) {
                 // If setting from an array of enum values, encode it as JSON
                 return json_encode($value);
             }
         );
+    }
+
+    /**
+     * The characteristic ids as stored, for ticking checkboxes.
+     *
+     * `characteristics` is a display accessor returning translated names, so a
+     * form cannot use it to decide which boxes are checked. Rows that hold
+     * names rather than ids are mapped back, so an older record still shows its
+     * real answers instead of an empty set.
+     *
+     * @return array<int, int>
+     */
+    public function characteristicIds(): array
+    {
+        $decoded = json_decode((string) $this->getRawOriginal('characteristics'), true);
+
+        if (blank($decoded)) {
+            return [];
+        }
+
+        $byName = [];
+        foreach (TalentCharEnum::cases() as $case) {
+            $byName[TalentCharEnum::toName($case->value)] = $case->value;
+        }
+
+        return array_values(array_filter(array_map(
+            fn ($val) => is_numeric($val) ? (int) $val : ($byName[$val] ?? null),
+            is_array($decoded) ? $decoded : [$decoded]
+        ), fn ($v) => $v !== null));
     }
 
     /**

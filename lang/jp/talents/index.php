@@ -42,6 +42,8 @@ return array(
     "FROM_DATE" => "参画日要相談",
     "view_resume" => "履歴書を見る",
     "view_profile" => "プロフィールを見る",
+    "edit_profile" => "編集",
+    "actions" => "操作",
     "application_deadline"  => "応募締切",
     "favourite" => "お気に入り",
     "last_logged_in" => "最終ログイン",

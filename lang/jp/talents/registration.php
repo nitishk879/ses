@@ -27,6 +27,8 @@ return array(
     "upload_resume" => "履歴書をアップロード",
     "write_bio" => "履歴書をご記入ください。",
     "file_acceptance" => "PDF・DOC・DOCX、最大2MB",
+    'current_resume' => '登録済み:',
+    'replace_resume_help' => '空のままにすると、登録済みの履歴書がそのまま使われます。',
     "start_with_cv" => "まずは履歴書から",
     "start_with_cv_hint" => "先に履歴書を添付すると、以下のフォームが自動入力されます。入力された値はすべて編集可能で、送信するまで保存されません。",
     "autofill_absent" => "履歴書にはありますが、このフォームに項目がないため保存されません:",
