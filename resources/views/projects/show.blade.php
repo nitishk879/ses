@@ -47,6 +47,15 @@
                         <div class="job-title">
                             <h1>{{ $project->title }}</h1>
                         </div>
+
+                        {{-- Same rule the route enforces, so the two cannot disagree. --}}
+                        @if($project->isMatchableBy(auth()->user()))
+                            <a href="{{ route('project-matches.index', $project->id) }}"
+                               class="btn btn-primary my-2">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                                {{ __('interview.match_run.open_screen') }}
+                            </a>
+                        @endif
                         <div class="d-flex flex-wrap gap-2 my-2">
                             <div class="mb-2 job-timestamp"><i class="fa-solid fa-calendar-days"></i> {{ __("common/home.registered_on") }}: <span>{{ $project->created_at->format('M d, Y') }}</span></div>
                             <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->format('M d, Y') }}</span></div>

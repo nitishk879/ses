@@ -101,33 +101,10 @@
             </div>
         </div>
     </div>
-    {{-- Rank candidates against one of this company's projects.
-         A match score belongs to a (project, candidate) pair, so nothing can
-         be scored until the recruiter says which project they are hiring for. --}}
-    @if($matchableProjects->isNotEmpty())
-        <div class="row align-items-center mb-3">
-            <div class="col-md-6">
-                <label for="matchProject" class="form-label mb-1">
-                    {{ __("talents/index.match_against_project") }}
-                </label>
-                <select id="matchProject" class="form-select" wire:model.live="matchProject">
-                    <option value="">{{ __("talents/index.no_project_selected") }}</option>
-                    @foreach($matchableProjects as $matchable)
-                        <option value="{{ $matchable->id }}">{{ $matchable->title }}</option>
-                    @endforeach
-                </select>
-            </div>
-            @if($matchProject)
-                <div class="col-md-6 text-md-end">
-                    <small class="text-muted">{{ __("talents/index.ranked_by_match") }}</small>
-                </div>
-            @endif
-        </div>
-    @endif
+    {{-- Match scoring now lives on the project, not on this list. --}}
 
     @if($talents->count() >=1)
         @foreach($talents as $talent)
-            @php($match = $matchProject ? $talent->aiMatches->first() : null)
             <div class="talent-card" wire:key="{{ $talent->id }}">
                 <a href="" class="add-to-favourite">
                     <i class="fa-solid fa-star"></i>
@@ -191,89 +168,6 @@
                     </ul>
                 </div>
 
-                {{-- The match block sits in the card's top-left corner, which is
-                     already occupied: `.add-to-favourite` is absolutely positioned
-                     at top:-1rem / left:-1rem with a 3.5rem circle and z-index 1,
-                     so it covers everything up to 2.5rem in from the card edge.
-                     The first version of this put the score there and the star ate
-                     the leading digits — "64/100" rendered as "100", which is not a
-                     cosmetic bug: it is a wrong number shown to a recruiter.
-
-                     `.talent-match` clears it with padding rather than with a
-                     z-index fight, because the star has to stay clickable. The
-                     rule lives in the parent view's stylesheets stack: the
-                     compiled CSS bundle on the server is from Dec 2024 and
-                     rebuilding it would ship two years of unrelated style changes
-                     at the same time. --}}
-                @if($matchProject)
-                    @php($parse = $talent->aiResumeParse)
-                    <div class="talent-match">
-                        @if($match)
-                            {{-- Colour is a reading aid only — never the only signal.
-                                 The number is always spelled out, and the reasons
-                                 below are what a recruiter should actually act on. --}}
-                            @php($tone = $match->score >= 75 ? 'strong' : ($match->score >= 50 ? 'fair' : 'weak'))
-                            @php($width = max(0, min(100, (int) round($match->score))))
-                            <div class="talent-match-head">
-                                <span class="talent-match-caption">{{ __('talents/index.match_score') }}</span>
-                                <div class="talent-match-figure">
-                                    <span class="talent-match-score talent-match-score--{{ $tone }}">
-                                        <span class="talent-match-number">{{ $match->score }}</span><span
-                                              class="talent-match-outof">/100</span>
-                                    </span>
-                                    {{-- aria-hidden on purpose: the figure to its left already
-                                         states the same number, and a screen reader announcing
-                                         it twice is noise, not access. --}}
-                                    <span class="talent-match-meter" aria-hidden="true">
-                                        <span class="talent-match-meter-fill talent-match-meter-fill--{{ $tone }}"
-                                              style="width: {{ $width }}%"></span>
-                                    </span>
-
-                                    {{-- A score read off a profile is a weaker claim than one
-                                         read off a CV. Saying so is the difference between a
-                                         number a recruiter can act on and one they have to
-                                         take on faith. --}}
-                                    @if($parse?->isFromProfile())
-                                        <span class="talent-match-flag"
-                                              title="{{ __('talents/index.scored_from_profile_help') }}">
-                                            {{ __("talents/index.scored_from_profile") }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <ul class="talent-match-reasons">
-                                @foreach($match->reasons() as $reason)
-                                    <li>{{ $reason }}</li>
-                                @endforeach
-                                @foreach($match->blockers() as $blocker)
-                                    <li class="is-blocker">&#33; {{ $blocker }}</li>
-                                @endforeach
-                                @foreach($match->unverified() as $unverified)
-                                    <li class="is-unverified">? {{ $unverified }}</li>
-                                @endforeach
-                            </ul>
-                        @else
-                            {{-- An absent score is not a zero, and the three reasons
-                                 it can be absent need different actions from the
-                                 recruiter. Collapsing them into one badge left the
-                                 only visible explanation — "not scored yet" — as the
-                                 one that was usually wrong. --}}
-                            <div class="talent-match-head">
-                                <span class="talent-match-score talent-match-score--none">
-                                    {{ __("talents/index.not_scored_yet") }}
-                                </span>
-                            </div>
-                            <div class="talent-match-note">
-                                @if(! $parse)
-                                    {{ __("talents/index.not_scored_no_parse") }}
-                                @else
-                                    {{ __("talents/index.not_scored_run_matching") }}
-                                @endif
-                            </div>
-                        @endif
-                    </div>
-                @endif
 
                 <div class="talent-card-header">
                     <div class="row justify-content-between">

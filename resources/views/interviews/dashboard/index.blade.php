@@ -91,6 +91,15 @@
                                     {{ __('interview.dashboard.run') }}
                                 </button>
                             </form>
+
+                            {{-- Follows the project selector above, like the forms do. --}}
+                            <a class="btn btn-outline-primary w-100 mt-2 disabled"
+                               data-project-link
+                               data-link-base="{{ url('projects') }}"
+                               data-link-suffix="matches"
+                               href="#">
+                                {{ __('interview.match_run.open_screen') }}
+                            </a>
                         </div>
                     </div>
 
@@ -291,6 +300,18 @@
                             : ! hasBot ? (project.dataset.botHint || '')
                             : pending ? (project.dataset.unsavedHint || '')
                             : (project.dataset.slotsHint || '');
+                    });
+
+                    // The link to the full matching screen follows the same
+                    // selector. Held shut until a project is chosen, because
+                    // /projects/0/matches is a 404 that reads as a broken
+                    // feature rather than as a missing answer.
+                    document.querySelectorAll('[data-project-link]').forEach(function (a) {
+                        a.classList.toggle('disabled', ! chosen);
+                        a.href = chosen
+                            ? a.dataset.linkBase + '/' + project.value + '/' + a.dataset.linkSuffix
+                            : '#';
+                        a.title = chosen ? '' : (project.dataset.requiredHint || '');
                     });
 
                     document.querySelectorAll('[data-needs-project]')

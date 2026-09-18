@@ -6,6 +6,7 @@ use App\Models\AiJdParse;
 use App\Models\AiResumeParse;
 use App\Models\Talent;
 use App\Services\AiParsingService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -13,15 +14,11 @@ use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
 
-/**
- * Structure a candidate's resume into skills and experience.
- *
- * Slower than the JD parse — measured at 4.6-8.8s, and longer again for a CV
- * that has to be split across several model calls to fit the 8k context.
- */
+/** Structure a candidate's resume into skills and experience. */
 class ParseTalentResume implements ShouldBeUniqueUntilProcessing, ShouldQueue
 {
-    use Queueable;
+    /** `Batchable` as well as `Queueable`, because the matching run dispatches these inside a `Bus::batch()` — and a batch refuses any job without the trait outright. */
+    use Batchable, Queueable;
 
     public int $tries = 3;
 

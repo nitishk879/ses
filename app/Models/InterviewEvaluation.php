@@ -13,6 +13,7 @@ class InterviewEvaluation extends Model
 
     protected $fillable = [
         'interview_attempt_id',
+        'digest_id',
         'status',
         'technical_fit',
         'jd_fit',
@@ -56,5 +57,23 @@ class InterviewEvaluation extends Model
             InterviewAttempt::class,
             'interview_attempt_id'
         );
+    }
+
+    /** Alias for the relation above, for call sites that read better short. */
+    public function attempt(): BelongsTo
+    {
+        return $this->interviewAttempt();
+    }
+
+    /** The digest email this evaluation was counted in, if any. */
+    public function digest(): BelongsTo
+    {
+        return $this->belongsTo(InterviewEvaluationDigest::class, 'digest_id');
+    }
+
+    /** Whether this candidate is one the recruiter should take forward. */
+    public function isRecommended(): bool
+    {
+        return $this->recommendation === 'recommended';
     }
 }

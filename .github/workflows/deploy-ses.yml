@@ -1,0 +1,145 @@
+name: Deploy SES to EC2
+
+# Read off the server, not assumed:
+#   app /home/ses_project/ses (owner ses_project) · ssh user ubuntu · branch master
+#   nginx -> php8.3-fpm · queue ses-queue.service · @vite so assets are built
+#   DB=mysql QUEUE=database CACHE=database
+#
+# SES_HOST / SES_USER / SES_SSH_KEY are the same machine as ses-ai-service,
+# but GitHub secrets are per repository, so add them here too.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Never cancel a running deploy — an interrupted one leaves maintenance mode on.
+concurrency:
+  group: deploy-ses-production
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'          # matches the server
+          extensions: mbstring, intl, pdo_sqlite, sqlite3, curl, fileinfo, zip
+          coverage: none
+
+      # Warns that composer.lock is behind composer.json and exits 0. That
+      # mismatch is pre-existing; `composer validate` is deliberately not run
+      # here so a deploy does not decide it.
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # Without APP_KEY every session/Livewire test fails on encryption.
+      - name: Prepare test environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Run tests
+        run: php artisan test
+
+  deploy:
+    name: Deploy to EC2
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SES_HOST }}
+          username: ${{ secrets.SES_USER }}
+          key: ${{ secrets.SES_SSH_KEY }}
+          command_timeout: 20m
+          envs: DEPLOY_SHA
+          script: |
+            set -euo pipefail
+
+            APP=/home/ses_project/ses
+            BRANCH=master
+            # Files are owned by ses_project; running as ubuntu leaves vendor/
+            # and storage/ unwritable by php-fpm.
+            AS_APP="sudo -u ses_project"
+
+            cd "$APP"
+            echo "==> Before: $(${AS_APP} git rev-parse --short HEAD)"
+
+            # The trap matters: a failure between down and up leaves the site 503.
+            ${AS_APP} php artisan down --retry=30 || true
+            trap '${AS_APP} php artisan up || true' EXIT
+
+            echo "==> Fetching ${BRANCH}"
+            ${AS_APP} git fetch --prune origin "$BRANCH"
+            # Reset, not pull — a merge can ship a tree matching neither the
+            # branch nor what was reviewed.
+            ${AS_APP} git reset --hard "origin/${BRANCH}"
+            echo "==> Now at: $(${AS_APP} git rev-parse --short HEAD)"
+
+            echo "==> composer install"
+            ${AS_APP} composer install \
+              --no-interaction --prefer-dist --no-progress \
+              --no-dev --optimize-autoloader
+
+            echo "==> building assets"
+            ${AS_APP} npm ci --no-audit --no-fund
+            ${AS_APP} npm run build
+
+            echo "==> migrating"
+            ${AS_APP} php artisan migrate --force
+
+            # Cleared before rebuilding: a stale cached view outlives its code.
+            echo "==> rebuilding caches"
+            ${AS_APP} php artisan optimize:clear
+            ${AS_APP} php artisan config:cache
+            ${AS_APP} php artisan route:cache
+            ${AS_APP} php artisan view:cache
+            ${AS_APP} php artisan storage:link || true
+
+            # New code is not live until opcache reloads.
+            echo "==> reloading php-fpm"
+            sudo systemctl reload php8.3-fpm
+
+            # queue:work loaded the old classes at boot and keeps using them.
+            # Skipping this leaves every queued job — matching batches and
+            # evaluation digest emails — running last release's code.
+            echo "==> restarting queue worker"
+            sudo systemctl restart ses-queue
+
+            # Up before the health check, so it exercises the real site.
+            ${AS_APP} php artisan up
+            trap - EXIT
+
+            echo "==> verifying deployed commit"
+            DEPLOYED=$(${AS_APP} git rev-parse HEAD)
+            if [ -n "${DEPLOY_SHA:-}" ] && [ "$DEPLOYED" != "$DEPLOY_SHA" ]; then
+              echo "MISMATCH: server is at $DEPLOYED, expected $DEPLOY_SHA" >&2
+              exit 1
+            fi
+            echo "    $DEPLOYED"
+
+            echo "==> health checks"
+            sleep 5
+            systemctl is-active --quiet ses-queue || {
+              echo "queue worker is not running" >&2
+              exit 1
+            }
+
+            curl -fsS -m 20 -o /dev/null -w '    GET / -> %{http_code}\n' \
+              https://ses.dcodingx.co.jp/
+            curl -fsS -m 20 -o /dev/null -w '    GET /login -> %{http_code}\n' \
+              https://ses.dcodingx.co.jp/login
+
+            echo ""
+            echo "==> Deploy complete"
+        env:
+          DEPLOY_SHA: ${{ github.sha }}

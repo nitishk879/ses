@@ -145,6 +145,40 @@ class Project extends Model
         return $this->hasMany(AiMatch::class)->orderByDesc('score');
     }
 
+    /** The requirements extracted from this project's JD, in the JD's order. */
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(ProjectRequirement::class)
+            ->orderBy('position')
+            ->orderBy('id');
+    }
+
+    /** Every "Analyze / Match Candidates" this project has had, newest first. */
+    public function matchRuns(): HasMany
+    {
+        return $this->hasMany(AiMatchRun::class)->orderByDesc('created_at');
+    }
+
+    /**
+     * Whether this user may run and read CV matching for this project.
+     *
+     * Narrower than ProjectPolicy::view(), which grants any 'user' role every
+     * project — this screen lists named candidates and their scores.
+     */
+    public function isMatchableBy(?User $user): bool
+    {
+        if (! $user) {
+            return false;
+        }
+
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+
+        return $this->company_id !== null
+            && $this->company_id === $user->company?->id;
+    }
+
     /**
      * Project Belongs to Many sub-categories
      *

@@ -114,6 +114,9 @@ return [
          * abandoned as timed out while it is still running.
          */
         'poll_interval_seconds' => env('INTERVIEW_POLL_INTERVAL_SECONDS', 20),
+        // How long finished evaluations are collected before one summary email.
+        'evaluation_digest_minutes' => env('INTERVIEW_EVALUATION_DIGEST_MINUTES', 20),
+
         'poll_max_attempts' => env('INTERVIEW_POLL_MAX_ATTEMPTS', 45),
 
         // Retries for a call nobody answered. Distinct from job retries: this

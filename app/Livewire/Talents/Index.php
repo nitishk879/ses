@@ -3,15 +3,12 @@
 namespace App\Livewire\Talents;
 
 use App\Models\Category;
-use App\Models\Project;
 use App\Models\SubCategory;
 use App\Models\Talent;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Application;
-use LaravelIdea\Helper\App\Models\_IH_Project_C;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -63,17 +60,6 @@ class Index extends Component
     #[Url]
     public $sortDirection = 'asc';
 
-    /**
-     * Score candidates against this project.
-     *
-     * A match score only exists for a (project, candidate) pair, so "Find
-     * Talent" cannot show one until the recruiter says which project they are
-     * hiring for. When set, the list is ordered by score instead of by date —
-     * which is the whole point: the best candidate should be at the top.
-     */
-    #[Url]
-    public ?int $matchProject = null;
-
     public ?int $id = null;
     public ?int $pages = 10;
 
@@ -107,15 +93,6 @@ class Index extends Component
         $this->subcategories = $filters['subcategories'];
         $this->work_mode = $filters['work_mode'];
 
-        $this->resetPage();
-    }
-
-    /**
-     * Switching project changes the ordering entirely, so page 3 of the old
-     * ranking is meaningless against the new one.
-     */
-    public function updatedMatchProject(): void
-    {
         $this->resetPage();
     }
 
@@ -265,74 +242,11 @@ class Index extends Component
             $query->where('min_monthly_price', '>=', $this->min_salary)->where('max_monthly_price', '<=', $this->max_salary);
         }
 
-        // Rank by match score when a project is selected, otherwise fall back
-        // to the plain list ordering.
-        if ($this->matchProject) {
-            $query
-                ->leftJoin('ai_matches', function ($join) {
-                    $join->on('ai_matches.talent_id', '=', 'talent.id')
-                        ->where('ai_matches.project_id', '=', $this->matchProject);
-                })
-                // Without this the join's columns would overwrite the model's.
-                ->select('talent.*')
-                // Unscored candidates sort last rather than first, which is
-                // what a NULL would otherwise do on most engines.
-                ->orderByRaw('COALESCE(ai_matches.score, -1) DESC')
-                ->orderBy('talent.id')
-                // Carries reasons/blockers for the badge without a second
-                // query per card, plus the parse so the card can say whether a
-                // score came from a CV or from the candidate's profile — and,
-                // when there is no score, which of the two is missing.
-                ->with([
-                    'aiMatches' => fn ($q) => $q->where('project_id', $this->matchProject),
-                    'aiResumeParse',
-                ]);
-        } else {
-            $query->orderBy($this->sortBy, $this->sortDirection);
-        }
+        $query->orderBy($this->sortBy, $this->sortDirection);
 
         return view('livewire.talents.index', [
             'talents' => $query->paginate($this->pages),
-            'matchableProjects' => $this->matchableProjects(),
         ]);
     }
 
-    /**
-     * Projects this user may score against.
-     *
-     * Scoped to the signed-in user's company so one employer cannot rank
-     * candidates against another's requirement — **except for admins**, who
-     * see everything.
-     *
-     * That exception is not a convenience. {@see \App\Policies\TalentPolicy}
-     * already grants admins blanket access through its `before()` hook, so a
-     * dropdown that hid projects from them was inconsistent with the rest of
-     * the app: an administrator could open any talent and any project, but the
-     * one screen that ranks the two together came back empty, with nothing on
-     * it to explain why.
-     *
-     * @return Project[]|Collection|\Illuminate\Support\Collection|_IH_Project_C
-     */
-    private function matchableProjects(): Collection|array|\Illuminate\Support\Collection|_IH_Project_C
-    {
-        $user = auth()->user();
-
-        if (! $user) {
-            return collect();
-        }
-
-        $query = Project::query()->orderByDesc('created_at');
-
-        if (! $user->hasRole('admin')) {
-            $companyId = $user->company?->id;
-
-            if (! $companyId) {
-                return collect();
-            }
-
-            $query->where('company_id', $companyId);
-        }
-
-        return $query->get(['id', 'title']);
-    }
 }

@@ -14,6 +14,7 @@ use App\Http\Middleware\NoIndexNoStore;
 use Illuminate\Routing\Middleware\ValidateSignature;
 use App\Http\Controllers\MemberRegistration;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectMatchController;
 use App\Http\Controllers\SampleController;
 use App\Http\Controllers\SocialAuthController;
 use App\Http\Controllers\TalentController;
@@ -203,6 +204,12 @@ Route::middleware(['auth', 'role:admin,user'])
             ->whereNumber('interview')
             ->name('show');
     });
+
+// CV matching for one project. `{project:id}` because the route key is 'slug'.
+Route::middleware(['auth', 'role:admin,user'])
+    ->get('projects/{project:id}/matches', [ProjectMatchController::class, 'index'])
+    ->whereNumber('project')
+    ->name('project-matches.index');
 
 Route::middleware(['auth', 'role:admin,user'])->group(function () {
     Route::apiResource('interviews', InterviewController::class);

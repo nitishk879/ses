@@ -341,17 +341,27 @@ class AiParsingService
      * over the two parses, which is what makes scoring a whole candidate pool
      * affordable.
      *
+     * Must-haves ride along per request: SES owns them and they change
+     * without a re-parse.
+     *
      * @param  array<string, mixed>  $parsedJd      payload from ai_jd_parses
      * @param  array<string, mixed>  $parsedResume  payload from ai_resume_parses
+     * @param  array<int, array<string, mixed>>  $mandatory  from
+     *         {@see \App\Services\ProjectRequirementService::mandatoryPayload()}
      * @return array<string, mixed>
      */
-    public function match(array $parsedJd, array $parsedResume, Talent $talent): array
-    {
+    public function match(
+        array $parsedJd,
+        array $parsedResume,
+        Talent $talent,
+        array $mandatory = [],
+    ): array {
         $talent->loadMissing(['locations:id', 'subCategories:id']);
 
         return $this->post('/v1/match', [
             'jd' => $parsedJd,
             'resume' => $parsedResume,
+            'mandatory' => $mandatory,
             'talent' => [
                 'talent_id' => (int) $talent->id,
                 'min_monthly_price' => $talent->min_monthly_price !== null

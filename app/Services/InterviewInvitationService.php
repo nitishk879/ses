@@ -65,6 +65,9 @@ class InterviewInvitationService
      * shortlist is the match result, not a separate judgement that could
      * disagree with it.
      *
+     * The must-have gate applies here too, or this and the results screen
+     * answer the same question two different ways.
+     *
      * @return \Illuminate\Support\Collection<int, AiMatch>
      */
     public function shortlistFor(Project $project, ?int $threshold = null): \Illuminate\Support\Collection
@@ -78,6 +81,8 @@ class InterviewInvitationService
         return AiMatch::query()
             ->where('project_id', $project->id)
             ->where('score', '>=', $threshold)
+            // Defaults to true, so a project with no must-haves is unaffected.
+            ->where('meets_mandatory', true)
             ->whereNotIn('talent_id', $alreadyInvited)
             ->orderByDesc('score')
             ->get();
@@ -103,8 +108,11 @@ class InterviewInvitationService
         return [
             // Has matching ever run for this project at all?
             'scored' => (clone $scored)->count(),
-            // Of those, how many clear the threshold, invited or not?
-            'qualifying' => (clone $scored)->where('score', '>=', $threshold)->count(),
+            // Counted the same way shortlistFor() selects, so the two agree.
+            'qualifying' => (clone $scored)
+                ->where('score', '>=', $threshold)
+                ->where('meets_mandatory', true)
+                ->count(),
             // And how many of those have not already been invited?
             'available' => $this->shortlistFor($project, $threshold)->count(),
         ];

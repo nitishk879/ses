@@ -47,17 +47,4 @@ return array(
     "application_deadline"  => "応募締切",
     "favourite" => "お気に入り",
     "last_logged_in" => "最終ログイン",
-
-    // JD/candidate match scoring.
-    // English for now — awaiting sign-off before these are translated, so the
-    // wording is settled once rather than translated twice.
-    "match_against_project" => "プロジェクトの適合度スコアを表示",
-    "no_project_selected" => "— プロジェクト未選択 —",
-    "ranked_by_match" => "適合度スコア順",
-    "not_scored_yet" => "未スコア",
-    "match_score" => "適合度スコア",
-    "scored_from_profile" => "プロフィールに基づく",
-    "scored_from_profile_help" => "履歴書ファイルが未登録のため、候補者が入力したプロフィールからスコアを算出しています。",
-    "not_scored_no_parse" => "履歴書もプロフィール情報も読み取れませんでした。",
-    "not_scored_run_matching" => "「面接」画面の「マッチング実行」でこのプロジェクトのスコアを算出してください。"
 );

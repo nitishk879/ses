@@ -6,13 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * A stored JD-to-candidate match score.
- *
- * The score is a plain integer column rather than a value dug out of the JSON
- * so the database can sort and index it — that is what makes "top 5 for this
- * project" a single indexed query instead of a scan.
- */
+/** A stored JD-to-candidate match score. */
 class AiMatch extends Model
 {
     protected $table = 'ai_matches';
@@ -21,6 +15,13 @@ class AiMatch extends Model
         'project_id',
         'talent_id',
         'score',
+        // Both of these are written through updateOrCreate, which is mass
+        // assignment — a column missing from this list is dropped in silence
+        // and the row keeps its database default. For `meets_mandatory` that
+        // default is `true`, so an omission here does not read as a bug: it
+        // reads as every candidate clearing every must-have.
+        'meets_mandatory',
+        'unverified_mandatory',
         'payload',
         'scorer_version',
         'jd_source_hash',
@@ -33,6 +34,8 @@ class AiMatch extends Model
         return [
             'payload' => 'array',
             'score' => 'integer',
+            'meets_mandatory' => 'boolean',
+            'unverified_mandatory' => 'integer',
             'scored_at' => 'datetime',
         ];
     }
@@ -53,12 +56,7 @@ class AiMatch extends Model
         return $query->orderByDesc('score')->orderBy('talent_id');
     }
 
-    /**
-     * True when either side has been re-parsed since this score was computed.
-     *
-     * A score derived from an older parse is not wrong so much as unexplained:
-     * its reasons quote evidence that may no longer exist in the document.
-     */
+    /** True when either side has been re-parsed since this score was computed. */
     public function isStale(?string $jdHash, ?string $resumeHash): bool
     {
         return $this->jd_source_hash !== $jdHash

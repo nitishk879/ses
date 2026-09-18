@@ -160,40 +160,20 @@
                 </div>
             @endif
 
-            {{-- Questions and answers --}}
-            <div class="card mb-3">
-                <div class="card-header py-2"><strong>{{ __('interview.dashboard.questions') }}</strong></div>
-                @if(! $attempt || $attempt->questions->isEmpty())
-                    <div class="card-body text-muted small">{{ __('interview.dashboard.no_questions') }}</div>
-                @else
-                    <ol class="list-group list-group-flush list-group-numbered">
-                        @foreach($attempt->questions as $question)
-                            <li class="list-group-item py-2">
-                                <div>{{ $question->question_text }}</div>
-                                <div class="small text-muted mt-1">
-                                    @if($question->skill_area)
-                                        <span class="badge bg-light text-dark border">{{ $question->skill_area }}</span>
-                                    @endif
-                                    {{-- The intent is why the question was asked; it is what
-                                         lets an answer be read against a requirement rather
-                                         than judged on impression. --}}
-                                    <span>{{ $question->metadata['intent'] ?? $question->type->value }}</span>
-                                </div>
-                                @if($question->answer?->transcript)
-                                    <div class="mt-2 ps-2 border-start border-2">
-                                        <span class="small">{{ $question->answer->transcript }}</span>
-                                    </div>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ol>
-                @endif
-            </div>
+            {{-- The interview, as one conversation.
 
-            {{-- Transcript --}}
+                 This used to be two cards: the planned questions with their
+                 answers, and then the raw transcript underneath. That is the
+                 same screening printed twice, and it made the recruiter hold
+                 the correspondence between them in their own head — which of
+                 these turns was question three? Merged here, with the planned
+                 questions annotated onto the turns that asked them.
+
+                 @see \App\Support\InterviewConversation --}}
+            @php($conversation = $attempt ? \App\Support\InterviewConversation::for($attempt) : null)
             <div class="card mb-3">
                 <div class="card-header py-2 d-flex justify-content-between align-items-center">
-                    <strong>{{ __('interview.dashboard.transcript') }}</strong>
+                    <strong>{{ __('interview.dashboard.conversation') }}</strong>
                     @if($attempt?->recording_url)
                         <a href="{{ $attempt->recording_url }}" target="_blank" rel="noopener"
                            class="btn btn-sm btn-outline-secondary">
@@ -201,22 +181,57 @@
                         </a>
                     @endif
                 </div>
-                @if(! $attempt || empty($attempt->transcript))
+
+                @if(! $conversation || $conversation->isEmpty())
                     <div class="card-body text-muted small">{{ __('interview.dashboard.no_transcript') }}</div>
                 @else
-                    <div class="card-body" style="max-height: 26rem; overflow-y: auto;">
-                        @foreach($attempt->transcript as $turn)
-                            @php($isBot = strtoupper($turn['speaker'] ?? '') !== 'HUMAN')
-                            <div class="mb-2 {{ $isBot ? '' : 'ps-4' }}">
-                                <div class="small text-muted">
-                                    {{ $isBot ? __('interview.dashboard.interviewer') : __('interview.dashboard.candidate') }}
+                    @if($conversation->reconstructed)
+                        {{-- Said out loud: a stream rebuilt from question/answer pairs is
+                             missing whatever fell outside them, and a recruiter must not
+                             read it as a complete record of the call. --}}
+                        <div class="alert alert-warning rounded-0 mb-0 py-2 small">
+                            {{ __('interview.dashboard.conversation_reconstructed') }}
+                        </div>
+                    @endif
+
+                    <div class="card-body" style="max-height: 32rem; overflow-y: auto;">
+                        @foreach($conversation->turns as $turn)
+                            <div class="d-flex mb-3 {{ $turn->isBot ? '' : 'justify-content-end' }}">
+                                <div style="max-width: 82%;">
+                                    <div class="small text-muted mb-1 {{ $turn->isBot ? '' : 'text-end' }}">
+                                        {{ $turn->isBot
+                                            ? __('interview.dashboard.interviewer')
+                                            : __('interview.dashboard.candidate') }}
+                                        @if($turn->question)
+                                            {{-- The badges are the whole point of merging: they say
+                                                 which requirement this turn was probing, so the answer
+                                                 below can be read against it rather than on impression. --}}
+                                            @if($turn->skillArea())
+                                                <span class="badge bg-light text-dark border ms-1">{{ $turn->skillArea() }}</span>
+                                            @endif
+                                            @if($turn->intent())
+                                                <span class="badge bg-light text-dark border">{{ $turn->intent() }}</span>
+                                            @endif
+                                        @endif
+                                    </div>
+                                    <div class="p-2 rounded-3 {{ $turn->isBot ? 'bg-light' : 'bg-primary-subtle' }}">
+                                        <span class="small">{{ $turn->text }}</span>
+                                    </div>
                                 </div>
-                                <div class="small {{ $isBot ? 'text-muted' : '' }}">{{ $turn['text'] ?? '' }}</div>
                             </div>
                         @endforeach
                     </div>
-                    <div class="card-footer py-1">
+
+                    <div class="card-footer py-1 d-flex justify-content-between align-items-center">
                         <span class="small text-muted">{{ __('interview.dashboard.pii_notice') }}</span>
+                        @if($attempt->questions->isNotEmpty())
+                            <span class="small text-muted">
+                                {{ __('interview.dashboard.questions_matched', [
+                                    'matched' => $conversation->matchedQuestionCount(),
+                                    'total' => $attempt->questions->count(),
+                                ]) }}
+                            </span>
+                        @endif
                     </div>
                 @endif
             </div>

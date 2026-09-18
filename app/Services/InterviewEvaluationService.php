@@ -7,12 +7,14 @@ use App\Enums\InterviewEvaluationStatusEnum;
 use App\Models\InterviewAttempt;
 use App\Models\InterviewEvaluation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class InterviewEvaluationService
 {
     public function __construct(
-        protected InterviewEvaluationProvider $provider
+        protected InterviewEvaluationProvider $provider,
+        protected InterviewEvaluationDigestService $digests,
     ) {
     }
 
@@ -52,7 +54,7 @@ class InterviewEvaluationService
                 $result['communication']
             );
 
-            return DB::transaction(function () use (
+            $stored = DB::transaction(function () use (
                 $evaluation,
                 $result,
                 $overallScore
@@ -78,12 +80,7 @@ class InterviewEvaluationService
                     'prompt_version' =>
                         $result['prompt_version'] ?? null,
 
-                    /*
-                     * Carries how much of the interview was actually answered.
-                     * Without it a 78 from a full interview and a 78 from one
-                     * answered question are indistinguishable on the screen a
-                     * recruiter makes a decision from.
-                     */
+                    // Carries how much of the interview was actually answered.
                     'metadata' => $result['metadata'] ?? null,
 
                     'evaluated_at' => now(),
@@ -92,6 +89,18 @@ class InterviewEvaluationService
 
                 return $evaluation->fresh();
             });
+
+            // Join the digest that emails the recruiter about this batch.
+            try {
+                $this->digests->record($stored);
+            } catch (\Throwable $e) {
+                Log::error('interview.digest.record_failed', [
+                    'evaluation_id' => $stored->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
+
+            return $stored;
         } catch (\Throwable $exception) {
             $evaluation->update([
                 'status' => InterviewEvaluationStatusEnum::FAILED,

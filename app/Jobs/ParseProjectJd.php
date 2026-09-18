@@ -5,21 +5,19 @@ namespace App\Jobs;
 use App\Models\AiJdParse;
 use App\Models\Project;
 use App\Services\AiParsingService;
+use App\Services\ProjectRequirementService;
+use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldBeUniqueUntilProcessing;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
 use Throwable;
 
-/**
- * Structure a project's job description into skills and requirements.
- *
- * Queued because a parse is a language-model round trip — measured at roughly
- * 5.5s against the H200 — which has no business inside a web request.
- */
+/** Structure a project's job description into skills and requirements. */
 class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
 {
-    use Queueable;
+    /** Batched alongside the resume parses by a matching run. */
+    use Batchable, Queueable;
 
     public int $tries = 3;
 
@@ -27,9 +25,7 @@ class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
     public int $timeout = 180;
 
     /**
-     * Spread retries out. The usual reason a parse fails is the LLM being
-     * unreachable or saturated, and retrying into a saturated GPU makes it
-     * worse.
+     * Spread retries out.
      *
      * @return array<int, int>
      */
@@ -64,6 +60,9 @@ class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
         $existing = AiJdParse::firstWhere('project_id', $this->projectId);
 
         if (! $this->force && $existing && $existing->source_hash === $inputHash) {
+            // No language-model call needed — but the requirement list is still reconciled.
+            app(ProjectRequirementService::class)->syncFromParse($project, $existing);
+
             Log::info('ai.jd_parse.unchanged', ['project_id' => $this->projectId]);
 
             return;
@@ -71,7 +70,7 @@ class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
 
         $result = $parser->parseProject($project);
 
-        AiJdParse::updateOrCreate(
+        $parse = AiJdParse::updateOrCreate(
             ['project_id' => $this->projectId],
             [
                 'parser_version' => $result['meta']['parser_version'] ?? 'unknown',
@@ -80,6 +79,9 @@ class ParseProjectJd implements ShouldBeUniqueUntilProcessing, ShouldQueue
                 'parsed_at' => now(),
             ]
         );
+
+        // Reconcile the recruiter-facing requirement list against what was just extracted.
+        app(ProjectRequirementService::class)->syncFromParse($project, $parse);
 
         Log::info('ai.jd_parse.stored', [
             'project_id' => $this->projectId,

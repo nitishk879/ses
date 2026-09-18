@@ -42,7 +42,15 @@
                                             <div class="col job-duration"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: {{ $project->deadline->format('M d, Y') }}</div>
                                         </div>
                                     </div>
-                                    <div class="col-md-12 text-end">
+                                    {{-- Drawn only when the viewer could actually use it. --}}
+                                    <div class="col-md-12 text-end d-flex justify-content-end gap-2">
+                                        @if($project->isMatchableBy(auth()->user()))
+                                            <a href="{{ route('project-matches.index', $project->id) }}"
+                                               class="btn btn-primary">
+                                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i>
+                                                {{ __('interview.match_run.open_screen') }}
+                                            </a>
+                                        @endif
                                         <a href="{{ route("project.show", $project) ?? __("/project/{$project->slug}") }}" class="btn job-btn-summary">{{ __("common/home.summary") }}</a>
                                     </div>
                                     <div class="col-md-10">
