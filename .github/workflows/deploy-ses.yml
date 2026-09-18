@@ -5,8 +5,14 @@ name: Deploy SES to EC2
 #   nginx -> php8.3-fpm · queue ses-queue.service · @vite so assets are built
 #   DB=mysql QUEUE=database CACHE=database
 #
-# SES_HOST / SES_USER / SES_SSH_KEY are the same machine as ses-ai-service,
-# but GitHub secrets are per repository, so add them here too.
+# /home/ses_project is 0750 and owned by ses_project, so the SSH user cannot
+# even traverse into it. Nothing below cds into the app directly; every command
+# goes through the app() helper, which sudos and cds as ses_project.
+#
+# Secrets (GitHub secrets are per repository, so add all of these here even
+# though ses-ai-service already has the first three for the same machine):
+#   SES_HOST, SES_USER, SES_SSH_KEY  — SSH access
+#   SES_ENV_FILE                     — the full .env; optional, skipped if unset
 
 on:
   push:
@@ -33,9 +39,6 @@ jobs:
           extensions: mbstring, intl, pdo_sqlite, sqlite3, curl, fileinfo, zip
           coverage: none
 
-      # Warns that composer.lock is behind composer.json and exits 0. That
-      # mismatch is pre-existing; `composer validate` is deliberately not run
-      # here so a deploy does not decide it.
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
@@ -45,15 +48,128 @@ jobs:
           cp .env.example .env
           php artisan key:generate
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'          # matches the server: v18.19.1
+          cache: npm
+
+      # public/build is gitignored, so a fresh checkout has no Vite manifest
+      # and every page using @vite renders a 500. Building here also proves the
+      # asset build works before the deploy tries it — otherwise a broken build
+      # fails on the server with the site already in maintenance mode.
+      - name: Build assets
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+
       - name: Run tests
         run: php artisan test
 
-  deploy:
-    name: Deploy to EC2
-    needs: test
+  # The test job installs dev dependencies, so it can never catch a package
+  # that is only missing under --no-dev. That gap took the site down once:
+  # laravel/ui was in require-dev, but routes/web.php calls Auth::routes(),
+  # which the package registers — so the first --no-dev deploy removed it and
+  # package:discover failed mid-deploy with the site in maintenance mode.
+  production-deps:
+    name: Production dependencies
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_sqlite, sqlite3, curl, fileinfo, zip
+          coverage: none
+
+      # Exactly what the deploy runs.
+      - name: Install without dev dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader
+
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      # package:discover is the command that failed; route:list additionally
+      # proves the routes a removed package registers still resolve.
+      - name: Boot the app on production dependencies
+        run: |
+          php artisan package:discover
+          php artisan route:list --name=login
+
+  deploy:
+    name: Deploy to EC2
+    needs: [test, production-deps]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Skipped entirely when SES_ENV_FILE is unset, so the server keeps the
+      # .env it already has. Writing an empty secret here would truncate the
+      # production config — DB password, APP_KEY, mail and OAuth creds — and
+      # take the site down with no way back.
+      - name: Write .env file to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SES_HOST }}
+          username: ${{ secrets.SES_USER }}
+          key: ${{ secrets.SES_SSH_KEY }}
+          envs: ENV_FILE
+          script: |
+            set -euo pipefail
+
+            APP=/home/ses_project/ses
+            app() { sudo -u ses_project bash -c "cd '$APP' && $*"; }
+
+            if [ -z "${ENV_FILE:-}" ]; then
+              echo "==> SES_ENV_FILE not set; leaving the server's .env untouched"
+              exit 0
+            fi
+
+            # Refuse a secret missing something the app cannot boot without. A
+            # half-filled .env is worse than none: the site comes up and fails
+            # on every request.
+            for key in APP_KEY APP_URL DB_HOST DB_DATABASE DB_USERNAME; do
+              if ! printf '%s' "$ENV_FILE" | grep -q "^${key}="; then
+                echo "SES_ENV_FILE has no ${key}; refusing to write it" >&2
+                exit 1
+              fi
+            done
+
+            # APP_KEY is not config, it is the key every session cookie and
+            # encrypted column was written with. Changing it silently logs
+            # everyone out and makes encrypted data unreadable, so a change is
+            # something to do deliberately, not as a deploy side effect.
+            if sudo test -f "$APP/.env"; then
+              CURRENT=$(sudo grep -m1 '^APP_KEY=' "$APP/.env" || true)
+              INCOMING=$(printf '%s' "$ENV_FILE" | grep -m1 '^APP_KEY=' || true)
+              if [ -n "$CURRENT" ] && [ "$CURRENT" != "$INCOMING" ]; then
+                echo "SES_ENV_FILE changes APP_KEY. Refusing." >&2
+                echo "Rotating it invalidates every session and any encrypted column." >&2
+                exit 1
+              fi
+
+              BACKUP=".env.bak.$(date +%Y%m%d%H%M%S)"
+              app "cp .env '$BACKUP'"
+              echo "==> Backed up current .env to $BACKUP"
+            fi
+
+            printf '%s' "$ENV_FILE" | sudo tee "$APP/.env" > /dev/null
+
+            # 640, not the 755 the file carries today: it holds the database
+            # password and APP_KEY, and every user on the box can read it.
+            sudo chown ses_project:ses_project "$APP/.env"
+            sudo chmod 640 "$APP/.env"
+
+            # `sudo cat | wc`, not `sudo wc < file`: a redirect is opened by the
+            # calling shell, which is the SSH user and cannot read this file.
+            echo "==> .env written ($(sudo cat "$APP/.env" | wc -l) lines)"
+        env:
+          ENV_FILE: ${{ secrets.SES_ENV_FILE }}
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -67,43 +183,42 @@ jobs:
 
             APP=/home/ses_project/ses
             BRANCH=master
-            # Files are owned by ses_project; running as ubuntu leaves vendor/
-            # and storage/ unwritable by php-fpm.
-            AS_APP="sudo -u ses_project"
 
-            cd "$APP"
-            echo "==> Before: $(${AS_APP} git rev-parse --short HEAD)"
+            # Runs a command in the app directory as the user that owns it.
+            # Running as the SSH user instead leaves vendor/ and storage/
+            # unwritable by php-fpm — and cannot even enter the directory.
+            app() { sudo -u ses_project bash -c "cd '$APP' && $*"; }
+
+            echo "==> Before: $(app 'git rev-parse --short HEAD')"
 
             # The trap matters: a failure between down and up leaves the site 503.
-            ${AS_APP} php artisan down --retry=30 || true
-            trap '${AS_APP} php artisan up || true' EXIT
+            app 'php artisan down --retry=30' || true
+            trap 'app "php artisan up" || true' EXIT
 
             echo "==> Fetching ${BRANCH}"
-            ${AS_APP} git fetch --prune origin "$BRANCH"
+            app "git fetch --prune origin ${BRANCH}"
             # Reset, not pull — a merge can ship a tree matching neither the
             # branch nor what was reviewed.
-            ${AS_APP} git reset --hard "origin/${BRANCH}"
-            echo "==> Now at: $(${AS_APP} git rev-parse --short HEAD)"
+            app "git reset --hard origin/${BRANCH}"
+            echo "==> Now at: $(app 'git rev-parse --short HEAD')"
 
             echo "==> composer install"
-            ${AS_APP} composer install \
-              --no-interaction --prefer-dist --no-progress \
-              --no-dev --optimize-autoloader
+            app 'composer install --no-interaction --prefer-dist --no-progress --no-dev --optimize-autoloader'
 
             echo "==> building assets"
-            ${AS_APP} npm ci --no-audit --no-fund
-            ${AS_APP} npm run build
+            app 'npm ci --no-audit --no-fund'
+            app 'npm run build'
 
             echo "==> migrating"
-            ${AS_APP} php artisan migrate --force
+            app 'php artisan migrate --force'
 
             # Cleared before rebuilding: a stale cached view outlives its code.
             echo "==> rebuilding caches"
-            ${AS_APP} php artisan optimize:clear
-            ${AS_APP} php artisan config:cache
-            ${AS_APP} php artisan route:cache
-            ${AS_APP} php artisan view:cache
-            ${AS_APP} php artisan storage:link || true
+            app 'php artisan optimize:clear'
+            app 'php artisan config:cache'
+            app 'php artisan route:cache'
+            app 'php artisan view:cache'
+            app 'php artisan storage:link' || true
 
             # New code is not live until opcache reloads.
             echo "==> reloading php-fpm"
@@ -116,11 +231,11 @@ jobs:
             sudo systemctl restart ses-queue
 
             # Up before the health check, so it exercises the real site.
-            ${AS_APP} php artisan up
+            app 'php artisan up'
             trap - EXIT
 
             echo "==> verifying deployed commit"
-            DEPLOYED=$(${AS_APP} git rev-parse HEAD)
+            DEPLOYED=$(app 'git rev-parse HEAD')
             if [ -n "${DEPLOY_SHA:-}" ] && [ "$DEPLOYED" != "$DEPLOY_SHA" ]; then
               echo "MISMATCH: server is at $DEPLOYED, expected $DEPLOY_SHA" >&2
               exit 1
