@@ -83,6 +83,39 @@
                 <div class="col-md-6 text-end">
                     <h4 class="job-budget"><i class="fa-solid fa-yen-sign"></i> {{ $project->salary_range }}</h4>
                 </div>
+             {{--
+    Project actions (kebab / 3-dot menu)
+
+    Shows a dropdown on the project card header with actions for the project.
+    Currently: Edit -> route 'project.edit'.
+
+    Visibility: only rendered if the user passes the 'update' policy on $project.
+    Requires: Bootstrap 5 JS (dropdown) and Font Awesome 6 (ellipsis icon).
+    Styling: .project-actions / .project-actions-toggle in the app stylesheet.
+    Note: data-bs-strategy="fixed" keeps the menu from being clipped by the card.
+--}}
+@can('update', $project)
+    <div class="dropdown project-actions">
+        <button type="button"
+                class="btn btn-sm project-actions-toggle"
+                id="projectActions{{ $project->id }}"
+                data-bs-toggle="dropdown"
+                data-bs-strategy="fixed"
+                aria-expanded="false"
+                aria-label="{{ __('projects/index.actions') }}"
+                title="{{ __('projects/index.actions') }}">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="projectActions{{ $project->id }}">
+            <li>
+                <a class="dropdown-item" href="{{ route('project.edit', $project) }}">
+                    {{ __('projects/index.edit_project') }}
+                </a>
+            </li>
+        </ul>
+    </div>
+@endcan
             </x-slot:header>
             <!--- Card Body content ---->
             <div class="col-md-8 mb-4 ps-md-3">
