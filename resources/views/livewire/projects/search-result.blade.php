@@ -1,4 +1,36 @@
 <div>
+    @once
+        <style>
+            .project-actions {
+                position: absolute;
+                top: 0.5rem;
+                right: 0.75rem;
+                z-index: 2;
+            }
+
+            .project-actions-toggle {
+                border: 1px solid transparent;
+                border-radius: 50%;
+                width: 2rem;
+                height: 2rem;
+                padding: 0;
+                line-height: 1;
+                color: #767F8C;
+                background: transparent;
+            }
+
+            .project-actions-toggle:hover,
+            .project-actions-toggle:focus-visible,
+            .project-actions.show .project-actions-toggle {
+                color: #1F2430;
+                background: #F1F2F4;
+                border-color: #D6D8DC;
+            }
+
+            .project-actions-toggle::after { display: none; }
+        </style>
+    @endonce
+    
     <div class="row justify-content-center">
         <div class="col-md-12">
             @if($subcategories)
@@ -92,7 +124,6 @@
     Visibility: only rendered if the user passes the 'update' policy on $project.
     Requires: Bootstrap 5 JS (dropdown) and Font Awesome 6 (ellipsis icon).
     Styling: .project-actions / .project-actions-toggle in the app stylesheet.
-    Note: data-bs-strategy="fixed" keeps the menu from being clipped by the card.
 --}}
 @can('update', $project)
     <div class="dropdown project-actions">
@@ -100,7 +131,6 @@
                 class="btn btn-sm project-actions-toggle"
                 id="projectActions{{ $project->id }}"
                 data-bs-toggle="dropdown"
-                data-bs-strategy="fixed"
                 aria-expanded="false"
                 aria-label="{{ __('projects/index.actions') }}"
                 title="{{ __('projects/index.actions') }}">
