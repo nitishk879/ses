@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslatedTitle;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SubCategory extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasTranslatedTitle, SoftDeletes;
+
+    /** Shared with Category: the slugs live in one namespace. */
+    protected const TITLE_TRANSLATIONS = 'common/category';
 
     /**
      * The attributes that are mass assignable.

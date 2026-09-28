@@ -1,7 +1,7 @@
 <?php
 
 return array(
-    'title' => 'Welcome',
+    'title' => 'ようこそ',
     'job_and_project' => 'プロフィール&プロジェクト',
     'companies' => '企業',
     'registered_talents' => '登録プロフィール',
@@ -19,9 +19,9 @@ return array(
     'find_the_perfect_match' => '理想のマッチを見つけよう',
     'start_collaborating_jobs' => 'コラボレーションを始める',
     'featured_jobs_and_projects' => '注目のプロジェクト',
-    'contract_base' => 'Contract Base',
+    'contract_base' => '請負',
     'apply_now' => '今すぐ申し込む',
-    'top_companies_and_employer' => 'Top <span>&nbsp; companies & employers</span>',
+    'top_companies_and_employer' => '人気の <span>&nbsp;企業・採用担当者</span>',
     // Nov 14th, 2024
     'how_it_work' =>[
         'step_1_title'  => 'プロジェクトや人材プロフィールを投稿しよう',//20dec2024 for all step1 to 6 how it works, language is changed

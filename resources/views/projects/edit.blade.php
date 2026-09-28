@@ -48,9 +48,9 @@
                             <h1>{{ $project->title }}</h1>
                         </div>
                         <div class="d-flex flex-wrap gap-2 my-2">
-                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-calendar-days"></i> {{ __("common/home.registered_on") }}: <span>{{ $project->created_at->format('M d, Y') }}</span></div>
-                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->format('M d, Y') }}</span></div>
-                            <div class="mb-2 job-timestamp"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: <span>{{ $project->deadline->format('M d, Y') }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-calendar-days"></i> {{ __("common/home.registered_on") }}: <span>{{ $project->created_at->translatedFormat(__('common/common.date_format')) }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->translatedFormat(__('common/common.date_format')) }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: <span>{{ $project->deadline?->translatedFormat(__('common/common.date_format')) ?? '—' }}</span></div>
                         </div>
                         <div class="d-flex gap-2 user-data">
                             <div class="avatar-view me-3">
@@ -80,7 +80,7 @@
                         <div class="project-card-body p-3">
                             <div class="d-md-flex justify-content-between">
                                 <div class="d-inline-flex pe-2 project-payout-type">{{ __("common/home.fixed") }}</div>
-                                <span class="project-date">{{ $similar_project->created_at->format('M d, Y') }}</span>
+                                <span class="project-date">{{ $similar_project->created_at->translatedFormat(__('common/common.date_format')) }}</span>
                             </div>
                             <h2 class="project-title">{{ $similar_project->title }}</h2>
                             <h6 class="project-budget">{{ __("projects/show.project_budget") }}: <span>{{ __("talents/index.currency_text") }}{{ $project->salary_range }}/{{ __("common/home.month") }}</span></h6>
@@ -91,7 +91,7 @@
                             </div>
                             <div class="d-flex gap-2 my-2">
                                 @foreach($similar_project->subCategories as $subcategory)
-                                    <div class="project-skill">{{ $subcategory->title }}</div>
+                                    <div class="project-skill">{{ $subcategory->display_title }}</div>
                                     @break($loop->iteration >= 3)
                                 @endforeach
                                 @if($similar_project->subCategories->count() > 3)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslatedTitle;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +12,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Location extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasTranslatedTitle, SoftDeletes;
+
+    /** Prefecture names, keyed by slug. */
+    protected const TITLE_TRANSLATIONS = 'locations';
 
     /**
      *
@@ -51,4 +55,5 @@ class Location extends Model
     {
         return $this->morphedByMany(Talent::class, 'locatable', 'locatable');
     }
+
 }

@@ -30,7 +30,7 @@
                         </td>
                         <td>
                             @foreach($project->locations as $location)
-                                <span class="badge bg-primary text-white">{{ $location->title }}</span>
+                                <span class="badge bg-primary text-white">{{ $location->display_title }}</span>
                             @endforeach
                         </td>
                         <td>

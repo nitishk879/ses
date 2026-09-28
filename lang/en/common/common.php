@@ -23,5 +23,8 @@ return array(
     'close' => 'Close',
     'sample_data_title' => 'Sample data',
     'modal_title' => 'Modal title',
-    'interview_status'
+    'submit' => 'Submit',
+    // Date layout, as a translation. `M d, Y` is read by Carbon's
+    // translatedFormat(), so the month name follows the page's language.
+    'date_format' => 'M d, Y',
 );

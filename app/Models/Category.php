@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasTranslatedTitle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,10 @@ use LaravelIdea\Helper\App\Models\_IH_SubCategory_QB;
 
 class Category extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, HasTranslatedTitle, SoftDeletes;
+
+    /** Shared with SubCategory: one file, keyed by slug. */
+    protected const TITLE_TRANSLATIONS = 'common/category';
 
     /**
      * The attributes that are mass assignable.
@@ -34,6 +38,30 @@ class Category extends Model
     public function subcategories(): HasMany
     {
         return $this->hasMany(SubCategory::class);
+    }
+
+    /**
+     * Categories a person can actually pick something from.
+     *
+     * A category with no sub-categories renders as a heading with nothing under
+     * it — "ERP (SAP)" and "Project Management" both do, because the dataset
+     * never gave them children. That is not a choice, it is a gap in the page,
+     * and a recruiter reading it cannot tell whether the options failed to load
+     * or do not exist.
+     *
+     * The talent screens already filtered this way inline; naming the rule here
+     * means the project form and the search panels cannot drift from them, and
+     * the day those two categories get sub-categories they appear on every
+     * screen at once with nothing else to change.
+     *
+     * Eager-loads the children, because every caller immediately loops them —
+     * without it each category costs its own query.
+     */
+    public function scopeSelectable(Builder $query): Builder
+    {
+        return $query->whereHas('subcategories')
+            ->with('subcategories')
+            ->orderBy('display_order');
     }
 
     /**

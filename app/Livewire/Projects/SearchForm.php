@@ -102,7 +102,7 @@ class SearchForm extends Component
 
     public function mount(): void
     {
-        $this->categories = Category::all();
+        $this->categories = Category::selectable()->get();
     }
     public function render()
     {

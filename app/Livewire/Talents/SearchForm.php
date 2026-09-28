@@ -90,7 +90,7 @@ class SearchForm extends Component
 
     public function mount(): void
     {
-        $this->categories = Category::with('subcategories:id')->get();
+        $this->categories = Category::selectable()->get();
     }
 
     public function render()

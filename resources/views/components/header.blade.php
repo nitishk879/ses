@@ -83,9 +83,25 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ __("common/header.language") }}
                         </a>
+                        {{-- Each language is written in itself — "English" and
+                             "日本語" — never translated into the language that
+                             happens to be active. This menu is the one control a
+                             reader needs when the interface is in a language they
+                             cannot read, and labelling English as 「英語」 hides it
+                             from exactly the person looking for it. The flag and
+                             the endonym together make the right row obvious
+                             without reading a word of the current locale. --}}
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('language', 'en') }}"><img src="{{ asset("images/united-states.png") }}" alt="" class="me-3" height="16" width="16"/> {{ __("common/header.english") }}</a></li>
-                            <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('language', 'jp') }}"><img src="{{ asset("images/japan.png") }}" alt="" class="me-3" height="16" width="16"/>{{ __("common/header.japanese") }}</a></li>
+                            @foreach(['en' => ['English', 'united-states.png'], 'jp' => ['日本語', 'japan.png']] as $code => [$endonym, $flag])
+                                <li>
+                                    <a class="dropdown-item d-flex align-items-center gap-2 {{ app()->getLocale() === $code ? 'active' : '' }}"
+                                       href="{{ route('language', $code) }}"
+                                       lang="{{ $code === 'jp' ? 'ja' : 'en' }}"
+                                       @if(app()->getLocale() === $code) aria-current="true" @endif>
+                                        <img src="{{ asset("images/{$flag}") }}" alt="" class="me-3" height="16" width="16"/>{{ $endonym }}
+                                    </a>
+                                </li>
+                            @endforeach
                         </ul>
                     </li>
                     <!-- Authentication Links -->

@@ -24,7 +24,7 @@
                                     <div class="accordion-item border-0">
                                         <h4 class="accordion-header">
                                             <button class="accordion-button px-0 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{$category->id}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{$category->id}}">
-                                                {{ $category->title }} ({{ $category->subCategories->count() }})
+                                                {{ $category->display_title }} ({{ $category->subCategories->count() }})
                                             </button>
                                         </h4>
                                         <div id="panelsStayOpen-collapse{{$category->id}}" class="accordion-collapse collapse show">
@@ -154,9 +154,9 @@
                     </h2>
                     <div id="flush-collapseWorkLocation" class="accordion-collapse collapse show" data-bs-parent="#accordionFlushExample">
                         <div class="accordion-body">
-                            <select class="form-control form-select mb-3" id="multiple-select-fieldx" wire:model.live="workLocation" data-placeholder="e.g. Tokyo" aria-describedby="search-location" multiple>
+                            <select class="form-control form-select mb-3" id="multiple-select-fieldx" wire:model.live="workLocation" data-placeholder="{{ __('talents/index.preferred_location') }}" aria-describedby="search-location" multiple>
                                 @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                    <option value="{{$location->id}}">{{ $location->title ?? '' }}</option>
+                                    <option value="{{$location->id}}">{{ $location->display_title }}</option>
                                 @endforeach
                             </select>
                             <h4>{{ __("projects/form.work_mode") }}</h4>

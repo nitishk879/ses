@@ -23,7 +23,7 @@
             @if($workLocation)
                 <span class="badge text-bg-primary text-white">{{ __("projects/form.locations") }} </span>
                 @foreach(\App\Models\Location::all() as $lok)
-                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->title : '' }}</span>
+                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->display_title : '' }}</span>
                 @endforeach
             @endif
 
@@ -180,9 +180,9 @@
                         </div>
                         <div class="col-md-6 col-lg-5">
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-calendar-days"></i>
-                                {{ __("talents/index.registered_on") }}: {{ $talent->user->created_at->format('M d, Y') }}</div>
+                                {{ __("talents/index.registered_on") }}: {{ $talent->user->created_at->translatedFormat(__('common/common.date_format')) }}</div>
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-rotate"></i>
-                                {{ __("talents/index.updated_on") }}: {{ $talent->user->updated_at->format('M d, Y') }}</div>
+                                {{ __("talents/index.updated_on") }}: {{ $talent->user->updated_at->translatedFormat(__('common/common.date_format')) }}</div>
                             @if($talent->user?->last_login)
                                 <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-lock"></i>
                                     {{ __("talents/index.last_logged_in") }}: {{ $talent->user?->last_login }}
@@ -263,7 +263,7 @@
                                                  row does: a label with empty space beside it
                                                  reads as a rendering fault, not as "unstated". --}}
                                             @forelse($talent->locations as $location)
-                                                {{ $location->title ?? '' }}@if(!$loop->last), @endif
+                                                {{ $location->display_title }}@if(!$loop->last), @endif
                                             @empty
                                                 —
                                             @endforelse

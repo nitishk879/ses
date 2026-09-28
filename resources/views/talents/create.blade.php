@@ -355,7 +355,7 @@
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Models\Location::orderBy('title')->get() as $location)
                                                 <option value="{{ $location->id }}"
-                                                    @selected(in_array($location->id, (array) old('locations', [])))>{{ $location->title }}</option>
+                                                    @selected(in_array($location->id, (array) old('locations', [])))>{{ $location->display_title }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -435,9 +435,9 @@
                         <div class="col-md-12 bg-light mb-4">
                             <div class="bg-light p-3">
                                 <h2>{{ __("talents/registration.experience_fields") }}</h2>
-                                @foreach(\App\Models\Category::whereHas('subcategories')->orderBy('title')->get() as $category)
+                                @foreach(\App\Models\Category::selectable()->get() as $category)
                                     <div class="mb-3">
-                                        <h4 class="category-heading">{{ $category->title ?? '' }}</h4>
+                                        <h4 class="category-heading">{{ $category->display_title }}</h4>
                                     </div>
                                     <div class="mb-3">
                                         @foreach($category->subcategories as $subcategory)
@@ -458,7 +458,7 @@
                                                        value="{{ $subcategory->id }}"
                                                 >
                                                 <label class="form-check-label"
-                                                       for="{{ $subcategory->slug."_".$subcategory->id }}">{{ $subcategory->title ?? '' }}</label>
+                                                       for="{{ $subcategory->slug."_".$subcategory->id }}">{{ $subcategory->display_title }}</label>
                                             </div>
                                         @endforeach
                                     </div>

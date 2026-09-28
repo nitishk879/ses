@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ $htmlLang ?? str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -213,7 +213,7 @@
                                             <i class="fa-solid fa-street-view"></i>
                                         </div>
                                         <div class="d-flex flex-column justify-content-start align-items-start d-inline-flex">
-                                            <h4>{{ $location->title }}</h4>
+                                            <h4>{{ $location->display_title }}</h4>
                                             <h5>{{ $location->projects->count() }} {{ __("common/welcome.open_positions") }}</h5>
                                         </div>
                                     </div>
@@ -351,7 +351,7 @@
                                         <div class="Info justify-content-start align-items-center gap-4 d-inline-flex">
                                             <div class="justify-content-start align-items-center gap-1 d-flex">
                                                 <i class="fa-solid fa-map-pin fs-6"></i>
-                                                <p class="mb-0 text-gray-500 text-sm font-medium leading-tight">{{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</p>
+                                                <p class="mb-0 text-gray-500 text-sm font-medium leading-tight">{{ $project->locations->first()?->display_title ?? __("common/home.japan_tokyo") }}</p>
                                             </div>
                                             <div class="justify-content-start align-items-center gap-1 d-flex">
                                                 <i class="fa-solid fa-yen-sign fs-6"></i>
@@ -360,7 +360,7 @@
                                             </div>
                                             <div class="justify-content-start align-items-center gap-1 d-flex">
                                                 <i class="fa-regular fa-calendar-days fs-6"></i>
-                                                <p class="mb-0 text-gray-500 text-sm font-medium leading-tight">{{ $project->deadline->diffForHumans() }}</p>
+                                                <p class="mb-0 text-gray-500 text-sm font-medium leading-tight">{{ $project->deadline?->diffForHumans() ?? '—' }}</p>
                                             </div>
                                         </div>
                                     </div>

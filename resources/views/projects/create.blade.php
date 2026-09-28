@@ -31,7 +31,7 @@
                                               id="projectDescription"
                                               name="project_description"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! old("project_description") ?? '' !!}</textarea>
+                                              placeholder="{{ __('projects/form.enter_job_duties') }}">{!! old("project_description") ?? '' !!}</textarea>
                                     @error('project_description')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -45,7 +45,7 @@
                                               id="projectRequirement"
                                               name="personnel_requirement"
                                               rows="3"
-                                              placeholder="{{ __('talents/registration.write_bio') }}">{!! old("personnel_requirement") ?? '' !!}</textarea>
+                                              placeholder="{{ __('projects/form.enter_required_skills') }}">{!! old("personnel_requirement") ?? '' !!}</textarea>
                                     @error('personnel_requirement')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
                                     @enderror
@@ -182,7 +182,7 @@
                                                        id="{{ $location->slug."_".$location->id }}"
                                                        value="{{ $location->id }}">
                                                 <label class="form-check-label"
-                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->title ?? '' }}</label>
+                                                       for="{{ $location->slug."_".$location->id }}">{{ $location->display_title }}</label>
                                             </div>
                                         </div>
                                     @endforeach
@@ -279,13 +279,13 @@
                                 <h2>{{ __("projects/form.categories") }}</h2>
                                 <div class="mb-3">
                                     @foreach($categories as $category)
-                                        <h4>{{ $category->title }}</h4>
+                                        <h4>{{ $category->display_title }}</h4>
                                         <div class="mb-3">
                                             @foreach($category->subCategories as $subCategory)
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="checkbox" name="category_id[]" value="{{$subCategory->id}}" id="category_{{$subCategory->id}}">
                                                     <label class="form-check-label" for="category_{{$subCategory->id}}">
-                                                        {{ $subCategory->title ?? __("company/register.dispatch_business") }}
+                                                        {{ $subCategory->display_title }}
                                                     </label>
                                                     @error('category_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                                 </div>
@@ -318,45 +318,98 @@
                             <div class="bg-light p-3">
                                 <div class="row align-items-center">
                                     <div class="col-md-6 mb-3">
-                                        <label for="projectDeadline" class="form-label required">{{ __('projects/form.deadline') }}</label>
+                                        {{-- Optional, and now says so.
+                                             The column is nullable and the request rules
+                                             have always been `nullable`; only the markup
+                                             claimed otherwise, so the asterisk and the
+                                             browser demanded an answer the server never
+                                             wanted. A recruiter who does not yet know the
+                                             deadline can register the project. --}}
+                                        <label for="projectDeadline" class="form-label">{{ __('projects/form.deadline') }}</label>
                                         <input type="date" class="form-control @error('deadline') is-invalid @enderror"
                                                name="deadline"
                                                id="projectDeadline"
                                                value="{{ old("deadline") ?? '' }}"
-                                               placeholder="{{ __('projects/form.deadline_placeholder') }}" required
+                                               placeholder="{{ __('projects/form.deadline_placeholder') }}"
                                         />
                                         @error('deadline')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="expectedApplications" class="form-label required">{{ __('projects/form.no_of_application') }}</label>
+                                        {{-- Optional, for the same reason as the deadline
+                                             beside it: nullable column, nullable rule. --}}
+                                        <label for="expectedApplications" class="form-label">{{ __('projects/form.no_of_application') }}</label>
                                         <input type="number" class="form-control @error('number_of_application') is-invalid @enderror"
                                                name="number_of_application"
                                                id="expectedApplications"
+                                               min="0"
                                                value="{{ old("number_of_application") ?? '' }}"
-                                               placeholder="{{ __('projects/form.no_of_application_placeholder') }}" required
+                                               placeholder="{{ __('projects/form.no_of_application_placeholder') }}"
                                         />
                                         @error('number_of_application')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                                 <div class="col-md-12 mb-3">
                                     <h5>{{ __("projects/form.number_of_interview") }}</h5>
-                                    @for($i=1; $i <=4; $i++)
+                                    {{-- Driven by the enum, not by a 1..4 counter.
+                                         The counter rendered a fourth radio, "3回以上",
+                                         for a value InterviewEnum has no case for — the
+                                         `thrice` case is commented out. Choosing it used
+                                         to reach the cast and die as a 500; it is now
+                                         caught in validation, which is better but still
+                                         offers a recruiter something the server refuses.
+                                         Reading the cases means the form can only ever
+                                         show answers the server accepts, and re-enabling
+                                         `thrice` brings its radio back on its own. --}}
+                                    {{-- "Not specified" is a real option, and the default.
+                                         Radios are one-way: with only the three counts on
+                                         screen a recruiter who ticked one by accident had
+                                         no way back to "no answer", on a field that is
+                                         optional. Posting an empty value is turned into
+                                         null by ConvertEmptyStringsToNull, which is exactly
+                                         what the nullable column wants. --}}
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio"
+                                               name="number_of_interviewers" value=""
+                                               id="interview_none"
+                                               @checked(blank(old('number_of_interviewers')))>
+                                        <label class="form-check-label text-muted" for="interview_none">
+                                            {{ __('projects/form.interview_none') }}
+                                        </label>
+                                    </div>
+                                    @foreach(\App\Enums\InterviewEnum::cases() as $interview)
                                         <div class="form-check form-check-inline">
-                                            <input class="form-check-input" type="radio" name="number_of_interviewers" value="{{$i}}" id="interview_{{$i}}">
-                                            <label class="form-check-label" for="interview_{{$i}}">
-                                                {{ __("projects/form.interview_{$i}") }}
+                                            <input class="form-check-input" type="radio"
+                                                   name="number_of_interviewers"
+                                                   value="{{ $interview->value }}"
+                                                   id="interview_{{ $interview->value }}"
+                                                   @checked((string) old('number_of_interviewers') === (string) $interview->value)>
+                                            <label class="form-check-label" for="interview_{{ $interview->value }}">
+                                                {{ __("projects/form.interview_{$interview->value}") }}
                                             </label>
-                                            @error('number_of_interviewers') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                         </div>
-                                    @endfor
+                                    @endforeach
+                                    @error('number_of_interviewers')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
                                 </div>
                                 <div class="mb-3">
                                     <label for="commercialFlow" class="form-label required">{{ __("projects/form.commercial_flow") }}</label>
                                     <select class="form-select @error('commercial_flow') is-invalid @enderror"
                                             name="commercial_flow" id="commercialFlow" aria-label="commercial_flow" required>
                                         <option value="">{{ __("talents/registration.choose") }}</option>
+                                        {{-- Nothing is pre-selected.
+                                             The first case used to carry `selected`, which
+                                             defeated the `required` on this field: the browser
+                                             saw a value and never asked, so a recruiter who had
+                                             not looked at this menu still submitted an answer to
+                                             it. With the placeholder selected instead, `required`
+                                             does its job and `old()` brings a rejected form back
+                                             with the choice they actually made. --}}
                                         @foreach(\App\Enums\CommercialFlow::cases() as $case)
-                                            <option value="{{ $case->value }}" {{ $loop->first ? 'selected' : '' }}>{{ __("projects/form.{$case->name}") ?? __('One') }}</option>
+                                            <option value="{{ $case->value }}"
+                                                    @selected((string) old('commercial_flow') === (string) $case->value)>
+                                                {{ __("projects/form.{$case->name}") }}
+                                            </option>
                                         @endforeach
                                     </select>
                                     @error('commercial_flow')
@@ -391,7 +444,7 @@
                         @foreach($errors as $error)
                             <p>{{ $message }}</p>
                         @endforeach
-                        <button type="submit" class="btn btn-primary">{{ __("Submit") }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __("common/common.submit") }}</button>
                     </div>
                 </form>
             </div>
@@ -403,17 +456,17 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="d-flex justify-content-center align-items-center w-100">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("Sample Cover Letter") }}</h1>
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("common/common.sample_data_title") }}</h1>
                 </div>
                 <div class="modal-body">
                     <div class="cover-letter ">
-                        <h4 id="modalTitle">{{ __("Cover Letter") }}</h4>
+                        <h4 id="modalTitle">{{ __("common/common.modal_title") }}</h4>
                         <div class="cover-letter-description border border-secondary-subtle p-4"></div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Understood</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __("common/common.close") }}</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ __("common/common.use") }}</button>
                 </div>
             </div>
         </div>
@@ -425,19 +478,30 @@
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
         <script>
-            $('.tinyEditor').summernote({
-                placeholder: "{{ __("talents/registration.write_bio") }}",
-                tabsize: 2,
-                height: 120,
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
+            // One init per editor, not one for the whole page.
+            //
+            // `$('.tinyEditor').summernote({placeholder: ...})` applies a single
+            // string to every box it matches, and Summernote hides the original
+            // textarea — so the per-field `placeholder` attribute set in the
+            // markup was never the one on screen. Both boxes showed the talent
+            // profile's "enter your resume" text, on a form about a project.
+            // Reading each element's own attribute keeps the wording next to the
+            // field it belongs to.
+            $('.tinyEditor').each(function () {
+                $(this).summernote({
+                    placeholder: $(this).attr('placeholder') || '',
+                    tabsize: 2,
+                    height: 120,
+                    toolbar: [
+                        ['style', ['style']],
+                        ['font', ['bold', 'underline', 'clear']],
+                        ['color', ['color']],
+                        ['para', ['ul', 'ol', 'paragraph']],
+                        ['table', ['table']],
+                        ['insert', ['link', 'picture', 'video']],
+                        ['view', ['fullscreen', 'codeview', 'help']]
+                    ]
+                });
             });
         </script>
         <!---- Summer note libraries -->

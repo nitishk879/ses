@@ -95,7 +95,7 @@
                                                     <div class="col-6 col-md-5 feature-head">{{ __("talents/index.preferred_location") }}: </div>
                                                     <div class="col-6 col-md-7 feature-text">
                                                         @forelse($talent->locations as $location)
-                                                            {{ $location->title ?? '' }}@if(!$loop->last), @endif
+                                                            {{ $location->display_title }}@if(!$loop->last), @endif
                                                         @empty
                                                             —
                                                         @endforelse
@@ -129,7 +129,7 @@
                                         <div>
                                             <ul class="list-group list-group-flush">
                                                 @foreach($talent->locations as $location)
-                                                    <li class="list-group-item">{{ $location->title }}</li>
+                                                    <li class="list-group-item">{{ $location->display_title }}</li>
                                                 @endforeach
                                             </ul>
                                             <div class="p-head py-2"> {{ __("talents/show.work_mode") }}</div>
@@ -171,15 +171,15 @@
             <div class="modal-dialog modal-dialog-centered modal-xl">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+                        <h1 class="modal-title fs-5" id="staticBackdropLabel">{{ __("common/common.modal_title") }}</h1>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                         ...
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn btn-primary">Understood</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __("common/common.close") }}</button>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ __("common/common.use") }}</button>
                     </div>
                 </div>
             </div>

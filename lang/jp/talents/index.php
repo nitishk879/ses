@@ -47,4 +47,7 @@ return array(
     "application_deadline"  => "応募締切",
     "favourite" => "お気に入り",
     "last_logged_in" => "最終ログイン",
+    'future' => '将来的に参画可能',
+    'from_date' => '参画可能時期はお問い合わせください',
+    'immediately' => 'すぐに参画可能',
 );

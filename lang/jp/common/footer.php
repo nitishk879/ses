@@ -28,6 +28,6 @@ return array(
     'browse_candidates' => '求人情報を投稿する',
     'employer_dashboard' => 'プロジェクトダッシュボード ',
     'applications' => '申請件数',
-    'address' => '〒102-0085 Chiyoda-ku, Tokyo ,Rokubancho 15-2, 2nd floor',
+    'address' => '〒102-0085 東京都千代田区六番町15-2 2階',
     'phone' => '(319) 555-0115'
 );

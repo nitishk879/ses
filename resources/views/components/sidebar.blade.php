@@ -19,11 +19,11 @@
                         </h2>
                         <div id="flush-collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
                             <div class="accordion-body">
-                                @foreach(\App\Models\Category::all() as $category)
+                                @foreach(\App\Models\Category::selectable()->get() as $category)
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="{{ $category->id }}" id="{{ $category->id }}">
                                         <label class="form-check-label" for="{{ $category->id }}">
-                                            {{ $category->title ?? __('something') }}
+                                            {{ $category->display_title }}
                                         </label>
                                     </div>
                                 @endforeach

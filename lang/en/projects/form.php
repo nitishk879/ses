@@ -12,6 +12,12 @@ return array(
     'project_start_time' => 'Project Start Time',
     'project_end_time' => 'Project End Time',
     'enter_your_project_requirements' => 'Enter Your Project Requirements',
+    // Placeholders for the two rich-text boxes on the project form.
+    // They used to share `talents/registration.write_bio`, a key written
+    // for the talent profile — so a project form asked the employer for
+    // their resume.
+    'enter_job_duties' => 'Please enter the job duties.',
+    'enter_required_skills' => 'Please enter the required skills and experience.',
     'project_in_charge_name' => 'Project In-charge Name',
     'address' => 'Address',
     'contract_period' => 'Contract Period',
@@ -65,11 +71,15 @@ return array(
     'FREELANCER' => 'Freelancer', // Oct 25, 2024
     'FREELANCER_SINGLE' => 'Self Employed', // Oct 25, 2024
     'FREELANCER_MORE' => 'Freelance: Two companies or more',
-    'Commercial' => 'Yes', //Oct 30, 2024
+    // The two choices for 'commercial_flow'. Both had to be spelled out:
+    // the Japanese side of this pair was an empty string, which rendered
+    // the required dropdown as two blank rows and made the field
+    // impossible to answer.
+    'Commercial' => 'Participates in the business chain',
     'Intermediary' => 'Intermediary only',
     'skill_matching' => 'Skill matching',
     'project_finalise'  => 'Project finalised',
-    'possible_to_continue' => 'Possible to continue',
+    'possible_to_continue' => 'Possibility of contract renewal',
     'remote_operation_possible' => 'Remote operation possible',
     // Oct 10, 2024
     'affiliation_1' => 'Company employees',
@@ -84,6 +94,7 @@ return array(
     "no_of_application_placeholder" => "20",
     "number_of_interview" => "Number of interviews",
     "number_of_interview_placeholder" => "5",
+    "interview_none" => "Not specified",
     "interview_1"   => "Once",
     "interview_2"   => "1-2 times",
     "interview_3"   => "Twice",

@@ -24,7 +24,7 @@
                                     <div class="accordion-item border-0">
                                         <h4 class="accordion-header">
                                             <button class="accordion-button px-0 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{$category->id}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{$category->id}}">
-                                                {{ $category->title }} ({{ $category->subCategories->count() }})
+                                                {{ $category->display_title }} ({{ $category->subCategories->count() }})
                                             </button>
                                         </h4>
                                         <div id="panelsStayOpen-collapse{{$category->id}}" class="accordion-collapse collapse show">
@@ -64,7 +64,7 @@
                         <div class="accordion-body">
                             <select class="form-control form-select mb-3" id="multiple-select-field" wire:model.live="workLocation" data-placeholder="e.g. Tokyo" aria-describedby="search-location" multiple>
                                 @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                    <option value="{{$location->id}}" @selected(in_array($location->id, $workLocation)) >{{ $location->title ?? '' }} ({{ $location->projects->count() }})</option>
+                                    <option value="{{$location->id}}" @selected(in_array($location->id, $workLocation)) >{{ $location->display_title }} ({{ $location->projects->count() }})</option>
                                 @endforeach
                             </select>
                             <h4>{{ __("projects/form.work_mode") }}</h4>

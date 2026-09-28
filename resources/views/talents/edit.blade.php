@@ -399,7 +399,7 @@
                                         <select class="form-select form-select-sm" name="locations[]" id="multiple-select-field" data-placeholder="{{ __("talents/registration.choose") }}" multiple>
                                             <option value="">{{ __("talents/registration.choose") }}</option>
                                             @foreach(\App\Models\Location::orderBy('title')->get() as $location)
-                                                <option value="{{ $location->id }}" @selected($talent->locations->contains('id', $location->id) ?? old('locations', $location->id))>{{ $location->title }}</option>
+                                                <option value="{{ $location->id }}" @selected($talent->locations->contains('id', $location->id) ?? old('locations', $location->id))>{{ $location->display_title }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -478,9 +478,9 @@
                         <div class="col-md-12 bg-light mb-4">
                             <div class="bg-light p-3">
                                 <h2>{{ __("talents/registration.experience_fields") }}</h2>
-                                @foreach(\App\Models\Category::whereHas('subcategories')->orderBy('title')->get() as $category)
+                                @foreach(\App\Models\Category::selectable()->get() as $category)
                                     <div class="mb-3">
-                                        <h4 class="category-heading">{{ $category->title ?? '' }}</h4>
+                                        <h4 class="category-heading">{{ $category->display_title }}</h4>
                                     </div>
                                     <div class="mb-3">
                                         @foreach($category->subcategories as $subcategory)
@@ -492,7 +492,7 @@
                                                        value="{{ $subcategory->id }}"
                                                 >
                                                 <label class="form-check-label"
-                                                       for="{{ $subcategory->slug."_".$subcategory->id }}">{{ $subcategory->title ?? '' }}</label>
+                                                       for="{{ $subcategory->slug."_".$subcategory->id }}">{{ $subcategory->display_title }}</label>
                                             </div>
                                         @endforeach
                                     </div>

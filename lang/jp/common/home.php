@@ -8,7 +8,7 @@ return array(
     'new' => '新しい',
     'japan_tokyo' => '日本 東京',
     'month' => '月',
-    'fixed' => 'Fixed',
+    'fixed' => '固定',
     'fixed_price' => '固定価格',
     'registered_on' => '登録日',
     'updated_on' => '更新日',

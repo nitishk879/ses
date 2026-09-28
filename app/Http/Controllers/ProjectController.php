@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CommercialFlow;
+use App\Enums\ContractClassificationEnum;
+use App\Enums\InterviewEnum;
 use App\Enums\TalentStatusEnum;
+use App\Enums\TradeClassification;
 use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
@@ -10,6 +14,7 @@ use App\Models\Project;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
@@ -28,7 +33,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        $categories = Category::get();
+        // Only categories with something to tick — see Category::scopeSelectable().
+        $categories = Category::selectable()->get();
         $features = Feature::all();
 
         return view('projects.create', compact('categories', 'features'));
@@ -53,14 +59,27 @@ class ProjectController extends Controller
             "project_description" => 'required',
             "personnel_requirement" => 'required',
             "project_finalized" => 'nullable',
-            "trade_classification" => 'required',
-            "contract_classification" => 'required',
+            "trade_classification" => ['required', Rule::enum(TradeClassification::class)],
+            "contract_classification" => ['required', Rule::enum(ContractClassificationEnum::class)],
             "languages" => 'required',
             "workLocations" => 'nullable',
             "deadline" => 'nullable',
             "number_of_application" => 'nullable',
-            "number_of_interviewers" => 'nullable',
-            "commercial_flow" => 'nullable',
+            /*
+             * The four enum-cast columns are validated against their enum.
+             *
+             * Without this an unexpected value reaches Project::create() and
+             * dies inside the cast — `InterviewEnum::from('')` is a TypeError,
+             * which Laravel renders as a 500. A recruiter filling in a form
+             * gets a blank error page and no idea which field to fix, which is
+             * how "registration cannot be completed" was reported.
+             *
+             * `commercial_flow` is `required`, not `nullable`: the column is
+             * NOT NULL and the form marks the field required, so nullable here
+             * was the odd one out of the three.
+             */
+            "number_of_interviewers" => ['nullable', Rule::enum(InterviewEnum::class)],
+            "commercial_flow" => ['required', Rule::enum(CommercialFlow::class)],
             "person_in_charge" => 'nullable',
             "eligibility" => 'nullable',
             "is_public" => 'nullable',
@@ -70,7 +89,7 @@ class ProjectController extends Controller
 
         $project = Project::create([
             "title" => $validated["title"] ?? '',
-            "slug" => Str::slug($validated['title'], '-'),
+            "slug" => self::slugFor($validated['title']),
             "minimum_price" => $validated["minimum_price"] ?? '',
             "maximum_price" => $validated["maximum_price"] ?? '',
             "skill_matching" => $validated["skill_matching"] ?? false,
@@ -84,17 +103,41 @@ class ProjectController extends Controller
             "person_in_charge" => $validated["person_in_charge"] ?? auth()->user()->name,
             "is_public" => $validated["is_public"] ?? false,
             "company_info_disclose" => $validated["company_info_disclose"] ?? false,
-            "contract_classification" => $validated["contract_classification"] ?? '',
-            "deadline" => $validated["deadline"] ?? '',
+            /*
+             * `trade_classification` was validated as required and then never
+             * written. The column is NOT NULL, so every single registration
+             * ended in an integrity-constraint 500 — the form asked for the
+             * answer, refused to continue without it, and threw it away.
+             */
+            "trade_classification" => $validated["trade_classification"],
+            "contract_classification" => $validated["contract_classification"],
+            /*
+             * Unanswered optional fields are stored as null, not ''.
+             *
+             * Every column below is either cast to an enum, a date or an array,
+             * and none of those casts accepts an empty string: '' reaches
+             * `InterviewEnum::from('')` and throws, and the array casts store a
+             * JSON `""` that later reads back as a string where the code
+             * expects a list. `?? ''` looked like a harmless default and was
+             * the reason a project could not be registered at all whenever the
+             * recruiter left the interview-count radios untouched — which is
+             * the normal case, since none of them is checked by default.
+             */
+            "deadline" => self::blankToNull($validated["deadline"] ?? null),
             "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
-            'work_location_prefer' => $validated["workLocations"] ?? '',
-            "affiliation" => $validated["eligibility"] ?? '',
-            "number_of_application" => $validated["number_of_application"] ?? '',
-            "number_of_interviewers" => $validated["number_of_interviewers"] ?? '',
-            "commercial_flow" => $validated["commercial_flow"] ?? '',
+            'work_location_prefer' => self::blankToNull($validated["workLocations"] ?? null),
+            "affiliation" => self::blankToNull($validated["eligibility"] ?? null),
+            "number_of_application" => self::blankToNull($validated["number_of_application"] ?? null),
+            "number_of_interviewers" => self::blankToNull($validated["number_of_interviewers"] ?? null),
+            // Required and enum-validated above, so it is always a real case.
+            "commercial_flow" => $validated["commercial_flow"],
             "company_id" => auth()->user()->company->id ?? 0,
             "user_id" => auth()->user()->id ?? 0,
         ]);
+
+        // The row exists now, so a title that romanised to nothing can take the
+        // id as its URL key.
+        self::backfillSlug($project);
 
         $project->subCategories()->attach($request->input('category_id'));
 
@@ -104,6 +147,71 @@ class ProjectController extends Controller
 
         return redirect()->route('project.index')->with('success', 'Project created successfully.');
 
+    }
+
+    /**
+     * An unanswered optional field, as the database should record it.
+     *
+     * "Not answered" is null. It is never '', because the columns these values
+     * land in are cast — an enum, a date, a JSON list — and none of those casts
+     * can read an empty string. Kept as one named helper rather than a `?:` at
+     * each call site so the next optional field added to this form inherits the
+     * rule instead of rediscovering it through a 500.
+     */
+    private static function blankToNull(mixed $value): mixed
+    {
+        return filled($value) ? $value : null;
+    }
+
+    /**
+     * A URL key for this project that is never empty and never a duplicate.
+     *
+     * `slug` is Project::getRouteKeyName(), so it is what every project URL is
+     * built from — and `Str::slug()` drops every character it cannot romanise.
+     * A title written in Japanese, which on this site is every real title,
+     * slugged to an empty string. Two of those collide, `route('project.show')`
+     * throws UrlGenerationException for a missing parameter, and the project
+     * list dies with a 500 while drawing a link.
+     *
+     * That was unreachable until now only because no project could be
+     * registered at all; it surfaces the moment registration works.
+     *
+     * So: romanise where that means something, fall back to the id where it
+     * does not, and add a counter for the case two different Latin titles
+     * romanise to the same thing ("Web System" and "Web-System" both give
+     * web-system, and `unique:projects` guards the title, not the slug).
+     *
+     * A reserved placeholder is stored first because the id does not exist
+     * until the row does; {@see backfillSlug()} replaces it straight after.
+     */
+    private static function slugFor(string $title): string
+    {
+        $base = Str::slug($title, '-');
+
+        if ($base === '') {
+            return Str::random(16);   // replaced with the id once it is known
+        }
+
+        $slug = $base;
+
+        for ($suffix = 2; Project::where('slug', $slug)->exists(); $suffix++) {
+            $slug = "{$base}-{$suffix}";
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Swap the placeholder slug for the project's id.
+     *
+     * Only for titles that romanise to nothing. The id is the shortest stable
+     * key available and cannot collide; a Latin title keeps its readable slug.
+     */
+    private static function backfillSlug(Project $project): void
+    {
+        if (Str::slug($project->title, '-') === '') {
+            $project->forceFill(['slug' => (string) $project->id])->save();
+        }
     }
 
     /**

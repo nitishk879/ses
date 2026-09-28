@@ -23,7 +23,7 @@
             @if($workLocation)
                 <span class="badge text-bg-primary text-white">{{ __("projects/form.locations") }} </span>
                 @foreach(\App\Models\Location::all() as $lok)
-                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->title : '' }}</span>
+                    <span class="badge text-bg-secondary">{{ in_array($lok->id, $workLocation) ? $lok->display_title : '' }}</span>
                 @endforeach
             @endif
 
@@ -78,7 +78,7 @@
                     @if($project->deadline <= today()->addMonth())
                             <span class="job-status">{{ __("Urgent") }}</span>
                     @endif
-                    <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</span>
+                    <span class="job-location"><i class="fa-solid fa-location-dot"></i> {{ $project->locations->first()?->display_title ?? __("common/home.japan_tokyo") }}</span>
                 </div>
                 <div class="col-md-6 text-end">
                     <h4 class="job-budget"><i class="fa-solid fa-yen-sign"></i> {{ $project->salary_range }}</h4>

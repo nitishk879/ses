@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ $htmlLang ?? str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -80,8 +80,13 @@
         <link href="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.css" rel="stylesheet">
         <script src="https://cdn.jsdelivr.net/npm/summernote@0.9.0/dist/summernote-lite.min.js"></script>
             <script>
-                $('.tinyEditor').summernote({
-                    placeholder: "{{ __("talents/registration.write_bio") }}",
+                // Per element, so a field that states its own placeholder keeps
+                // it. The shared string stays as the fallback for the bio boxes
+                // this section was written for; a project form that asks for job
+                // duties must not inherit "enter your resume".
+                $('.tinyEditor').each(function () {
+                    $(this).summernote({
+                    placeholder: $(this).attr('placeholder') || "{{ __("talents/registration.write_bio") }}",
                     tabsize: 2,
                     height: 120,
                     toolbar: [
@@ -93,6 +98,7 @@
                         ['insert', ['link', 'picture', 'video']],
                         ['view', ['fullscreen', 'codeview', 'help']]
                     ]
+                    });
                 });
             </script>
         <!---- Summer note libraries -->

@@ -37,9 +37,9 @@
                                     <div class="col-md-12 d-flex justify-content-between">
                                         <div class="row">
                                             <div class="col-md-6 mb-2 job-listing-date"><i class="fa-solid fa-calendar-days"></i>
-                                                {{ __("common/home.registered_on") }}: {{ $project->created_at->format('M d, Y') }}</div>
-                                            <div class="col-md-6 mb-2 job-updated"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: {{ $project->updated_at->format('M d, Y') }}</div>
-                                            <div class="col job-duration"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: {{ $project->deadline->format('M d, Y') }}</div>
+                                                {{ __("common/home.registered_on") }}: {{ $project->created_at->translatedFormat(__('common/common.date_format')) }}</div>
+                                            <div class="col-md-6 mb-2 job-updated"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: {{ $project->updated_at->translatedFormat(__('common/common.date_format')) }}</div>
+                                            <div class="col job-duration"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: {{ $project->deadline?->translatedFormat(__('common/common.date_format')) ?? '—' }}</div>
                                         </div>
                                     </div>
                                     {{-- Drawn only when the viewer could actually use it. --}}

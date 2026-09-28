@@ -57,9 +57,9 @@
                             </a>
                         @endif
                         <div class="d-flex flex-wrap gap-2 my-2">
-                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-calendar-days"></i> {{ __("common/home.registered_on") }}: <span>{{ $project->created_at->format('M d, Y') }}</span></div>
-                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->format('M d, Y') }}</span></div>
-                            <div class="mb-2 job-timestamp"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: <span>{{ $project->deadline->format('M d, Y') }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-calendar-days"></i> {{ __("common/home.registered_on") }}: <span>{{ $project->created_at->translatedFormat(__('common/common.date_format')) }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-solid fa-rotate"></i> {{ __("common/home.updated_on") }}: <span>{{ $project->updated_at->translatedFormat(__('common/common.date_format')) }}</span></div>
+                            <div class="mb-2 job-timestamp"><i class="fa-regular fa-hourglass-half"></i> {{ __("common/home.duration") }}: <span>{{ $project->deadline?->translatedFormat(__('common/common.date_format')) ?? '—' }}</span></div>
                         </div>
 {{--                        <div class="d-flex gap-2 user-data">--}}
 {{--                            <div class="avatar-view me-3">--}}
@@ -112,7 +112,7 @@
                                 </div>
                                 <div class="flex-grow-1 align-items-center ms-3">
                                     <h5 class="main-title">{{ __("projects/show.location") }}</h5>
-                                    <h4 class="main-sub-title">{{ $project->locations->first()->title ?? __("common/home.japan_tokyo") }}</h4>
+                                    <h4 class="main-sub-title">{{ $project->locations->first()?->display_title ?? __("common/home.japan_tokyo") }}</h4>
                                 </div>
                             </div>
                         </div>
@@ -138,7 +138,7 @@
                         <h4>{{ __("projects/show.skill_requirements") }}</h4>
                         <div class="d-flex flex-wrap w-100 gap-3">
                             @foreach($project->subCategories as $subcategory)
-                                <a href="#" class="skill">{{ $subcategory->title }}</a>
+                                <a href="#" class="skill">{{ $subcategory->display_title }}</a>
                             @endforeach
                         </div>
                     </div>
@@ -191,7 +191,7 @@
                             </div>
                             <div class="flex-grow-1 align-items-center ms-3">
                                 <h5 class="requirement-title">{{ __("projects/show.project_category") }}</h5>
-                                <h4 class="requirement-sub-title">{{ $project->subcategories->first()->category->title ?? '' }}</h4>
+                                <h4 class="requirement-sub-title">{{ $project->subcategories->first()?->category?->display_title ?? '' }}</h4>
                             </div>
                         </div>
                         <div class="d-flex align-items-center mb-3">
@@ -302,7 +302,7 @@
                         <div class="project-card-body p-3">
                             <div class="d-md-flex justify-content-between">
                                 <div class="d-inline-flex pe-2 project-payout-type">{{ __("common/home.fixed") }}</div>
-                                <span class="project-date">{{ $similar_project->created_at->format('M d, Y') }}</span>
+                                <span class="project-date">{{ $similar_project->created_at->translatedFormat(__('common/common.date_format')) }}</span>
                             </div>
                             <h2 class="project-title">{{ $similar_project->title }}</h2>
                             <h6 class="project-budget">{{ __("projects/show.project_budget") }}: <span>{{ __("talents/index.currency_text") }}{{ $project->salary_range }}/{{ __("common/home.month") }}</span></h6>
@@ -313,7 +313,7 @@
                             </div>
                             <div class="d-flex gap-2 my-2">
                                 @foreach($similar_project->subCategories as $subcategory)
-                                    <div class="project-skill">{{ $subcategory->title }}</div>
+                                    <div class="project-skill">{{ $subcategory->display_title }}</div>
                                     @break($loop->iteration >= 3)
                                 @endforeach
                                 @if($similar_project->subCategories->count() > 3)
@@ -329,7 +329,7 @@
                                 <div class="flex-grow-1 ms-3">
                                     <div class="d-flex justify-content-between align-items-center w-100">
                                         <div class="avatar">
-                                            <span class="text-break">{{ __("projects/form.deadline") }}: {{ $similar_project->deadline->format('y-m-d') ?? __("projects/form.deadline") }}</span>
+                                            <span class="text-break">{{ __("projects/form.deadline") }}: {{ $similar_project->deadline?->format('y-m-d') ?? '—' }}</span>
                                             <i class="fa-regular fa-circle-check"></i>
                                         </div>
                                         <a href="{{ route("project.show", $similar_project) }}" class="btn btn-theme">{{ __("projects/show.project_detail") }}</a>

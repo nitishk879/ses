@@ -20,9 +20,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-calendar-days"></i>
-                                {{ __("talents/index.registered_on") }}: {{ $company->created_at->format('M d, Y') }}</div>
+                                {{ __("talents/index.registered_on") }}: {{ $company->created_at->translatedFormat(__('common/common.date_format')) }}</div>
                             <div class="d-flex gap-2 align-items-center talent-updated"><i class="fa-solid fa-rotate"></i>
-                                {{ __("talents/index.updated_on") }}: {{ $company->updated_at->format('M d, Y') }}</div>
+                                {{ __("talents/index.updated_on") }}: {{ $company->updated_at->translatedFormat(__('common/common.date_format')) }}</div>
                         </div>
                     </div>
                 </div>
