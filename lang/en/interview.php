@@ -97,16 +97,8 @@ return [
         'detail_title' => 'Interview detail',
         'back' => 'Back to interviews',
 
-        'actions' => 'Actions',
-        'run_matching' => 'Run matching',
-        'run_matching_help' => 'Parses the job description and any unread CVs, then scores every candidate against this project. Runs in the background.',
-        'invite_shortlist' => 'Invite shortlist',
-        'invite_help' => 'Emails everyone at or above the match score, offering three interview times.',
         'invite_confirm' => 'This sends real email to candidates. Continue?',
         'project' => 'Project',
-        'choose_project' => 'Choose a project…',
-        'choose_project_first' => 'Choose a project first — it decides which candidates these actions apply to.',
-        'run_matching_first' => 'Run matching first — Send needs scores to choose who to invite.',
         'bot_required' => "Save an interview bot first — invitations are not sent without one, because the questions live in the bot's prompt.",
         'bot_unsaved' => "The bot shown here is not saved yet — press Save, or Send will use whichever bot the project already had.",
         'no_bot_warning' => "This project has no bot. Invitations stay disabled until one is chosen — the interview asks the questions written in the bot's prompt.",
@@ -119,12 +111,8 @@ return [
         'reschedule_help' => 'Cancels the times already offered — including one the candidate has chosen — and emails them new ones. Leave the boxes empty to have three chosen automatically.',
         'reschedule_confirm' => 'This cancels the current booking and emails the candidate new times. Continue?',
         'rescheduled' => 'Rescheduled. The candidate has been emailed the new times.',
-        'project_applies_to_all' => 'This project is used by all three actions below.',
         'threshold' => 'Min score',
-        'run' => 'Run',
-        'send' => 'Send',
 
-        'matching_queued' => 'Matching queued. :count CV(s) are being read; refresh in a minute.',
 
         // Choosing which DenAI dashboard bot conducts the calls.
         'interview_bot' => 'Interview bot',
@@ -135,12 +123,9 @@ return [
         'bot_assigned' => 'Interview bot saved for this project.',
         'bot_cleared' => 'Interview bot cleared. Calls will use the generated script only.',
         'bot_id_placeholder' => 'Bot id from the dashboard URL',
+        'bot_invalid' => 'That does not look like a bot id — paste the id from the bot URL, not the whole address.',
         'bot_list_unavailable' => 'The bot list could not be loaded from the DenAI dashboard. Paste the id from the bot URL instead.',
-        'no_shortlist' => 'Nobody is at or above :threshold for this project yet.',
-        'no_matching_yet' => 'No candidate has been scored for this project yet. Run matching first, then invite.',
-        'all_already_invited' => ':count candidate(s) are at or above :threshold, but every one of them has already been invited.',
         'invited' => 'Invited :count candidate(s).',
-        'invited_with_failures' => 'Invited :count candidate(s). Some could not be reached: :failures',
 
         'stat_total' => 'Total',
         'stat_awaiting_reply' => 'Awaiting reply',
@@ -261,12 +246,19 @@ return [
         'no_must_haves' => 'no must-haves set',
         'unnamed' => 'Candidate #:id',
         'already_invited' => 'invited',
+        'already_invited_hint' => 'This candidate already has a live invitation, so Send would pass over them.',
+
+        'bot_set' => 'Bot chosen',
+        'bot_missing' => 'No bot yet',
 
         'select_page' => 'Select every candidate on this page',
         'select_all' => 'Select all :count candidates',
         'selected' => ':count selected',
         'clear_selection' => 'Clear',
         'nothing_selected' => 'Nobody is selected.',
+        'all_already_invited' => 'All :count selected candidate(s) already have a live invitation. Nothing was sent — use Reschedule on an interview to offer new times.',
+        'skipped_already_invited' => ':count already had a live invitation and were not emailed again.',
+        'some_unreachable' => 'Some could not be reached: :failures',
         'invite_selected' => 'Invite selected',
         'slot_n' => 'Time :n',
 

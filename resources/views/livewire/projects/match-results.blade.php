@@ -135,7 +135,74 @@
         @endif
     </div>
 
-    {{-- ── 3. Results ───────────────────────────────────────────────────── --}}
+    {{-- ── 3. Which bot conducts the calls ──────────────────────────────────
+         Beside the button that needs it. Invite refuses without a bot, and
+         this is where that refusal is read — the picker used to live on the
+         interviews dashboard, which meant leaving this screen, choosing the
+         same project again in a second selector, and coming back. --}}
+    <div class="card mb-3" id="interview-bot">
+        <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                <div>
+                    <span class="fw-semibold">{{ __('interview.dashboard.interview_bot') }}</span>
+                    <p class="text-muted small mb-0">{{ __('interview.dashboard.interview_bot_help') }}</p>
+                </div>
+                @if(filled($project->interview_agent_id))
+                    <span class="badge text-bg-success">
+                        <i class="fa-solid fa-check me-1"></i>{{ __('interview.match_run.bot_set') }}
+                    </span>
+                @else
+                    <span class="badge text-bg-warning">{{ __('interview.match_run.bot_missing') }}</span>
+                @endif
+            </div>
+
+            <div class="d-flex flex-wrap align-items-end gap-2">
+                <div class="flex-grow-1" style="min-width: 16rem;">
+                    <label class="form-label small mb-1" for="interviewAgentId">
+                        {{ __('interview.dashboard.bot') }}
+                    </label>
+                    @if($this->bots !== [])
+                        <select class="form-select form-select-sm" id="interviewAgentId"
+                                wire:model.live="interviewAgentId">
+                            <option value="">{{ __('interview.dashboard.no_bot') }}</option>
+                            @foreach($this->bots as $bot)
+                                <option value="{{ $bot['agent_id'] }}">
+                                    {{ $bot['name'] }}@if(! empty($bot['language'])) — {{ $bot['language'] }}@endif
+                                </option>
+                            @endforeach
+                        </select>
+                    @else
+                        {{-- An unreachable directory is said out loud rather than
+                             rendered as "no bots exist", which would send a
+                             recruiter off to create one that already exists. --}}
+                        <input type="text" class="form-control form-control-sm" id="interviewAgentId"
+                               maxlength="64" wire:model.live.debounce.500ms="interviewAgentId"
+                               placeholder="{{ __('interview.dashboard.bot_id_placeholder') }}">
+                    @endif
+                </div>
+
+                <button class="btn btn-outline-primary btn-sm" wire:click="saveBot" wire:loading.attr="disabled">
+                    {{ __('interview.dashboard.save_bot') }}
+                </button>
+            </div>
+
+            @if($this->bots === [])
+                <div class="form-text text-warning">{{ __('interview.dashboard.bot_list_unavailable') }}</div>
+            @endif
+
+            @if($this->botUnsaved)
+                <div class="form-text text-warning">{{ __('interview.dashboard.bot_unsaved') }}</div>
+            @elseif(blank($project->interview_agent_id))
+                {{-- With a bot assigned, the bot's prompt IS the interview: SES
+                     supplies only the recorded-call opening, the candidate's
+                     facts and the closing. The AI service can fall back to
+                     generated questions; this product does not want that. --}}
+                <div class="form-text text-warning">{{ __('interview.dashboard.no_bot_warning') }}</div>
+            @endif
+        </div>
+    </div>
+
+    {{-- ── 4. Results ───────────────────────────────────────────────────── --}}
     <div class="card">
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
             <ul class="nav nav-pills">
@@ -165,6 +232,13 @@
              email client's does, so the default view is the list rather than a
              row of disabled buttons. --}}
         @if($this->selectionCount > 0)
+            @php
+                // Send needs three things, and they fail for different reasons,
+                // so the hint under the button names the one that is missing
+                // rather than listing all three every time.
+                $botReady = filled($project->interview_agent_id) && ! $this->botUnsaved;
+                $slotsFilled = count(array_filter($slotTimes, 'filled')) === 3;
+            @endphp
             <div class="card-body border-bottom bg-light">
                 <div class="d-flex flex-wrap align-items-end gap-3">
                     <div>
@@ -182,8 +256,13 @@
                                 <label class="form-label small mb-1">
                                     {{ __('interview.match_run.slot_n', ['n' => $i + 1]) }}
                                 </label>
+                                {{-- `.live`: the Send button is gated on these
+                                     being filled, and a value the server has
+                                     not seen yet would leave it dead under a
+                                     form that looks complete. --}}
                                 <input type="datetime-local" class="form-control form-control-sm"
-                                       wire:model="slotTimes.{{ $i }}">
+                                       min="{{ now(config('services.interview.invitation.timezone', 'Asia/Tokyo'))->format('Y-m-d\TH:i') }}"
+                                       wire:model.live="slotTimes.{{ $i }}">
                             </div>
                         @endforeach
                     </div>
@@ -191,6 +270,7 @@
                     <button class="btn btn-success"
                             wire:click="inviteSelected"
                             wire:loading.attr="disabled"
+                            @disabled(! $botReady || ! $slotsFilled)
                             wire:confirm="{{ __('interview.dashboard.invite_confirm') }}">
                         <i class="fa-solid fa-paper-plane me-1"></i>
                         {{ __('interview.match_run.invite_selected') }}
@@ -202,6 +282,23 @@
                         'zone' => config('services.interview.invitation.timezone', 'Asia/Tokyo'),
                     ]) }}
                 </p>
+
+                {{-- Names the step that is actually missing, and links to where
+                     it gets fixed. Telling someone to pick times when what they
+                     lack is a bot sends them to fill boxes that change nothing. --}}
+                @if(! $botReady)
+                    <p class="small text-warning mb-0 mt-1">
+                        <a href="#interview-bot" class="link-warning">
+                            {{ blank($project->interview_agent_id)
+                                ? __('interview.dashboard.bot_required')
+                                : __('interview.dashboard.bot_unsaved') }}
+                        </a>
+                    </p>
+                @elseif(! $slotsFilled)
+                    <p class="small text-warning mb-0 mt-1">
+                        {{ __('interview.dashboard.slot_times_required') }}
+                    </p>
+                @endif
             </div>
         @endif
 
@@ -243,11 +340,16 @@
 
                         <tr wire:key="match-{{ $match->id }}">
                             <td>
+                                {{-- An already-invited row is not tickable. Send
+                                     passes over it anyway, so offering the tick
+                                     would only inflate the count the recruiter
+                                     reads before pressing it. --}}
                                 <input type="checkbox" class="form-check-input"
                                        value="{{ $match->talent_id }}"
                                        wire:model.live="selected"
-                                       @checked($selectAllMatching)
-                                       @disabled($selectAllMatching)
+                                       @checked($selectAllMatching && ! $invited)
+                                       @disabled($selectAllMatching || $invited)
+                                       title="{{ $invited ? __('interview.match_run.already_invited_hint') : '' }}"
                                        aria-label="{{ $match->talent?->user?->name }}">
                             </td>
 

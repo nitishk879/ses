@@ -92,16 +92,8 @@ return [
         'detail_title' => '面接詳細',
         'back' => '面接一覧へ戻る',
 
-        'actions' => '操作',
-        'run_matching' => 'マッチングを実行',
-        'run_matching_help' => '求人情報と未解析の職務経歴書を解析し、全候補者をこの案件に対してスコアリングします。バックグラウンドで実行されます。',
-        'invite_shortlist' => '候補者を招待',
-        'invite_help' => '基準スコア以上の候補者全員に、3つの面接日時を提示するメールを送信します。',
         'invite_confirm' => '候補者に実際のメールが送信されます。続行しますか？',
         'project' => '案件',
-        'choose_project' => '案件を選択…',
-        'choose_project_first' => '先に案件を選択してください。以下の操作はその案件の候補者に対して実行されます。',
-        'run_matching_first' => '先にマッチングを実行してください。招待する候補者はスコアから選ばれます。',
         'bot_required' => '先に面接ボットを保存してください。質問はボットのプロンプトに記述されているため、ボットがない状態では招待を送信できません。',
         'bot_unsaved' => 'ここに表示されているボットはまだ保存されていません。保存してください。保存しない場合、招待には案件に元々設定されていたボットが使われます。',
         'no_bot_warning' => 'この案件にはボットが設定されていません。面接はボットのプロンプトに書かれた質問で行われるため、ボットを選択するまで招待は送信できません。',
@@ -114,12 +106,8 @@ return [
         'reschedule_help' => '提示済みの日時（候補者が選択済みのものを含む）を取り消し、新しい候補日時をメールで送ります。空欄のままにすると3つ自動で選ばれます。',
         'reschedule_confirm' => '現在の予約を取り消し、候補者に新しい日時をメールします。よろしいですか。',
         'rescheduled' => '再調整しました。新しい日時を候補者にメールしました。',
-        'project_applies_to_all' => '下の3つの操作はすべて、ここで選んだプロジェクトに対して実行されます。',
         'threshold' => '基準スコア',
-        'run' => '実行',
-        'send' => '送信',
 
-        'matching_queued' => 'マッチングを登録しました。:count 件の職務経歴書を解析中です。1分ほどで再読み込みしてください。',
 
         // Choosing which DenAI dashboard bot conducts the calls.
         'interview_bot' => '面接ボット',
@@ -130,12 +118,9 @@ return [
         'bot_assigned' => '面接ボットを保存しました。',
         'bot_cleared' => '面接ボットを解除しました。自動生成のスクリプトのみで発信します。',
         'bot_id_placeholder' => 'ダッシュボードURLのボットID',
+        'bot_invalid' => 'ボットIDの形式ではありません。URL全体ではなく、ボットのIDだけを貼り付けてください。',
         'bot_list_unavailable' => 'DenAI ダッシュボードからボット一覧を取得できませんでした。ボットのURLに含まれるIDを貼り付けてください。',
-        'no_shortlist' => 'この案件で :threshold 以上の候補者はまだいません。',
-        'no_matching_yet' => 'この案件はまだスコアリングされていません。先にマッチングを実行してから招待してください。',
-        'all_already_invited' => ':threshold点以上の候補者が:count名いますが、全員すでに招待済みです。',
         'invited' => ':count 名を招待しました。',
-        'invited_with_failures' => ':count 名を招待しました。一部は送信できませんでした： :failures',
 
         'stat_total' => '合計',
         'stat_awaiting_reply' => '返信待ち',
@@ -256,12 +241,19 @@ return [
         'no_must_haves' => '必須条件の指定なし',
         'unnamed' => '候補者 #:id',
         'already_invited' => '案内済み',
+        'already_invited_hint' => 'この候補者には有効な案内が送信済みのため、送信時はスキップされます。',
+
+        'bot_set' => 'ボット設定済み',
+        'bot_missing' => 'ボット未設定',
 
         'select_page' => 'このページの候補者をすべて選択',
         'select_all' => ':count 名すべてを選択',
         'selected' => ':count 名を選択中',
         'clear_selection' => '選択を解除',
         'nothing_selected' => '候補者が選択されていません。',
+        'all_already_invited' => '選択した :count 名全員に有効な案内が送信済みです。何も送信していません。日時を再提示する場合は面接詳細の「再調整」をご利用ください。',
+        'skipped_already_invited' => ':count 名には有効な案内が送信済みのため、再送していません。',
+        'some_unreachable' => '一部の候補者に連絡できませんでした: :failures',
         'invite_selected' => '選択した候補者に案内',
         'slot_n' => '候補日時 :n',
 

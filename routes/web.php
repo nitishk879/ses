@@ -175,26 +175,18 @@ Route::middleware(['auth', 'role:admin,user'])
         Route::get('/', [InterviewDashboardController::class, 'index'])->name('index');
 
         /*
-         * Bound as `{project:id}`, not `{project}`.
+         * There is no `match`, `invite` or `bot` route here any more.
          *
-         * Project::getRouteKeyName() returns 'slug', so the bare parameter
-         * would look for a project whose *slug* is "8" and 404 on every
-         * submission. The forms on this page post the id — a <select> built
-         * from a list the controller already scoped — so the id is what the
-         * route has to resolve. Stated explicitly here rather than by changing
-         * the model's route key, which the public project URLs depend on.
+         * All three were a second way to do what the per-project matching
+         * screen already does, and the worse way: invite went out on a
+         * threshold with no list of who would receive it, and match dispatched
+         * the JD parse outside the batch, so scoring raced the CV parses and
+         * was skipped altogether when the JD had not changed. Those operations
+         * live on `projects/{project}/matches` — one screen, one path, one set
+         * of guards. Deleted rather than hidden: an endpoint that still sends
+         * real email is not made safe by removing the button that posts to it.
          */
-        Route::post('match/{project:id}', [InterviewDashboardController::class, 'runMatching'])
-            ->whereNumber('project')
-            ->name('match');
-        Route::post('invite/{project:id}', [InterviewDashboardController::class, 'invite'])
-            ->whereNumber('project')
-            ->name('invite');
 
-        // Which DenAI dashboard bot conducts this project's calls.
-        Route::post('bot/{project:id}', [InterviewDashboardController::class, 'assignBot'])
-            ->whereNumber('project')
-            ->name('bot');
         // Withdraw the times already offered and email new ones.
         Route::post('{interview}/reschedule', [InterviewDashboardController::class, 'reschedule'])
             ->whereNumber('interview')

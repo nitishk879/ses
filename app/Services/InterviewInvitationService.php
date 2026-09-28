@@ -119,6 +119,40 @@ class InterviewInvitationService
     }
 
     /**
+     * Of these candidates, the ones a fresh invitation would not actually email.
+     *
+     * {@see invite()} is idempotent by design: a live invitation, or an
+     * interview already past the invitation stage, comes back untouched and no
+     * mail is sent. That is the right behaviour and it is what stops a queue
+     * retry doubling somebody's inbox — but it is *silent*. A caller looping
+     * over ids and counting returns reports every one of those skips as a
+     * person emailed, so "Invited 5" can mean two emails went out.
+     *
+     * The rule is stated here, beside the one it mirrors, rather than
+     * re-derived by each caller and left to drift from it.
+     *
+     * @param  array<int, int>  $talentIds
+     * @return array<int, int>
+     */
+    public function skippableTalentIds(Project $project, array $talentIds): array
+    {
+        if ($talentIds === []) {
+            return [];
+        }
+
+        return Interview::query()
+            ->where('project_id', $project->id)
+            ->whereIn('talent_id', $talentIds)
+            ->get(['id', 'talent_id', 'invitation_token', 'status'])
+            ->filter(fn (Interview $interview) => filled($interview->invitation_token)
+                || ! in_array($interview->status, self::REINVITABLE, true))
+            ->pluck('talent_id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
+
+    /**
      * States a reschedule must refuse.
      *
      * The interview is happening, or has happened. Rescheduling one of these

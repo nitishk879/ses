@@ -11,11 +11,13 @@ use App\Models\AiMatchRun;
 use App\Models\Project;
 use App\Models\ProjectRequirement;
 use App\Models\Talent;
+use App\Services\InterviewAiService;
 use App\Services\InterviewInvitationService;
 use Illuminate\Bus\Batch;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
@@ -55,7 +57,21 @@ class MatchResults extends Component
     /** The three times offered to everyone in this batch. */
     public array $slotTimes = ['', '', ''];
 
+    /** The DenAI bot picked in the box, which is not yet the one that is saved. */
+    public string $interviewAgentId = '';
+
     public int $perPage = 20;
+
+    /**
+     * The DenAI bot directory, shared by every project — it is one account's
+     * list of bots, not one project's, so the key carries no project id.
+     */
+    private const BOT_DIRECTORY_CACHE_KEY = 'interview.bot_directory';
+
+    private const BOT_DIRECTORY_TTL = 300;
+
+    /** Short, so a recovered service is picked up in seconds. */
+    private const BOT_DIRECTORY_FAILURE_TTL = 20;
 
     public function mount(Project $project): void
     {
@@ -63,6 +79,7 @@ class MatchResults extends Component
         $this->project = $project;
 
         $this->threshold = (int) config('services.interview.invitation.min_match_score', 70);
+        $this->interviewAgentId = (string) ($project->interview_agent_id ?? '');
     }
 
     // ── guards ───────────────────────────────────────────────────────────── #
@@ -326,6 +343,14 @@ class MatchResults extends Component
     {
         $ids = $this->results()->pluck('talent_id')->map(fn ($id) => (int) $id)->all();
 
+        // Minus the rows whose own checkbox is disabled. Otherwise "select
+        // page" ticks candidates the recruiter cannot tick one at a time, and
+        // they render as checked-but-disabled while Send passes over them.
+        $ids = array_values(array_diff(
+            $ids,
+            app(InterviewInvitationService::class)->skippableTalentIds($this->project, $ids),
+        ));
+
         $this->selected = $checked
             ? array_values(array_unique([...$this->selected, ...$ids]))
             : array_values(array_diff($this->selected, $ids));
@@ -372,6 +397,106 @@ class MatchResults extends Component
         $this->resetPage();
     }
 
+    // ── bot ──────────────────────────────────────────────────────────────── #
+
+    /**
+     * The bots this account has on the DenAI dashboard.
+     *
+     * Empty means the directory was unreachable, which the view says out loud
+     * rather than rendering as "no bots exist" — that would send a recruiter
+     * off to create one that is already there.
+     *
+     * Cached across requests, not merely memoized within one. A plain
+     * #[Computed] lasts a single request, and on a Livewire page every tick of
+     * a checkbox and every keystroke in the search box *is* a request — so the
+     * directory would be fetched over HTTP dozens of times while a recruiter
+     * builds a shortlist, and a slow DenAI would be felt on every click. Bots
+     * are authored by hand and change on the order of weeks.
+     *
+     * Written by hand rather than with `#[Computed(persist: true)]` for one
+     * reason: that caches whatever comes back, and what comes back from an
+     * unreachable service is `[]`. A single timeout would then pin the picker
+     * to its free-text fallback for the full window, long after the service
+     * recovered. A failure is cached too — otherwise an outage restores the
+     * per-keystroke HTTP call — but for seconds rather than minutes.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    #[Computed]
+    public function bots(): array
+    {
+        $cached = Cache::get(self::BOT_DIRECTORY_CACHE_KEY);
+
+        if (is_array($cached)) {
+            return $cached;
+        }
+
+        $bots = app(InterviewAiService::class)->agents();
+
+        Cache::put(
+            self::BOT_DIRECTORY_CACHE_KEY,
+            $bots,
+            $bots === [] ? self::BOT_DIRECTORY_FAILURE_TTL : self::BOT_DIRECTORY_TTL,
+        );
+
+        return $bots;
+    }
+
+    /** A box showing something other than what the project has saved. */
+    #[Computed]
+    public function botUnsaved(): bool
+    {
+        return trim($this->interviewAgentId) !== (string) ($this->project->interview_agent_id ?? '');
+    }
+
+    /**
+     * Record which DenAI bot conducts this project's calls.
+     *
+     * On this screen rather than on the interviews dashboard because it is a
+     * precondition of the button beside it: {@see inviteSelected()} refuses
+     * without a bot, and the recruiter who hits that refusal is standing here.
+     * Asking them to leave, find a second panel, choose the same project again
+     * and come back is three chances to invite from the wrong one.
+     *
+     * The bot itself — its wording, its voice, its name — is authored on the
+     * DenAI dashboard and stays there. This only records *which* one, because a
+     * second place to write prompts would drift from the first within a week
+     * and nobody would know which one the candidate heard.
+     */
+    public function saveBot(): void
+    {
+        $this->assertVisible();
+
+        $agentId = trim($this->interviewAgentId);
+
+        // Loose on purpose: a dashboard ObjectId today, whatever the dashboard
+        // stores tomorrow. Tight enough to reject a pasted URL.
+        if ($agentId !== '' && ! preg_match('/^[A-Za-z0-9_-]{1,64}$/', $agentId)) {
+            $this->dispatch('notify', type: 'danger', message: __('interview.dashboard.bot_invalid'));
+
+            return;
+        }
+
+        // Accepted even when the directory could not be reached. A recruiter
+        // who already knows the id should not be blocked by a network path
+        // between two services, and the id is validated against the directory
+        // at dial time anyway.
+        $this->project->update(['interview_agent_id' => $agentId ?: null]);
+        $this->interviewAgentId = $agentId;
+
+        unset($this->botUnsaved);
+
+        Log::info('interview.bot_assigned', [
+            'project_id' => $this->project->id,
+            'agent_id' => $this->project->interview_agent_id,
+            'by' => auth()->id(),
+        ]);
+
+        $this->dispatch('notify', type: 'success', message: $agentId !== ''
+            ? __('interview.dashboard.bot_assigned')
+            : __('interview.dashboard.bot_cleared'));
+    }
+
     // ── invite ───────────────────────────────────────────────────────────── #
 
     /** Invite everyone ticked, offering the three chosen times. */
@@ -380,10 +505,23 @@ class MatchResults extends Component
         $this->assertVisible();
 
         if (blank($this->project->interview_agent_id)) {
-            // The same rule the interview dashboard enforces: the questions
-            // live in the bot's prompt, so an interview without one asks the
-            // wrong things.
+            // A product rule, not a technical one: the AI service would happily
+            // run the interview on questions SES generates, but the questions
+            // that matter are the ones written in the bot's prompt, so an
+            // interview without a bot asks the wrong things.
+            //
+            // Enforced here and not only by disabling the button, because the
+            // button is a hint and this is a rule.
             $this->dispatch('notify', type: 'warning', message: __('interview.dashboard.bot_required'));
+
+            return;
+        }
+
+        if ($this->botUnsaved()) {
+            // The box says one bot and the project has another. Sending now
+            // would call the candidate with whichever one was saved, while the
+            // screen promised the one on display.
+            $this->dispatch('notify', type: 'warning', message: __('interview.dashboard.bot_unsaved'));
 
             return;
         }
@@ -400,6 +538,31 @@ class MatchResults extends Component
 
         if ($ids === []) {
             $this->dispatch('notify', type: 'warning', message: __('interview.match_run.nothing_selected'));
+
+            return;
+        }
+
+        /*
+         * Who, of the ticked candidates, would receive no email anyway.
+         *
+         * invite() is idempotent: a live invitation comes back untouched,
+         * without throwing and without sending. Counting its return as a send —
+         * which this loop used to do — reported "Invited 5" when two emails
+         * went out, and a recruiter reading that stops chasing the other three.
+         *
+         * Taken out of the batch before the loop rather than detected inside
+         * it, so the count and the message describe the same thing.
+         */
+        $skipped = $invitations->skippableTalentIds($this->project, $ids);
+        $ids = array_values(array_diff($ids, $skipped));
+
+        if ($ids === []) {
+            $this->clearSelection();
+
+            $this->dispatch('notify', type: 'info', message: __(
+                'interview.match_run.all_already_invited',
+                ['count' => count($skipped)],
+            ));
 
             return;
         }
@@ -448,15 +611,25 @@ class MatchResults extends Component
 
         $this->clearSelection();
 
+        // Built from parts rather than picked from two fixed sentences: a batch
+        // can both skip somebody and fail to reach somebody else, and a message
+        // that can only say one of those hides the other.
+        $parts = [__('interview.dashboard.invited', ['count' => $sent])];
+
+        if ($skipped !== []) {
+            $parts[] = __('interview.match_run.skipped_already_invited', ['count' => count($skipped)]);
+        }
+
+        if ($failures !== []) {
+            $parts[] = __('interview.match_run.some_unreachable', [
+                'failures' => implode('; ', array_slice($failures, 0, 3)),
+            ]);
+        }
+
         $this->dispatch(
             'notify',
             type: $failures === [] ? 'success' : 'warning',
-            message: $failures === []
-                ? __('interview.dashboard.invited', ['count' => $sent])
-                : __('interview.dashboard.invited_with_failures', [
-                    'count' => $sent,
-                    'failures' => implode('; ', array_slice($failures, 0, 3)),
-                ]),
+            message: implode(' ', $parts),
         );
     }
 
@@ -469,14 +642,26 @@ class MatchResults extends Component
 
     public function render(): View
     {
+        $results = $this->results();
+
         return view('livewire.projects.match-results', [
-            'results' => $this->results(),
-            // Talents already invited, so a row can say so instead of offering
-            // to invite somebody twice.
-            'invitedIds' => $this->project->interviews()
-                ->pluck('talent_id')
-                ->map(fn ($id) => (int) $id)
-                ->all(),
+            'results' => $results,
+            /*
+             * Rows that Send would pass over, badged so the recruiter sees it
+             * before they tick rather than in the message afterwards.
+             *
+             * Read through the same rule inviteSelected() skips on, not "has an
+             * interview row at all". The two disagree on a candidate whose
+             * invitation expired or was cancelled — that one carries a row but
+             * *will* be emailed again, and badging it "invited" would be the
+             * screen contradicting the button.
+             *
+             * Scoped to the page, so this is one query over at most 20 ids.
+             */
+            'invitedIds' => app(InterviewInvitationService::class)->skippableTalentIds(
+                $this->project,
+                $results->pluck('talent_id')->map(fn ($id) => (int) $id)->all(),
+            ),
         ]);
     }
 }

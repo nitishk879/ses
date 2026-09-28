@@ -3,13 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InterviewStatus;
-use App\Jobs\ParseProjectJd;
-use App\Jobs\ParseTalentResume;
-use App\Models\AiMatch;
 use App\Models\Interview;
 use App\Models\Project;
-use App\Models\Talent;
-use App\Services\InterviewAiService;
 use App\Services\InterviewInvitationService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
@@ -30,6 +25,20 @@ use Throwable;
  * Deliberately separate from {@see InterviewController}: that one serves JSON
  * to whatever consumes the API, and mixing HTML rendering into it would make
  * two contracts out of one class. Nothing here changes those endpoints.
+ *
+ * **This screen reads; it does not select candidates.** Matching, choosing the
+ * bot and sending invitations all live on the per-project matching screen
+ * ({@see \App\Livewire\Projects\MatchResults}). They used to be duplicated into
+ * an "Actions" panel here, which was a second path to the same two writes and
+ * the weaker one of the two: it invited by threshold alone, so nobody could see
+ * who was about to be emailed; it silently capped the batch at 25 while
+ * reporting the capped number as the whole shortlist; and its matching button
+ * dispatched the JD parse outside a batch, which both raced the CV parses and
+ * dropped the scoring step entirely whenever the JD was unchanged. One screen
+ * owns those operations now.
+ *
+ * What remains here is reschedule, which belongs to one already-booked
+ * candidate rather than to a shortlist.
  *
  * **Scoping is the load-bearing part.** An interview record carries a
  * candidate's transcript and an assessment of them. One employer seeing
@@ -84,17 +93,6 @@ class InterviewDashboardController extends Controller
             'statuses' => InterviewStatus::cases(),
             'filters' => $filters,
             'summary' => $this->summary(),
-            // How many candidates each project has scores for, so the panel can
-            // keep "Invite shortlist" shut until matching has actually produced
-            // something to invite from. One grouped query, not one per project.
-            'scoredCounts' => AiMatch::query()
-                ->selectRaw('project_id, COUNT(*) as total')
-                ->groupBy('project_id')
-                ->pluck('total', 'project_id'),
-            // Live from the DenAI dashboard. Empty means the directory was
-            // unreachable, which the view says rather than passing off as
-            // "no bots exist".
-            'bots' => app(InterviewAiService::class)->agents(),
         ]);
     }
 
@@ -121,238 +119,6 @@ class InterviewDashboardController extends Controller
             ) ?? $interview->attempts->first(),
             'timezone' => $interview->timezone
                 ?: (string) config('services.interview.invitation.timezone', 'Asia/Tokyo'),
-        ]);
-    }
-
-    /**
-     * Queue a re-parse and re-score of one project's candidate pool.
-     *
-     * Replaces `php artisan ses:ai-match`. Queued rather than run inline: this
-     * is one language-model call per unparsed CV, and a recruiter should not
-     * be staring at a spinner for two minutes to find out whether it worked.
-     */
-    public function runMatching(Project $project): RedirectResponse
-    {
-        $this->authorizeProject($project);
-
-        // One hash-guarded job per candidate.
-        //
-        // Deliberately not filtered. The two obvious filters are both wrong:
-        //
-        // * filtering on `resume` skipped every candidate without a CV file,
-        //   which is most of them — and they are parseable from the profile
-        //   they filled in ({@see AiParsingService::resumeSource()}). This is
-        //   why the score column was mostly empty;
-        // * filtering on "has no parse row yet" skips a candidate whose stored
-        //   parse came from a CV that has since been deleted or replaced. Their
-        //   score then stays frozen at an answer derived from a document that
-        //   no longer exists, and no amount of pressing this button fixes it.
-        //
-        // Dispatching for everyone is safe because {@see ParseTalentResume}
-        // compares a content hash before calling the model: an unchanged
-        // candidate costs one cheap hash and returns. The expensive thing is
-        // the language model, and that is guarded where it belongs rather than
-        // by a query here that cannot see whether the source changed.
-        $queued = 0;
-
-        Talent::query()->select('id')->chunkById(500, function ($talents) use (&$queued) {
-            foreach ($talents as $talent) {
-                ParseTalentResume::dispatch($talent->id);
-                $queued++;
-            }
-        });
-
-        // Parsing the JD chains into scoring on completion, so this is the
-        // only other job needed.
-        ParseProjectJd::dispatch($project->id);
-
-        Log::info('interview.matching_queued', [
-            'project_id' => $project->id,
-            'resumes_queued' => $queued,
-            'by' => auth()->id(),
-        ]);
-
-        return back()->with([
-            'message' => __('interview.dashboard.matching_queued', ['count' => $queued]),
-            'type' => 'info',
-        ]);
-    }
-
-    /**
-     * Choose which bot conducts this project's screening calls.
-     *
-     * The bot itself — its wording, its voice, its name — is authored on the
-     * DenAI dashboard, and stays there. This screen only records *which* one,
-     * because a second place to write prompts would drift from the first
-     * within a week and nobody would know which one the candidate heard.
-     *
-     * The id is accepted even when the bot directory could not be reached. A
-     * recruiter who already knows which bot they want should not be blocked by
-     * a network path between two services that has nothing to do with them,
-     * and the id is validated against the directory at dial time anyway.
-     */
-    public function assignBot(Request $request, Project $project): RedirectResponse
-    {
-        $this->authorizeProject($project);
-
-        $validated = $request->validate([
-            // Loose on purpose: a dashboard ObjectId today, whatever the
-            // dashboard stores tomorrow. Tight enough to reject a pasted URL.
-            'interview_agent_id' => ['nullable', 'string', 'max:64', 'regex:/^[A-Za-z0-9_-]*$/'],
-        ]);
-
-        $project->update([
-            'interview_agent_id' => $validated['interview_agent_id'] ?: null,
-        ]);
-
-        Log::info('interview.bot_assigned', [
-            'project_id' => $project->id,
-            'agent_id' => $project->interview_agent_id,
-            'by' => auth()->id(),
-        ]);
-
-        return back()->with([
-            'message' => $project->interview_agent_id
-                ? __('interview.dashboard.bot_assigned')
-                : __('interview.dashboard.bot_cleared'),
-            'type' => 'success',
-        ]);
-    }
-
-    /**
-     * Invite everyone on this project's shortlist.
-     *
-     * Replaces `php artisan interviews:invite`. Runs inline rather than
-     * queued, because a recruiter pressing "Invite" is entitled to be told
-     * immediately how many people it reached — and the slow part (the email)
-     * is queued inside the notification anyway.
-     */
-    public function invite(Request $request, Project $project, InterviewInvitationService $invitations): RedirectResponse
-    {
-        $this->authorizeProject($project);
-
-        /*
-         * No bot, no invitations.
-         *
-         * The AI service will happily run an interview without one — it falls
-         * back to questions SES generates — but this product does not want that
-         * path: the questions live in the bot's prompt on the DenAI dashboard,
-         * and an interview conducted on generated questions instead is a call
-         * that asked the wrong things.
-         *
-         * Enforced here and not only by disabling the button, because the
-         * button is a hint and this is a rule: a page left open from before the
-         * bot was cleared would otherwise still post.
-         */
-        if (blank($project->interview_agent_id)) {
-            return back()->with([
-                'message' => __('interview.dashboard.bot_required'),
-                'type' => 'warning',
-            ]);
-        }
-
-        $validated = $request->validate([
-            'threshold' => ['nullable', 'integer', 'min:0', 'max:100'],
-            'limit' => ['nullable', 'integer', 'min:1', 'max:50'],
-            /*
-             * All three times, every time.
-             *
-             * These used to be optional: left empty, the generator picked three
-             * itself. The generator still does that for `reschedule()`, but an
-             * invitation sent from this panel must offer times a recruiter
-             * actually chose — nobody should learn which slots went out by
-             * reading the email a candidate received.
-             *
-             * `required` on the members rather than `size:3` alone: the form
-             * always posts three inputs, and an empty one arrives as null
-             * (ConvertEmptyStringsToNull), which `size:3` would happily accept.
-             *
-             * Still validated as strings only — "not in the past" is enforced
-             * in the generator against the interview timezone, so one clock
-             * decides it rather than two that can disagree.
-             */
-            'slot_times' => ['required', 'array', 'size:3'],
-            'slot_times.*' => ['required', 'string', 'max:32'],
-        ]);
-
-        $slotTimes = array_values(array_filter(
-            $validated['slot_times'] ?? [],
-            static fn ($t) => filled($t)
-        ));
-
-        $threshold = $validated['threshold']
-            ?? (int) config('services.interview.invitation.min_match_score', 70);
-
-        $shortlist = $invitations->shortlistFor($project, $threshold)
-            ->take($validated['limit'] ?? 25);
-
-        if ($shortlist->isEmpty()) {
-            // Which of the three empty-shortlist reasons applies. Saying
-            // "nobody is at or above N" when in fact everyone qualifying was
-            // invited last week sends a recruiter round a loop of lowering the
-            // threshold, which cannot possibly help.
-            $breakdown = $invitations->shortlistBreakdown($project, $threshold);
-
-            $message = match (true) {
-                $breakdown['scored'] === 0 => __('interview.dashboard.no_matching_yet'),
-                $breakdown['qualifying'] > 0 => __('interview.dashboard.all_already_invited', [
-                    'count' => $breakdown['qualifying'],
-                    'threshold' => $threshold,
-                ]),
-                default => __('interview.dashboard.no_shortlist', ['threshold' => $threshold]),
-            };
-
-            return back()->with(['message' => $message, 'type' => 'warning']);
-        }
-
-        $sent = 0;
-        $failures = [];
-
-        foreach ($shortlist as $match) {
-            $talent = Talent::with('user')->find($match->talent_id);
-
-            if (! $talent) {
-                continue;
-            }
-
-            try {
-                $invitations->invite(
-                    $project,
-                    $talent,
-                    (int) $match->score,
-                    $slotTimes ?: null,
-                );
-                $sent++;
-            } catch (\InvalidArgumentException $e) {
-                // A bad time is wrong for every candidate in the batch, not
-                // just this one, so it stops here rather than repeating the
-                // same complaint once per person.
-                return back()->withInput()->with([
-                    'message' => $e->getMessage(),
-                    'type' => 'danger',
-                ]);
-            } catch (RuntimeException $e) {
-                // One unreachable candidate must not abandon the shortlist;
-                // the recruiter is told which ones need attention.
-                $failures[] = ($talent->user?->name ?: "talent #{$talent->id}").' — '.$e->getMessage();
-            } catch (Throwable $e) {
-                $failures[] = ($talent->user?->name ?: "talent #{$talent->id}").' — '.$e->getMessage();
-                Log::error('interview.invite_failed', [
-                    'project_id' => $project->id,
-                    'talent_id' => $talent->id,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        }
-
-        return back()->with([
-            'message' => $failures === []
-                ? __('interview.dashboard.invited', ['count' => $sent])
-                : __('interview.dashboard.invited_with_failures', [
-                    'count' => $sent,
-                    'failures' => implode('; ', array_slice($failures, 0, 3)),
-                ]),
-            'type' => $failures === [] ? 'success' : 'warning',
         ]);
     }
 
@@ -448,17 +214,6 @@ class InterviewDashboardController extends Controller
         );
     }
 
-    private function authorizeProject(Project $project): void
-    {
-        $user = auth()->user();
-
-        if ($user?->hasRole('admin')) {
-            return;
-        }
-
-        abort_unless($project->company_id === $user?->company?->id, 403);
-    }
-
     /**
      * @return \Illuminate\Support\Collection<int, Project>
      */
@@ -478,12 +233,11 @@ class InterviewDashboardController extends Controller
             $query->where('company_id', $companyId);
         }
 
-        // `interview_agent_id` is part of this list's job: the actions panel
-        // reads it to show which bot a project already has. Without it the
-        // picker rendered blank for a project that did have one, and saving any
-        // other change wrote that blank back over it — the exact thing the
-        // panel's "show the current bot" comment was there to prevent.
-        return $query->get(['id', 'title', 'company_id', 'interview_agent_id']);
+        // Only what the filter dropdown draws. This list used to carry
+        // `interview_agent_id` for the actions panel's bot picker; that picker
+        // now lives on the matching screen, which reads it from the one project
+        // it is already scoped to.
+        return $query->get(['id', 'title']);
     }
 
     /**
