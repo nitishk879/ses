@@ -1,35 +1,4 @@
 <div>
-    @once
-        <style>
-            .project-actions {
-                position: absolute;
-                top: 0.5rem;
-                right: 0.75rem;
-                z-index: 2;
-            }
-
-            .project-actions-toggle {
-                border: 1px solid transparent;
-                border-radius: 50%;
-                width: 2rem;
-                height: 2rem;
-                padding: 0;
-                line-height: 1;
-                color: #767F8C;
-                background: transparent;
-            }
-
-            .project-actions-toggle:hover,
-            .project-actions-toggle:focus-visible,
-            .project-actions.show .project-actions-toggle {
-                color: #1F2430;
-                background: #F1F2F4;
-                border-color: #D6D8DC;
-            }
-
-            .project-actions-toggle::after { display: none; }
-        </style>
-    @endonce
     
     <div class="row justify-content-center">
         <div class="col-md-12">
@@ -115,37 +84,7 @@
                 <div class="col-md-6 text-end">
                     <h4 class="job-budget"><i class="fa-solid fa-yen-sign"></i> {{ $project->salary_range }}</h4>
                 </div>
-             {{--
-    Project actions (kebab / 3-dot menu)
-
-    Shows a dropdown on the project card header with actions for the project.
-    Currently: Edit -> route 'project.edit'.
-
-    Visibility: only rendered if the user passes the 'update' policy on $project.
-    Requires: Bootstrap 5 JS (dropdown) and Font Awesome 6 (ellipsis icon).
-    Styling: .project-actions / .project-actions-toggle in the app stylesheet.
---}}
-@can('update', $project)
-    <div class="dropdown project-actions">
-        <button type="button"
-                class="btn btn-sm project-actions-toggle"
-                id="projectActions{{ $project->id }}"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                aria-label="{{ __('projects/index.actions') }}"
-                title="{{ __('projects/index.actions') }}">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end"
-            aria-labelledby="projectActions{{ $project->id }}">
-            <li>
-                <a class="dropdown-item" href="{{ route('project.edit', $project) }}">
-                    {{ __('projects/index.edit_project') }}
-                </a>
-            </li>
-        </ul>
-    </div>
-@endcan
+            <x-project-actions :project="$project" />
             </x-slot:header>
             <!--- Card Body content ---->
             <div class="col-md-8 mb-4 ps-md-3">

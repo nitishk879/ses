@@ -61,9 +61,13 @@
             background: transparent;
         }
 
+        /* `.talent-actions-toggle.show`, not `.talent-actions.show ...`:
+           Bootstrap 5 puts `.show` on the toggle and the menu, never on the
+           `.dropdown` wrapper, so the wrapper selector never matched and an
+           open menu carried no open state. */
         .talent-actions-toggle:hover,
         .talent-actions-toggle:focus-visible,
-        .talent-actions.show .talent-actions-toggle {
+        .talent-actions-toggle.show {
             color: #1F2430;
             background: #F1F2F4;
             border-color: #D6D8DC;

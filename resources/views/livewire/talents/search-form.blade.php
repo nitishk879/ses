@@ -24,12 +24,12 @@
                                     <div class="accordion-item border-0">
                                         <h4 class="accordion-header">
                                             <button class="accordion-button px-0 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#panelsStayOpen-collapse{{$category->id}}" aria-expanded="true" aria-controls="panelsStayOpen-collapse{{$category->id}}">
-                                                {{ $category->display_title }} ({{ $category->subCategories->count() }})
+                                                {{ $category->display_title }} ({{ $category->subcategories->count() }})
                                             </button>
                                         </h4>
                                         <div id="panelsStayOpen-collapse{{$category->id}}" class="accordion-collapse collapse show">
                                             <div class="accordion-body px-0 py-0">
-                                                @foreach($category->subCategories as $subcategory)
+                                                @foreach($category->subcategories as $subcategory)
                                                     <div class="form-check">
                                                         <input class="form-check-input" wire:model.live="subcategories" @checked(in_array($subcategory->id, $this->subcategories)) type="checkbox" value="{{ $subcategory->id }}" id="{{ $subcategory->id }}">
                                                         <label class="form-check-label" for="{{ $subcategory->id }}">

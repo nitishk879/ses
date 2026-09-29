@@ -12,7 +12,16 @@
                 @php($company = Auth::user()->company)
                 @if($company && $company->projects->count() >=1)
                     @foreach($company->projects as $project)
+                        {{-- `.job-list` already sets `position: relative`, so the
+                             absolutely-positioned kebab anchors to this card. --}}
                         <div class="job-list mt-4">
+                            {{-- These are the viewer's own projects, which is the
+                                 one place an owner can act on them. The menu used
+                                 to live only in the search-result component, and
+                                 that component is rendered only in the @else below
+                                 — reached when the company has no projects at all.
+                                 So the owner never met it. --}}
+                            <x-project-actions :project="$project" />
                             <a href="" class="add-to-favourite">
                                 <i class="fa-solid fa-star"></i>
                             </a>

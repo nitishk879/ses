@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AffiliationEnum;
 use App\Enums\CommercialFlow;
 use App\Enums\ContractClassificationEnum;
 use App\Enums\InterviewEnum;
 use App\Enums\TalentStatusEnum;
 use App\Enums\TradeClassification;
+use App\Enums\WorkLocationEnum;
 use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
@@ -46,8 +48,42 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
 
-        $validated = $request->validate([
-            "title" => 'required|unique:projects',
+        $validated = $request->validate($this->rules());
+
+        $project = Project::create($this->attributesFrom($validated) + [
+            "slug" => self::slugFor($validated['title']),
+            "company_id" => auth()->user()->company->id ?? 0,
+            "user_id" => auth()->user()->id ?? 0,
+        ]);
+
+        // The row exists now, so a title that romanised to nothing can take the
+        // id as its URL key.
+        self::backfillSlug($project);
+
+        $project->subCategories()->attach($request->input('category_id'));
+        $project->features()->attach($request->input("project_features") ?? []);
+        $project->locations()->attach($request->input("locations") ?? []);
+
+        return redirect()->route('project.index')->with('success', 'Project created successfully.');
+    }
+
+    /**
+     * The rules the project form is validated against, for create and update.
+     *
+     * Shared because the two screens post the same fields — they render from one
+     * partial — and a second copy of forty rules is a second thing to forget
+     * when a field changes.
+     *
+     * @return array<string, mixed>
+     */
+    private function rules(?Project $project = null): array
+    {
+        return [
+            /*
+             * `unique:projects` has to ignore the row being edited, or saving a
+             * project without renaming it fails on its own title.
+             */
+            "title" => ['required', Rule::unique('projects')->ignore($project)],
             "minimum_price" => 'required|int',
             "maximum_price" => 'required|int',
             "skill_matching" => 'nullable',
@@ -85,68 +121,86 @@ class ProjectController extends Controller
             "is_public" => 'nullable',
             "company_info_disclose" => 'nullable',
             "locations" => 'required'
-        ]);
+        ];
+    }
 
-        $project = Project::create([
-            "title" => $validated["title"] ?? '',
-            "slug" => self::slugFor($validated['title']),
-            "minimum_price" => $validated["minimum_price"] ?? '',
-            "maximum_price" => $validated["maximum_price"] ?? '',
-            "skill_matching" => $validated["skill_matching"] ?? false,
-            "accept" => $validated["accept"] ?? false,
-            "remote_operation_possible" => $validated["remote_operation_possible"] ?? false,
-            "contract_start_date" => $validated["contract_start_date"] ?? '',
-            "contract_end_date" => $validated["contract_end_date"] ?? '',
-            "possible_to_continue" => $validated["possible_to_continue"] ?? false,
-            "project_description" => $validated["project_description"] ?? '',
-            "personnel_requirement" => $validated["personnel_requirement"] ?? '',
+    /**
+     * Validated input, as the columns want it.
+     *
+     * Shared by store() and update() so the two cannot disagree about what a
+     * field means — the casts on this model are unforgiving, and every rule
+     * about blanks and enums is written once here.
+     *
+     * @param  array<string, mixed>  $validated
+     * @return array<string, mixed>
+     */
+    private function attributesFrom(array $validated, ?Project $project = null): array
+    {
+        return [
+            "title" => $validated["title"],
+            "minimum_price" => $validated["minimum_price"],
+            "maximum_price" => $validated["maximum_price"],
+            "contract_start_date" => $validated["contract_start_date"],
+            "contract_end_date" => $validated["contract_end_date"],
+            "project_description" => $validated["project_description"],
+            "personnel_requirement" => $validated["personnel_requirement"],
             "person_in_charge" => $validated["person_in_charge"] ?? auth()->user()->name,
-            "is_public" => $validated["is_public"] ?? false,
-            "company_info_disclose" => $validated["company_info_disclose"] ?? false,
+            /*
+             * The switches post `0` from a hidden field and `1` when ticked,
+             * so an absent key now means the form was not this form at all —
+             * not "unticked". They used to render `value=""`, which stored
+             * false for every switch a recruiter turned on.
+             */
+            "skill_matching" => (bool) ($validated["skill_matching"] ?? false),
+            "accept" => (bool) ($validated["accept"] ?? false),
+            "remote_operation_possible" => (bool) ($validated["remote_operation_possible"] ?? false),
+            "possible_to_continue" => (bool) ($validated["possible_to_continue"] ?? false),
+            "project_finalized" => (bool) ($validated["project_finalized"] ?? false),
+            "is_public" => (bool) ($validated["is_public"] ?? false),
+            "company_info_disclose" => (bool) ($validated["company_info_disclose"] ?? false),
             /*
              * `trade_classification` was validated as required and then never
-             * written. The column is NOT NULL, so every single registration
-             * ended in an integrity-constraint 500 — the form asked for the
-             * answer, refused to continue without it, and threw it away.
+             * written. The column is NOT NULL, so every registration ended in
+             * an integrity-constraint 500 — the form asked for the answer,
+             * refused to continue without it, and threw it away.
              */
             "trade_classification" => $validated["trade_classification"],
             "contract_classification" => $validated["contract_classification"],
+            "commercial_flow" => $validated["commercial_flow"],
             /*
              * Unanswered optional fields are stored as null, not ''.
              *
-             * Every column below is either cast to an enum, a date or an array,
-             * and none of those casts accepts an empty string: '' reaches
-             * `InterviewEnum::from('')` and throws, and the array casts store a
-             * JSON `""` that later reads back as a string where the code
-             * expects a list. `?? ''` looked like a harmless default and was
-             * the reason a project could not be registered at all whenever the
-             * recruiter left the interview-count radios untouched — which is
-             * the normal case, since none of them is checked by default.
+             * Every column below is cast to an enum, a date or an array, and
+             * none of those casts accepts an empty string: '' reaches
+             * `InterviewEnum::from('')` and throws. `?? ''` looked like a
+             * harmless default and was why a project could not be registered
+             * at all whenever the interview-count radios were left alone.
              */
             "deadline" => self::blankToNull($validated["deadline"] ?? null),
-            "languages" => $validated["languages"] == 3 ? [1,2] : [$validated["languages"]] ?? '',
-            'work_location_prefer' => self::blankToNull($validated["workLocations"] ?? null),
-            "affiliation" => self::blankToNull($validated["eligibility"] ?? null),
+            "languages" => $validated["languages"] == 3 ? [1, 2] : [$validated["languages"]],
+            /*
+             * These two lists keep any value the form had no control for.
+             *
+             * AffiliationEnum has cases 1-4; 5 and 6 are commented out, and the
+             * column holds them anyway. The form therefore draws four
+             * checkboxes for a project storing [1, 5, 6] — so an edit that only
+             * changed the price would post [1] and silently delete the other
+             * two. An unticked box is a decision; a box that was never on the
+             * page is not.
+             */
+            'work_location_prefer' => self::keepUnrepresentable(
+                $validated["workLocations"] ?? null,
+                $project?->work_location_prefer,
+                array_column(WorkLocationEnum::cases(), 'value'),
+            ),
+            "affiliation" => self::keepUnrepresentable(
+                $validated["eligibility"] ?? null,
+                $project?->affiliation,
+                array_column(AffiliationEnum::cases(), 'value'),
+            ),
             "number_of_application" => self::blankToNull($validated["number_of_application"] ?? null),
             "number_of_interviewers" => self::blankToNull($validated["number_of_interviewers"] ?? null),
-            // Required and enum-validated above, so it is always a real case.
-            "commercial_flow" => $validated["commercial_flow"],
-            "company_id" => auth()->user()->company->id ?? 0,
-            "user_id" => auth()->user()->id ?? 0,
-        ]);
-
-        // The row exists now, so a title that romanised to nothing can take the
-        // id as its URL key.
-        self::backfillSlug($project);
-
-        $project->subCategories()->attach($request->input('category_id'));
-
-        $project->features()->attach($request->input("project_features") ?? []);
-
-        $project->locations()->attach($request->input("locations") ?? []);
-
-        return redirect()->route('project.index')->with('success', 'Project created successfully.');
-
+        ];
     }
 
     /**
@@ -158,6 +212,30 @@ class ProjectController extends Controller
      * each call site so the next optional field added to this form inherits the
      * rule instead of rediscovering it through a 500.
      */
+    /**
+     * A list column's new value, keeping whatever the form could not offer.
+     *
+     * The form renders one control per enum case, so a stored value whose case
+     * has been removed has no checkbox — the recruiter could not have unticked
+     * it, and reading its absence as "delete this" turns every unrelated edit
+     * into silent data loss. Submitted values win; invisible ones are carried
+     * through.
+     *
+     * @param  array<int, mixed>|null  $submitted  what the form posted
+     * @param  array<int, mixed>|null  $stored     what the row already held
+     * @param  array<int, int>         $offered    the values the form can show
+     * @return array<int, int>|null
+     */
+    private static function keepUnrepresentable(?array $submitted, ?array $stored, array $offered): ?array
+    {
+        $submitted = array_map('intval', $submitted ?? []);
+        $invisible = array_diff(array_map('intval', (array) ($stored ?? [])), $offered);
+
+        $merged = array_values(array_unique([...$submitted, ...$invisible]));
+
+        return $merged === [] ? null : $merged;
+    }
+
     private static function blankToNull(mixed $value): mixed
     {
         return filled($value) ? $value : null;
@@ -228,15 +306,57 @@ class ProjectController extends Controller
     public function edit(Project $project)
     {
         $this->authorize('update', $project);
-        return view('projects.edit', compact('project'));
+
+        // The form partial draws these two lists; without them the edit screen
+        // renders the category and feature panels empty.
+        $categories = Category::selectable()->get();
+        $features = Feature::all();
+
+        // Eager-loaded because the partial reads each one to decide what is
+        // ticked, and doing it lazily is three queries per render.
+        $project->load(['locations:id', 'subCategories:id', 'features:id']);
+
+        return view('projects.edit', compact('project', 'categories', 'features'));
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * The method was an empty body, so the Edit action opened a page that could
+     * not save — and the page it opened had no form on it either. Both halves
+     * are here now: the fields come from the same partial the create screen
+     * uses, and the values go back through the same rules and the same mapping.
      */
     public function update(Request $request, Project $project)
     {
-        //
+        $this->authorize('update', $project);
+
+        $validated = $request->validate($this->rules($project));
+
+        /*
+         * The slug is deliberately left alone.
+         *
+         * It is this project's route key, so rewriting it on every rename would
+         * break links already sent out — interview invitations carry project
+         * URLs, and a recruiter's bookmarks would 404 for a wording change.
+         * `company_id` and `user_id` are left alone for the same reason they are
+         * not on the form: editing a project does not hand it to someone else.
+         */
+        $project->update($this->attributesFrom($validated, $project));
+
+        /*
+         * sync(), not attach(): this is an edit, so unticking has to remove the
+         * link. attach() only ever adds, which would leave a category the
+         * recruiter had just cleared still attached — and attaching an id that
+         * is already there would duplicate the pivot row.
+         */
+        $project->subCategories()->sync($request->input('category_id', []));
+        $project->features()->sync($request->input('project_features', []));
+        $project->locations()->sync($request->input('locations', []));
+
+        return redirect()
+            ->route('project.show', $project)
+            ->with('success', __('projects/index.updated'));
     }
 
     /**
@@ -244,6 +364,17 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        /*
+         * The route sits behind `role:user,admin`, which says the caller is an
+         * employer — not that this project is theirs. Without this line
+         * `DELETE /project/{slug}` let any employer delete any company's
+         * project, and ProjectPolicy::delete() was never reached at all.
+         *
+         * Added alongside the guard on edit(): that one protects a page you can
+         * only look at, this one protects the destructive action next to it.
+         */
+        $this->authorize('delete', $project);
+
         $project->delete();
         return redirect()->route('project.index')->with('success', 'Project deleted successfully.');
     }
