@@ -189,7 +189,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'experience_years' => '必要な実務経験（年）',
+        'experience_months' => '必要な実務経験（ヶ月）',
+    ],
 
     'dialable_phone' => '面接のお電話をおかけできる番号をご入力ください（例: 090-1234-5678）。',
 ];

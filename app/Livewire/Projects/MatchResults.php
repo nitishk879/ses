@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Projects;
 
-use App\Enums\RequirementKind;
 use App\Jobs\ParseProjectJd;
 use App\Jobs\ParseTalentResume;
 use App\Jobs\ScoreProjectMatches;
@@ -127,24 +126,15 @@ class MatchResults extends Component
         unset($this->requirements);
     }
 
-    /** Set the year threshold on an experience requirement. */
-    public function setExperienceYears(int $requirementId, int $years): void
-    {
-        $this->assertVisible();
-
-        $requirement = $this->ownedRequirement($requirementId);
-
-        abort_unless($requirement->kind === RequirementKind::EXPERIENCE, 422);
-
-        $years = max(0, min(40, $years));
-        $requirement->min_months = $years * 12;
-        $requirement->label = __('interview.requirement.experience_label', ['years' => $years]);
-        $requirement->save();
-
-        $this->clearSelection();
-
-        unset($this->requirements);
-    }
+    /*
+     * There is no action here for editing a requirement's value.
+     *
+     * The years of experience used to be typed on this screen and stored only
+     * on the requirement row, so the matching screen could show a requirement
+     * the project itself did not have. Values now live on the project form
+     * (`projects.min_experience_months` for experience) and this screen only
+     * decides which of them are must-haves.
+     */
 
     /** A requirement belonging to *this* project. */
     private function ownedRequirement(int $requirementId): ProjectRequirement
@@ -526,13 +516,20 @@ class MatchResults extends Component
             return;
         }
 
+        /*
+         * Empty is the normal case, and it means "open the calendar".
+         *
+         * This used to refuse unless all three boxes were filled, which made
+         * every invitation a decision the recruiter had to make on the
+         * candidate's behalf — three times, in the candidate's timezone, that
+         * a stranger's week has to fit around. Leaving them blank now sends a
+         * fortnight of half-hours the candidate picks from themselves.
+         *
+         * Filling them still wins, because a recruiter sometimes knows what no
+         * calendar does: that the client wants this person seen today, that
+         * Monday is a holiday.
+         */
         $slotTimes = array_values(array_filter($this->slotTimes, 'filled'));
-
-        if (count($slotTimes) !== 3) {
-            $this->dispatch('notify', type: 'warning', message: __('interview.dashboard.slot_times_required'));
-
-            return;
-        }
 
         $ids = $this->selectedIds();
 
@@ -586,7 +583,10 @@ class MatchResults extends Component
                     $this->project,
                     $talent,
                     (int) ($scores[$talentId] ?? 0),
-                    $slotTimes,
+                    // `null`, not `[]`: the service reads "no times given" as
+                    // the calendar, and an empty array must not be mistaken
+                    // for a recruiter who meant to pin times and failed.
+                    $slotTimes ?: null,
                 );
                 $sent++;
             } catch (\InvalidArgumentException $e) {

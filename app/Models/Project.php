@@ -63,6 +63,9 @@ class Project extends Model
         "work_location_prefer",
         "person_in_charge",
         "experience",
+        // Required experience in months, from the form's years + months.
+        // `experience` above is a legacy list with no form control.
+        "min_experience_months",
         "is_public",
         "company_info_disclose",
         "company_id",
@@ -100,7 +103,24 @@ class Project extends Model
              */
             'work_location_prefer' => 'array',
             'project_status' => ProjectStatusEnum::class,
+            'min_experience_months' => 'integer',
         ];
+    }
+
+    /**
+     * The required experience split back into what the form asks for.
+     *
+     * @return array{years: ?int, months: ?int} nulls when none is required
+     */
+    public function experienceParts(): array
+    {
+        $months = (int) ($this->min_experience_months ?? 0);
+
+        if ($months <= 0) {
+            return ['years' => null, 'months' => null];
+        }
+
+        return ['years' => intdiv($months, 12), 'months' => $months % 12];
     }
 
     /**

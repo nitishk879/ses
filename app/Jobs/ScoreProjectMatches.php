@@ -75,8 +75,26 @@ class ScoreProjectMatches implements ShouldBeUniqueUntilProcessing, ShouldQueue
         // The gate, read once for the whole pool.
         $mandatory = $requirements->mandatoryPayload($project);
 
-        // Fold the project form's language choice into the parsed JD.
-        $jdPayload = $this->withFormLanguages($jdParse->payload, $project);
+        // Fold the project form's language choice and required experience
+        // into the parsed JD — the form is authoritative over the prose.
+        $jdPayload = $this->withFormExperience(
+            $this->withFormLanguages($jdParse->payload, $project),
+            $project,
+        );
+
+        /*
+         * Those two come from the form, not the parse, so the parse's source
+         * hash cannot see them change. Fingerprinted separately: a recruiter
+         * raising the required experience from 2 years to 5 must re-score the
+         * pool, or every stored score keeps grading against the old bar.
+         */
+        $formHash = $this->formHash($project, (int) ($project->min_experience_months ?? 0));
+
+        // What a score stored before this fingerprint existed was computed
+        // under: the same languages (already folded in then) and no form
+        // experience, because the field did not exist. Same idea as
+        // $emptyGateHash below — an old score is not stale merely for being old.
+        $legacyFormHash = $this->formHash($project, 0);
 
         $existing = AiMatch::where('project_id', $this->projectId)
             ->get()
@@ -99,14 +117,18 @@ class ScoreProjectMatches implements ShouldBeUniqueUntilProcessing, ShouldQueue
             ]);
         }
 
-        $rescoreAll = $this->force || $gateChanged;
+        $formChanged = $existing->contains(
+            fn (AiMatch $m) => ($m->payload['form_hash'] ?? $legacyFormHash) !== $formHash
+        );
+
+        $rescoreAll = $this->force || $gateChanged || $formChanged;
 
         $scored = $skipped = $failed = 0;
 
         AiResumeParse::query()
             ->orderBy('talent_id')
             ->chunkById(self::CHUNK, function ($parses) use (
-                $parser, $jdParse, $jdPayload, $existing, $mandatory, $gateHash, $rescoreAll,
+                $parser, $jdParse, $jdPayload, $existing, $mandatory, $gateHash, $formHash, $rescoreAll,
                 &$scored, &$skipped, &$failed
             ) {
                 $talents = Talent::with(['locations:id', 'subCategories:id'])
@@ -161,7 +183,7 @@ class ScoreProjectMatches implements ShouldBeUniqueUntilProcessing, ShouldQueue
                             'unverified_mandatory' => (int) ($result['unverified_mandatory'] ?? 0),
                             // The gate this verdict was reached under, so the
                             // next run can tell whether it still applies.
-                            'payload' => $result + ['gate_hash' => $gateHash],
+                            'payload' => $result + ['gate_hash' => $gateHash, 'form_hash' => $formHash],
                             'scorer_version' => $result['scorer_version'] ?? 'unknown',
                             'jd_source_hash' => $jdParse->source_hash,
                             'resume_source_hash' => $resumeParse->source_hash,
@@ -222,6 +244,37 @@ class ScoreProjectMatches implements ShouldBeUniqueUntilProcessing, ShouldQueue
         }
 
         return $payload;
+    }
+
+    /**
+     * The parsed JD, with the project form's required experience in place of
+     * whatever the parser found in the prose.
+     *
+     * The AI service scores experience from `min_experience_months`, which it
+     * only ever filled from text like "3年以上". The form value is what a
+     * person typed, so it wins; with the form empty, the parse is left as is.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
+    private function withFormExperience(array $payload, Project $project): array
+    {
+        $months = (int) ($project->min_experience_months ?? 0);
+
+        if ($months > 0) {
+            $payload['min_experience_months'] = $months;
+        }
+
+        return $payload;
+    }
+
+    /** Fingerprint of the form values folded into the JD for scoring. */
+    private function formHash(Project $project, int $experienceMonths): string
+    {
+        return hash('sha256', json_encode([
+            'languages' => ProjectLanguages::forProject($project),
+            'min_experience_months' => $experienceMonths,
+        ], JSON_UNESCAPED_UNICODE));
     }
 
     /** Compare two language names the way the scorer does. */

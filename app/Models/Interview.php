@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InterviewOfferMode;
 use App\Enums\InterviewStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,9 @@ class Interview extends Model
         'invitation_expires_at',
         'slot_selected_at',
         'match_score',
+        'offer_mode',
+        'offer_window_starts_at',
+        'offer_window_ends_at',
         // `attempt_number` is deliberately absent: it belongs to
         // `interview_attempts` and there is no such column on `interviews`.
         // Listing it here made any create()/update() that happened to carry the
@@ -59,8 +63,23 @@ class Interview extends Model
             'invitation_sent_at' => 'datetime',
             'invitation_expires_at' => 'datetime',
             'slot_selected_at' => 'datetime',
+            'offer_mode' => InterviewOfferMode::class,
+            'offer_window_starts_at' => 'datetime',
+            'offer_window_ends_at' => 'datetime',
             'metadata' => 'array',
         ];
+    }
+
+    /**
+     * Whether this invitation opens a calendar or lists pinned times.
+     *
+     * Read through a method rather than compared inline, because the column is
+     * nullable on every row written before the calendar existed and `null`
+     * there means `fixed` — the behaviour those invitations were sent under.
+     */
+    public function offersCalendar(): bool
+    {
+        return $this->offer_mode === InterviewOfferMode::CALENDAR;
     }
 
     public function slots(): HasMany

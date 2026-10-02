@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Interview;
+use App\Services\InterviewAvailabilityService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -62,6 +63,12 @@ class InterviewInvitation extends Notification implements ShouldQueue
             ((int) config('services.interview.duration_seconds', 300)) / 60
         ));
 
+        // Through the service rather than straight off config, so the hours
+        // the email quotes are the clamped ones the calendar will actually
+        // draw. A misconfigured pair promising "8:00 to 4:00" in writing is
+        // worse than one that merely renders oddly.
+        $hours = app(InterviewAvailabilityService::class)->config();
+
         return (new MailMessage)
             ->subject(__($this->rescheduled ? 'interview.mail.subject_rescheduled' : 'interview.mail.subject', [
                 'project' => $this->interview->project?->title ?? '',
@@ -79,6 +86,15 @@ class InterviewInvitation extends Notification implements ShouldQueue
                 'expiresAt' => $this->interview->invitation_expires_at,
                 'url' => $this->interview->invitationUrl(),
                 'rescheduled' => $this->rescheduled,
+                /*
+                 * A calendar invitation lists no times, because there are 336
+                 * of them. It describes the window instead — which days, which
+                 * hours — so the candidate can still tell from the email alone
+                 * whether this is worth opening, without clicking anything.
+                 */
+                'calendar' => $this->interview->offersCalendar(),
+                'opensAt' => sprintf('%02d:00', $hours['day_start_hour']),
+                'closesAt' => sprintf('%02d:00', $hours['day_end_hour'] % 24),
             ]);
     }
 

@@ -11,27 +11,50 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Normalizer;
 
-/** Keep a project's requirement list in step with its parsed JD — without ever losing what the recruiter decided. */
+/**
+ * The matching screen's requirement list: what this project actually asks for.
+ *
+ * Every row comes from something the project states — a field on the project
+ * form, or a phrase in its description — and nothing else. A row whose source
+ * goes away goes away with it, unless the recruiter had made it a must-have,
+ * in which case it stays visible, greyed and not enforced, so a must-have
+ * never disappears without a word.
+ */
 class ProjectRequirementService
 {
     /**
-     * Rebuild a project's requirement list from its current JD parse.
+     * The marker the JD parser stamps on a skill it copied from the SES form
+     * rather than read out of prose.
      *
-     * @return array{created: int, refreshed: int, stale: int}
+     * Duplicated from `app/parsing/jd_parser.py` in the AI service, which is
+     * where it is written. A shared constant across two languages and two
+     * deployments would be a bigger lie than this comment: what matters is
+     * that both ends agree, and the only thing that keeps them agreeing is
+     * somebody reading this line. Nothing breaks if it drifts — a form-derived
+     * skill is simply labelled as coming from the text — which is precisely
+     * why it needs saying.
+     */
+    private const FORM_EVIDENCE = 'Selected in the SES project form';
+
+    /**
+     * Rebuild a project's requirement list from its form and its parsed text.
+     *
+     * Runs on every project save (form fields only — the stored parse is
+     * reused for the text) and after every JD parse. A project that has never
+     * been parsed still gets its form-derived rows, so must-haves can be set
+     * before the first matching run rather than only after it.
+     *
+     * @return array{created: int, refreshed: int, stale: int, removed: int}
      */
     public function syncFromParse(Project $project, ?AiJdParse $parse = null): array
     {
         $parse ??= AiJdParse::firstWhere('project_id', $project->id);
 
-        if (! $parse) {
-            return ['created' => 0, 'refreshed' => 0, 'stale' => 0];
-        }
+        $extracted = $this->extract($project, $parse?->payload ?? []);
 
-        $extracted = $this->extract($project, $parse->payload ?? []);
+        $created = $refreshed = $removed = 0;
 
-        $created = $refreshed = 0;
-
-        DB::transaction(function () use ($project, $extracted, &$created, &$refreshed) {
+        DB::transaction(function () use ($project, $extracted, &$created, &$refreshed, &$removed) {
             $existing = ProjectRequirement::where('project_id', $project->id)
                 ->get()
                 ->keyBy('requirement_key');
@@ -54,28 +77,44 @@ class ProjectRequirementService
                     continue;
                 }
 
-                // The AI-owned columns, and only those.
+                // Everything but the recruiter's must-have switch.
                 $row->fill([
                     'kind' => $candidate['kind'],
                     'label' => $candidate['label'],
                     'min_months' => $candidate['min_months'],
                     'level' => $candidate['level'],
                     'evidence' => $candidate['evidence'],
+                    'origin' => $candidate['origin'],
                     'position' => $candidate['position'],
                     'in_latest_parse' => true,
                 ])->save();
                 $refreshed++;
             }
 
-            // Everything the parse no longer mentions. Manual rows are exempt:
-            // the recruiter added them precisely because the JD does not say
-            // them, so "not in the parse" is their normal state.
+            /*
+             * Everything the project no longer states.
+             *
+             * Not a must-have: deleted. It carried no decision, and a list
+             * that keeps showing a category the recruiter just unticked is a
+             * list that does not describe the project. If the field comes
+             * back, the row comes back exactly as it was — off.
+             *
+             * A must-have: kept but marked stale, which takes it out of the
+             * gate (see scopeGating) while leaving it on screen. Deleting it
+             * would drop a hiring rule the recruiter set without telling them.
+             *
+             * Manual rows are exempt from both: "not stated by the project" is
+             * why somebody added them by hand.
+             */
             $keys = array_column($extracted, 'requirement_key');
 
-            ProjectRequirement::where('project_id', $project->id)
+            $gone = ProjectRequirement::where('project_id', $project->id)
                 ->where('source', 'ai')
-                ->when($keys !== [], fn ($q) => $q->whereNotIn('requirement_key', $keys))
-                ->update(['in_latest_parse' => false]);
+                ->when($keys !== [], fn ($q) => $q->whereNotIn('requirement_key', $keys));
+
+            $removed = (clone $gone)->where('is_mandatory', false)->delete();
+
+            (clone $gone)->where('is_mandatory', true)->update(['in_latest_parse' => false]);
         });
 
         $stale = ProjectRequirement::where('project_id', $project->id)
@@ -86,10 +125,12 @@ class ProjectRequirementService
             'project_id' => $project->id,
             'created' => $created,
             'refreshed' => $refreshed,
+            'removed' => $removed,
             'stale' => $stale,
+            'parsed' => $parse !== null,
         ]);
 
-        return ['created' => $created, 'refreshed' => $refreshed, 'stale' => $stale];
+        return ['created' => $created, 'refreshed' => $refreshed, 'stale' => $stale, 'removed' => $removed];
     }
 
     /**
@@ -120,17 +161,58 @@ class ProjectRequirementService
         $rows = [];
         $position = 0;
 
-        // ── Skills ────────────────────────────────────────────────────────
-        //
-        // Required and preferred both become rows. That is the point of the
-        // feature: a recruiter is allowed to decide that something the JD
-        // merely prefers is non-negotiable for *this* client, which is exactly
-        // the example in the brief. Marking it mandatory is what promotes it.
+        /*
+         * ── Skills: the categories ticked on the form ─────────────────────
+         *
+         * Read from the pivot as it is *now*, not from the parse. The parser
+         * copies the ticked categories into its payload too, but that copy is
+         * as old as the last matching run — reading it meant a category the
+         * recruiter had since unticked stayed on this list until somebody ran
+         * matching again.
+         *
+         * Keyed `skill:id:N`, the same key the parse copy used, so a must-have
+         * set before this change carries over.
+         */
+        $subCategories = $project->subCategories()
+            ->orderBy('sub_categories.id')
+            ->get(['sub_categories.id', 'sub_categories.title']);
+
+        foreach ($subCategories as $sub) {
+            $label = trim((string) $sub->title);
+
+            if ($label === '') {
+                continue;
+            }
+
+            $key = 'skill:id:'.(int) $sub->id;
+
+            $rows[$key] = [
+                'kind' => RequirementKind::SKILL,
+                'requirement_key' => $key,
+                'label' => $label,
+                'min_months' => null,
+                'level' => null,
+                'evidence' => null,
+                'origin' => 'project_form',
+                'position' => $position++,
+            ];
+        }
+
+        /*
+         * ── Skills: phrases from the description ──────────────────────────
+         *
+         * Required and preferred both become rows. That is the point of the
+         * feature: a recruiter is allowed to decide that something the JD
+         * merely prefers is non-negotiable for *this* client. Marking it
+         * mandatory is what promotes it.
+         */
         foreach (['required_skills', 'preferred_skills'] as $bucket) {
             foreach ($payload[$bucket] ?? [] as $skill) {
                 $label = trim((string) ($skill['raw'] ?? ''));
 
-                if ($label === '') {
+                if ($label === '' || $this->isFormCopy($skill)) {
+                    // The parse's copy of the form's categories, superseded by
+                    // the live pivot read above.
                     continue;
                 }
 
@@ -150,23 +232,36 @@ class ProjectRequirementService
                     'min_months' => null,
                     'level' => null,
                     'evidence' => $skill['evidence'] ?? null,
+                    'origin' => 'jd_text',
                     'position' => $position++,
                 ];
             }
         }
 
-        // ── Experience ────────────────────────────────────────────────────
-        $months = $payload['min_experience_months'] ?? null;
+        /*
+         * ── Experience ────────────────────────────────────────────────────
+         *
+         * Only when the project states one. The form's "Required experience"
+         * wins — a person typed it — and a number the parser found in the
+         * description ("3年以上") is used only when the form is empty. Neither:
+         * no row, because this list shows what the project asks for and this
+         * project does not ask for experience.
+         */
+        $formMonths = (int) ($project->min_experience_months ?? 0);
+        $textMonths = $payload['min_experience_months'] ?? null;
+        $textMonths = is_numeric($textMonths) ? max(0, (int) $textMonths) : 0;
 
-        if (is_numeric($months) && (int) $months > 0) {
-            $years = intdiv((int) $months, 12);
+        $months = $formMonths > 0 ? $formMonths : $textMonths;
+
+        if ($months > 0) {
             $rows['experience'] = [
                 'kind' => RequirementKind::EXPERIENCE,
                 'requirement_key' => 'experience',
-                'label' => __('interview.requirement.experience_label', ['years' => $years]),
-                'min_months' => (int) $months,
+                'label' => $this->experienceLabel($months),
+                'min_months' => $months,
                 'level' => null,
                 'evidence' => null,
+                'origin' => $formMonths > 0 ? 'project_form' : 'jd_text',
                 'position' => $position++,
             ];
         }
@@ -201,6 +296,7 @@ class ProjectRequirementService
                 'min_months' => null,
                 'level' => $language['level'] ?? null,
                 'evidence' => $language['evidence'] ?? null,
+                'origin' => 'jd_text',
                 'position' => $position++,
             ];
         }
@@ -225,6 +321,7 @@ class ProjectRequirementService
                 // bar", which is exactly what the form asked.
                 'level' => null,
                 'evidence' => null,
+                'origin' => 'project_form',
                 'position' => $position++,
             ];
         }
@@ -243,6 +340,7 @@ class ProjectRequirementService
                 'min_months' => null,
                 'level' => null,
                 'evidence' => null,
+                'origin' => 'project_form',
                 'position' => $position++,
             ];
         }
@@ -257,6 +355,7 @@ class ProjectRequirementService
                 'min_months' => null,
                 'level' => null,
                 'evidence' => null,
+                'origin' => 'project_form',
                 'position' => $position++,
             ];
         }
@@ -276,6 +375,50 @@ class ProjectRequirementService
         }
 
         return 'skill:'.$this->normalize((string) ($skill['raw'] ?? ''));
+    }
+
+    /**
+     * Whether a parsed skill is the parser's copy of a ticked category.
+     *
+     * The parser marks those with a fixed evidence string and `source: form`;
+     * either is enough.
+     *
+     * @param  array<string, mixed>  $skill
+     */
+    private function isFormCopy(array $skill): bool
+    {
+        return ($skill['evidence'] ?? null) === self::FORM_EVIDENCE
+            || ($skill['source'] ?? null) === 'form';
+    }
+
+    /**
+     * How a required-experience threshold reads: "At least 2 years 6 months".
+     *
+     * Months are shown, not rounded away — the form asks for them, and a
+     * screen that shows "2 years" for a project that asked for two and a half
+     * is a screen the recruiter stops trusting.
+     */
+    public function experienceLabel(int $months): string
+    {
+        return __('interview.requirement.experience_label', [
+            'duration' => self::duration($months),
+        ]);
+    }
+
+    /** "2 years 6 months", "1 year", "6 months" — in the current locale. */
+    public static function duration(int $months): string
+    {
+        $parts = [];
+
+        if (intdiv($months, 12) > 0) {
+            $parts[] = trans_choice('interview.requirement.duration_years', intdiv($months, 12));
+        }
+
+        if ($months % 12 > 0) {
+            $parts[] = trans_choice('interview.requirement.duration_months', $months % 12);
+        }
+
+        return implode(' ', $parts);
     }
 
     /** Fold a surface form down to a comparison key. */

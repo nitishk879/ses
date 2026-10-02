@@ -189,7 +189,10 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'experience_years' => 'required experience (years)',
+        'experience_months' => 'required experience (months)',
+    ],
 
     'dialable_phone' => 'Enter a phone number the interview call can reach, for example 090-1234-5678.',
 ];

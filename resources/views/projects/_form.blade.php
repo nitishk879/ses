@@ -38,7 +38,17 @@
     // the model's accessor turns it into display names — so the raw column is
     // what a radio can be compared against.
     $storedLanguages  = json_decode($project?->getRawOriginal('languages') ?? '[]', true);
-    $chosenLanguage   = old('languages', is_array($storedLanguages) ? ($storedLanguages[0] ?? null) : $storedLanguages);
+    $storedLanguages  = is_array($storedLanguages) ? array_map('intval', $storedLanguages) : [(int) $storedLanguages];
+    // "Bilingual" is saved as [1, 2], so both together read back as the
+    // bilingual radio. Reading only the first entry showed "English", and
+    // saving the edit unchanged then dropped Japanese from the project.
+    $chosenLanguage   = old('languages', match (true) {
+        in_array(1, $storedLanguages, true) && in_array(2, $storedLanguages, true) => 3,
+        default => $storedLanguages[0] ?? null,
+    });
+
+    // Required experience is stored in months; the form asks in years + months.
+    $experience       = $project?->experienceParts() ?? ['years' => null, 'months' => null];
 
     $chosenTrade      = old('trade_classification',    $project?->trade_classification?->value);
     $chosenContract   = old('contract_classification', $project?->contract_classification?->value);
@@ -89,6 +99,43 @@
                 <div class="ms-auto text-end mt-2">
                     <a href="" onclick="openDynamicModal(2)" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-id="" data-bs-target="#staticBackdrop">{{ __("talents/registration.sample_input") }}</a>
                 </div>
+            </div>
+
+            {{-- Required experience. Optional: both boxes empty means none is
+                 required, and the matching screen then shows no experience
+                 requirement at all. Stored as months. --}}
+            <div class="col-md-12 mb-3">
+                <label for="experienceYears" class="form-label">{{ __('projects/form.required_experience') }}</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="input-group">
+                            <input type="number" class="form-control @error('experience_years') is-invalid @enderror"
+                                   id="experienceYears"
+                                   name="experience_years"
+                                   min="0" max="40" step="1"
+                                   value="{{ old('experience_years', $experience['years']) }}"
+                                   aria-label="{{ __('projects/form.experience_years') }}">
+                            <span class="input-group-text">{{ __('projects/form.experience_years') }}</span>
+                        </div>
+                        @error('experience_years')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                    <div class="col-6">
+                        <div class="input-group">
+                            <select class="form-select @error('experience_months') is-invalid @enderror"
+                                    id="experienceMonths"
+                                    name="experience_months"
+                                    aria-label="{{ __('projects/form.experience_months') }}">
+                                <option value="">0</option>
+                                @foreach(range(1, 11) as $m)
+                                    <option value="{{ $m }}" @selected((string) old('experience_months', $experience['months']) === (string) $m)>{{ $m }}</option>
+                                @endforeach
+                            </select>
+                            <span class="input-group-text">{{ __('projects/form.experience_months') }}</span>
+                        </div>
+                        @error('experience_months')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                    </div>
+                </div>
+                <div class="form-text">{{ __('projects/form.required_experience_help') }}</div>
             </div>
 
             <div class="form-group mb-3">

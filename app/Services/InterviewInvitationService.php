@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InterviewOfferMode;
 use App\Enums\InterviewSlotStatus;
 use App\Enums\InterviewStatus;
 use App\Models\AiMatch;
@@ -55,6 +56,7 @@ class InterviewInvitationService
 
     public function __construct(
         private readonly InterviewSlotGenerator $slots,
+        private readonly InterviewAvailabilityService $availability,
     ) {
     }
 
@@ -216,28 +218,20 @@ class InterviewInvitationService
         }
 
         $timezone = $this->timezoneFor($interview);
-        $count = (int) config('services.interview.invitation.slots_offered', 3);
-
-        $windows = filled($slotTimes)
-            ? $this->slots->fromExplicit($slotTimes, $timezone)
-            : $this->slots->generate($timezone, $count);
-
-        if ($windows->isEmpty()) {
-            throw new RuntimeException(filled($slotTimes)
-                ? __('interview.no_slots_chosen')
-                : __('interview.no_slots_available'));
-        }
+        $offer = $this->buildOffer($slotTimes, $timezone);
 
         $previous = $interview->scheduled_at;
-        $validHours = (int) config('services.interview.invitation.offer_valid_hours', 72);
 
-        DB::transaction(function () use ($interview, $timezone, $windows, $validHours) {
+        DB::transaction(function () use ($interview, $timezone, $offer) {
             $interview->fill([
                 'status' => InterviewStatus::SLOT_SELECTION,
                 'timezone' => $timezone,
                 'invitation_token' => bin2hex(random_bytes(32)),
                 'invitation_sent_at' => now(),
-                'invitation_expires_at' => now()->addHours($validHours),
+                'invitation_expires_at' => $offer['expires_at'],
+                'offer_mode' => $offer['mode'],
+                'offer_window_starts_at' => $offer['window_starts_at'],
+                'offer_window_ends_at' => $offer['window_ends_at'],
                 // The old booking is gone. Left set, the scheduler that runs
                 // every minute would dial the withdrawn time.
                 'scheduled_at' => null,
@@ -247,14 +241,7 @@ class InterviewInvitationService
 
             $interview->slots()->delete();
 
-            foreach ($windows as $index => $window) {
-                $interview->slots()->create([
-                    'starts_at' => $window['starts_at']->utc(),
-                    'ends_at' => $window['ends_at']->utc(),
-                    'status' => InterviewSlotStatus::OFFERED,
-                    'position' => $index + 1,
-                ]);
-            }
+            $this->writeSlots($interview, $offer['windows']);
         });
 
         $interview->load('slots', 'project');
@@ -269,7 +256,8 @@ class InterviewInvitationService
             // The withdrawn booking, recorded here because deleting the slot
             // row removes the only other trace of it.
             'previous_scheduled_at' => $previous?->toIso8601String(),
-            'slots_offered' => $windows->count(),
+            'mode' => $offer['mode']->value,
+            'slots_offered' => $offer['windows']->count(),
             'chosen_by_recruiter' => filled($slotTimes),
             'by' => auth()->id(),
         ]);
@@ -348,33 +336,10 @@ class InterviewInvitationService
         }
 
         $timezone = $this->timezoneFor($interview);
-        $count = (int) config('services.interview.invitation.slots_offered', 3);
-
-        // Times the recruiter chose win over generated ones. They know
-        // things the scheduler cannot: that this candidate asked for an
-        // evening, that the client wants them seen today, that Monday is
-        // a holiday. The generator remains the default because most
-        // invitations do not need that knowledge.
-        $windows = filled($slotTimes)
-            ? $this->slots->fromExplicit($slotTimes, $timezone)
-            : $this->slots->generate($timezone, $count);
-
-        if ($windows->isEmpty()) {
-            // Loud, not silent. An email listing no times is worse than no
-            // email at all, and the two ways of getting here need different
-            // fixes — one is a recruiter who left every box blank, the
-            // other a calendar that is full or a misconfigured horizon.
-            throw new RuntimeException(filled($slotTimes)
-                ? __('interview.no_slots_chosen')
-                : 'No interview slots are available within the configured horizon; '
-                  .'widen INTERVIEW_HORIZON_DAYS or check for a booked-out calendar.'
-            );
-        }
-
-        $validHours = (int) config('services.interview.invitation.offer_valid_hours', 72);
+        $offer = $this->buildOffer($slotTimes, $timezone);
 
         $interview = DB::transaction(function () use (
-            $interview, $project, $talent, $timezone, $windows, $validHours, $matchScore
+            $interview, $project, $talent, $timezone, $offer, $matchScore
         ) {
             $interview->fill([
                 'project_id' => $project->id,
@@ -384,7 +349,10 @@ class InterviewInvitationService
                 'timezone' => $timezone,
                 'invitation_token' => bin2hex(random_bytes(32)),
                 'invitation_sent_at' => now(),
-                'invitation_expires_at' => now()->addHours($validHours),
+                'invitation_expires_at' => $offer['expires_at'],
+                'offer_mode' => $offer['mode'],
+                'offer_window_starts_at' => $offer['window_starts_at'],
+                'offer_window_ends_at' => $offer['window_ends_at'],
                 'match_score' => $matchScore,
                 'failure_reason' => null,
             ])->save();
@@ -400,14 +368,7 @@ class InterviewInvitationService
                 ->where('status', '!=', InterviewSlotStatus::SELECTED)
                 ->delete();
 
-            foreach ($windows as $index => $window) {
-                $interview->slots()->create([
-                    'starts_at' => $window['starts_at']->utc(),
-                    'ends_at' => $window['ends_at']->utc(),
-                    'status' => InterviewSlotStatus::OFFERED,
-                    'position' => $index + 1,
-                ]);
-            }
+            $this->writeSlots($interview, $offer['windows']);
 
             return $interview;
         });
@@ -423,11 +384,125 @@ class InterviewInvitationService
             'interview_id' => $interview->id,
             'project_id' => $project->id,
             'talent_id' => $talent->id,
+            'mode' => $offer['mode']->value,
             'slots' => $interview->slots->count(),
             'score' => $matchScore,
         ]);
 
         return $interview;
+    }
+
+    /**
+     * What this invitation offers: an open fortnight, or times a recruiter pinned.
+     *
+     * The calendar is the default. Three fixed times is a yes/no question with
+     * three chances to say yes, and the answer is usually no — a candidate who
+     * cannot make any of them has to reply, wait for a second email, and
+     * answer again, which is exactly the manual back-and-forth this feature
+     * exists to remove. An open window lets them answer once.
+     *
+     * Pinned times remain, because a recruiter sometimes knows things no
+     * calendar does: that the client wants this person seen today, that the
+     * candidate asked for an evening, that Monday is a holiday. Filling the
+     * boxes is how they say so, and when they do, those exact windows are what
+     * the candidate is offered.
+     *
+     * The two expire differently on purpose. Pinned times are *particular*, so
+     * the link dies with them after `offer_valid_hours`. A calendar's link is
+     * useful exactly as long as a bookable day remains in it, so it expires
+     * with the window — the fortnight the email promised, to the end of the
+     * last day.
+     *
+     * @param  array<int, string>|null  $slotTimes
+     * @return array{mode: InterviewOfferMode, windows: \Illuminate\Support\Collection,
+     *               expires_at: \Carbon\CarbonInterface,
+     *               window_starts_at: ?\Carbon\CarbonInterface,
+     *               window_ends_at: ?\Carbon\CarbonInterface}
+     *
+     * @throws RuntimeException when pinned times produce nothing to offer
+     */
+    private function buildOffer(?array $slotTimes, string $timezone): array
+    {
+        /*
+         * Blank boxes are removed *here*, not trusted to the caller.
+         *
+         * `blank(['', '', ''])` is false — an array of three empty strings is
+         * countable and has three things in it — so a caller that forwards the
+         * form untouched would land in the pinned branch below, filter every
+         * row out, and throw "no times were chosen" at a recruiter who chose
+         * the calendar by leaving the boxes empty. Both current callers filter
+         * first; a future one should not have to know to.
+         */
+        $slotTimes = array_values(array_filter(
+            (array) $slotTimes,
+            static fn ($t) => trim((string) $t) !== '',
+        ));
+
+        if ($slotTimes === []) {
+            $window = $this->availability->openWindow($timezone);
+
+            /*
+             * Converted to UTC before it is written, exactly as the slot rows
+             * are.
+             *
+             * Eloquent's `datetime` cast formats whatever Carbon it is handed
+             * in *that instance's* zone and stores the digits — it does not
+             * convert. So handing it "2026-10-20 23:59:59 +09:00" writes those
+             * digits, and reading the column back as UTC yields 08:59 the
+             * following morning: a fortnight that advertises the 20th and
+             * expires on the 21st, every window shifted nine hours, and a
+             * calendar whose last day does not exist.
+             */
+            return [
+                'mode' => InterviewOfferMode::CALENDAR,
+                'windows' => collect(),
+                'expires_at' => $window['end']->utc(),
+                'window_starts_at' => $window['start']->utc(),
+                'window_ends_at' => $window['end']->utc(),
+            ];
+        }
+
+        $windows = $this->slots->fromExplicit($slotTimes, $timezone);
+
+        if ($windows->isEmpty()) {
+            // Loud, not silent. An email listing no times is worse than no
+            // email at all — and this branch is only reachable when somebody
+            // asked for specific times and every one of them was blank.
+            throw new RuntimeException(__('interview.no_slots_chosen'));
+        }
+
+        return [
+            'mode' => InterviewOfferMode::FIXED,
+            'windows' => $windows,
+            'expires_at' => now()->addHours(
+                (int) config('services.interview.invitation.offer_valid_hours', 72)
+            ),
+            'window_starts_at' => null,
+            'window_ends_at' => null,
+        ];
+    }
+
+    /**
+     * Write the offered rows, if there are any.
+     *
+     * A calendar offers none: a fortnight of half-hours is ~340 windows per
+     * candidate, and writing those as `offered` rows would describe, in six
+     * figures of records, times nobody has asked for. The row is created when
+     * one is booked instead — see
+     * {@see InterviewSchedulingService::confirmAt()}.
+     *
+     * @param  \Illuminate\Support\Collection<int, array{starts_at: \Carbon\CarbonImmutable, ends_at: \Carbon\CarbonImmutable}>  $windows
+     */
+    private function writeSlots(Interview $interview, \Illuminate\Support\Collection $windows): void
+    {
+        foreach ($windows as $index => $window) {
+            $interview->slots()->create([
+                'starts_at' => $window['starts_at']->utc(),
+                'ends_at' => $window['ends_at']->utc(),
+                'status' => InterviewSlotStatus::OFFERED,
+                'position' => $index + 1,
+            ]);
+        }
     }
 
     /**

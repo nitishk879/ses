@@ -20,6 +20,20 @@
 
 {{ __('interview.mail.about', ['minutes' => $minutes]) }}
 
+@if($calendar ?? false)
+{{-- A window, not a list. 336 half-hours will not fit in an email, and a
+     candidate does not need them to decide whether to click: they need to know
+     the offer covers the next fortnight, evenings included. --}}
+<x-mail::panel>
+**{{ __('interview.mail.window_heading') }}**
+
+{{ __('interview.mail.window_days', [
+    'until' => \App\Support\InterviewTime::full($expiresAt, $timezone),
+]) }}
+
+{{ __('interview.mail.window_hours', ['from' => $opensAt, 'to' => $closesAt, 'timezone' => $timezone]) }}
+</x-mail::panel>
+@else
 <x-mail::panel>
 **{{ __('interview.mail.slots_heading') }}**
 
@@ -27,6 +41,7 @@
 {{ $loop->iteration }}. {{ $slot->presentIn($timezone) }}
 @endforeach
 </x-mail::panel>
+@endif
 
 <x-mail::button :url="$url">
 {{ __('interview.mail.cta') }}
@@ -36,7 +51,7 @@
 {{ __('interview.mail.expires', ['date' => \App\Support\InterviewTime::full($expiresAt, $timezone)]) }}
 @endif
 
-{{ __('interview.mail.none_suitable') }}
+{{ __(($calendar ?? false) ? 'interview.mail.none_suitable_calendar' : 'interview.mail.none_suitable') }}
 
 {{ __('interview.mail.recorded_notice') }}
 

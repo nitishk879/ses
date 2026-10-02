@@ -7,20 +7,29 @@
                 <span class="fw-semibold">{{ __('interview.requirement.heading') }}</span>
                 <p class="text-muted small mb-0">{{ __('interview.requirement.help') }}</p>
             </div>
-            <span class="badge text-bg-dark">
-                {{ __('interview.requirement.mandatory_count', [
-                    'count' => $this->requirements->where('is_mandatory', true)->where('in_latest_parse', true)->count(),
-                ]) }}
-            </span>
+            <div class="d-flex align-items-center gap-2">
+                {{-- Values are edited on the project form; this screen only
+                     decides which of them are must-haves. --}}
+                @can('update', $project)
+                    <a href="{{ route('project.edit', $project) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa-solid fa-pen me-1"></i>{{ __('interview.requirement.edit_in_project') }}
+                    </a>
+                @endcan
+                <span class="badge text-bg-dark">
+                    {{ __('interview.requirement.mandatory_count', [
+                        'count' => $this->requirements->where('is_mandatory', true)->where('in_latest_parse', true)->count(),
+                    ]) }}
+                </span>
+            </div>
         </div>
 
         <div class="card-body">
             @forelse($this->requirements as $requirement)
                 @php
-                    // A stale row is one the JD no longer states. Kept, greyed,
-                    // and excluded from the gate — because a must-have that
-                    // vanished without a word is the same failure in a slower
-                    // form.
+                    // A stale row is a must-have whose source the project no
+                    // longer states. Kept, greyed and not enforced, so a hiring
+                    // rule never disappears without a word. Non-mandatory rows
+                    // in that state are deleted on sync and never reach here.
                     $stale = ! $requirement->in_latest_parse;
                     $incomplete = $requirement->isIncomplete();
                 @endphp
@@ -36,24 +45,13 @@
                         <label class="form-check-label" for="req-{{ $requirement->id }}">
                             <span class="badge text-bg-light border me-1">{{ $requirement->kind->label() }}</span>
                             <span class="{{ $requirement->is_mandatory && ! $stale ? 'fw-semibold' : '' }}">
-                                {{ $requirement->label }}
+                                {{ $requirement->displayLabel() }}
                             </span>
                         </label>
                     </div>
 
                     @if($requirement->kind === \App\Enums\RequirementKind::LANGUAGE && filled($requirement->level))
                         <span class="badge text-bg-secondary">{{ $requirement->level }}</span>
-                    @endif
-
-                    {{-- he parser frequently reads "experienced engineer" with no number attached. --}}
-                    @if($requirement->kind === \App\Enums\RequirementKind::EXPERIENCE)
-                        <div class="input-group input-group-sm" style="width: 11rem;">
-                            <input type="number" class="form-control" min="0" max="40"
-                                   value="{{ (int) floor(($requirement->min_months ?? 0) / 12) }}"
-                                   aria-label="{{ __('interview.requirement.years') }}"
-                                   wire:change="setExperienceYears({{ $requirement->id }}, $event.target.value)">
-                            <span class="input-group-text">{{ __('interview.requirement.years') }}</span>
-                        </div>
                     @endif
 
                     @if($incomplete && $requirement->is_mandatory)
@@ -64,8 +62,21 @@
                         <span class="badge text-bg-secondary">{{ __('interview.requirement.stale') }}</span>
                     @endif
 
-                    @if(filled($requirement->evidence) && ! $stale)
-                        <small class="text-muted text-truncate d-none d-md-inline" style="max-width: 24rem;"
+                    {{-- Where this row came from. Three different things are
+                         listed under one heading — pivots the recruiter
+                         ticked, columns they filled in, and phrases pulled out
+                         of the description — and a list whose provenance
+                         cannot be read is a list whose switches do not get
+                         used. --}}
+                    <span class="badge rounded-pill text-bg-light border text-muted fw-normal">
+                        {{ $requirement->originLabel() }}
+                    </span>
+
+                    {{-- A quote only when it is one. On a form-derived row the
+                         "evidence" is the parser's sentinel, which the pill
+                         beside it already says more plainly. --}}
+                    @if(filled($requirement->evidence) && ! $stale && $requirement->origin === 'jd_text')
+                        <small class="text-muted text-truncate d-none d-md-inline" style="max-width: 20rem;"
                                title="{{ $requirement->evidence }}">
                             “{{ $requirement->evidence }}”
                         </small>
@@ -233,11 +244,12 @@
              row of disabled buttons. --}}
         @if($this->selectionCount > 0)
             @php
-                // Send needs three things, and they fail for different reasons,
-                // so the hint under the button names the one that is missing
-                // rather than listing all three every time.
+                // A bot is the only hard precondition left. Times used to be a
+                // second one; they are now an override, and an unfilled
+                // override is the normal case rather than a missing step.
                 $botReady = filled($project->interview_agent_id) && ! $this->botUnsaved;
-                $slotsFilled = count(array_filter($slotTimes, 'filled')) === 3;
+                $pinnedCount = count(array_filter($slotTimes, 'filled'));
+                $zone = config('services.interview.invitation.timezone', 'Asia/Tokyo');
             @endphp
             <div class="card-body border-bottom bg-light">
                 <div class="d-flex flex-wrap align-items-end gap-3">
@@ -250,27 +262,10 @@
                         </button>
                     </div>
 
-                    <div class="d-flex flex-wrap gap-2">
-                        @foreach([0, 1, 2] as $i)
-                            <div>
-                                <label class="form-label small mb-1">
-                                    {{ __('interview.match_run.slot_n', ['n' => $i + 1]) }}
-                                </label>
-                                {{-- `.live`: the Send button is gated on these
-                                     being filled, and a value the server has
-                                     not seen yet would leave it dead under a
-                                     form that looks complete. --}}
-                                <input type="datetime-local" class="form-control form-control-sm"
-                                       min="{{ now(config('services.interview.invitation.timezone', 'Asia/Tokyo'))->format('Y-m-d\TH:i') }}"
-                                       wire:model.live="slotTimes.{{ $i }}">
-                            </div>
-                        @endforeach
-                    </div>
-
                     <button class="btn btn-success"
                             wire:click="inviteSelected"
                             wire:loading.attr="disabled"
-                            @disabled(! $botReady || ! $slotsFilled)
+                            @disabled(! $botReady)
                             wire:confirm="{{ __('interview.dashboard.invite_confirm') }}">
                         <i class="fa-solid fa-paper-plane me-1"></i>
                         {{ __('interview.match_run.invite_selected') }}
@@ -278,14 +273,50 @@
                 </div>
 
                 <p class="text-muted small mb-0 mt-2">
-                    {{ __('interview.dashboard.slot_times_help', [
-                        'zone' => config('services.interview.invitation.timezone', 'Asia/Tokyo'),
+                    <i class="fa-regular fa-calendar me-1"></i>
+                    {{ __('interview.dashboard.calendar_default', [
+                        'days' => config('services.interview.invitation.horizon_days', 14),
+                        'from' => sprintf('%02d:00', (int) config('services.interview.invitation.business_start_hour', 8)),
+                        'to' => sprintf('%02d:00', (int) config('services.interview.invitation.business_end_hour', 20)),
+                        'zone' => $zone,
                     ]) }}
                 </p>
 
-                {{-- Names the step that is actually missing, and links to where
-                     it gets fixed. Telling someone to pick times when what they
-                     lack is a bot sends them to fill boxes that change nothing. --}}
+                {{-- Collapsed, because it is the exception. Opened by default
+                     when something is already typed in it, so a half-filled
+                     override is never hidden behind a summary that reads as
+                     "nothing to see here". --}}
+                <details class="mt-2" @if($pinnedCount > 0) open @endif>
+                    <summary class="small text-primary" style="cursor: pointer;">
+                        {{ __('interview.dashboard.pin_times') }}
+                        @if($pinnedCount > 0)
+                            <span class="badge text-bg-primary ms-1">{{ $pinnedCount }}</span>
+                        @endif
+                    </summary>
+
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        @foreach([0, 1, 2] as $i)
+                            <div>
+                                <label class="form-label small mb-1">
+                                    {{ __('interview.match_run.slot_n', ['n' => $i + 1]) }}
+                                </label>
+                                {{-- `.live`: the hint below counts what is
+                                     filled, and a value the server has not seen
+                                     yet would make it contradict the boxes. --}}
+                                <input type="datetime-local" class="form-control form-control-sm"
+                                       min="{{ now($zone)->format('Y-m-d\TH:i') }}"
+                                       wire:model.live="slotTimes.{{ $i }}">
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <p class="text-muted small mb-0 mt-2">
+                        {{ __('interview.dashboard.slot_times_help', ['zone' => $zone]) }}
+                    </p>
+                </details>
+
+                {{-- The one thing that still blocks Send, linked to where it
+                     gets fixed. --}}
                 @if(! $botReady)
                     <p class="small text-warning mb-0 mt-1">
                         <a href="#interview-bot" class="link-warning">
@@ -293,10 +324,6 @@
                                 ? __('interview.dashboard.bot_required')
                                 : __('interview.dashboard.bot_unsaved') }}
                         </a>
-                    </p>
-                @elseif(! $slotsFilled)
-                    <p class="small text-warning mb-0 mt-1">
-                        {{ __('interview.dashboard.slot_times_required') }}
                     </p>
                 @endif
             </div>

@@ -28,6 +28,7 @@ class InterviewSlot extends Model
         'status',
         'position',
         'selected_at',
+        'reserved_instant',
     ];
 
     protected function casts(): array
@@ -37,7 +38,31 @@ class InterviewSlot extends Model
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'selected_at' => 'datetime',
+            'reserved_instant' => 'datetime',
         ];
+    }
+
+    /**
+     * Keep `reserved_instant` meaning what the unique index needs it to mean.
+     *
+     * The column is the predicate of a partial index MySQL cannot express:
+     * "one SELECTED slot per instant". It only works if it is non-null exactly
+     * while the row is SELECTED. Left to each caller, the first code path that
+     * moves a booking to RELEASED and forgets the column would hold that
+     * instant forever — a phantom booking no screen shows, refusing every
+     * candidate who tries to take it.
+     *
+     * Bulk `update()` queries bypass this, which is why every one of those in
+     * the scheduling code touches only OFFERED rows, whose column is already
+     * null.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (InterviewSlot $slot) {
+            if ($slot->status !== InterviewSlotStatus::SELECTED) {
+                $slot->reserved_instant = null;
+            }
+        });
     }
 
     public function interview(): BelongsTo

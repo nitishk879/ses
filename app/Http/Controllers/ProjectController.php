@@ -13,8 +13,10 @@ use App\Events\TalentInvitationEvent;
 use App\Models\Category;
 use App\Models\Feature;
 use App\Models\Project;
+use App\Services\ProjectRequirementService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -63,6 +65,9 @@ class ProjectController extends Controller
         $project->subCategories()->attach($request->input('category_id'));
         $project->features()->attach($request->input("project_features") ?? []);
         $project->locations()->attach($request->input("locations") ?? []);
+
+        // After the pivots, which several requirements are read from.
+        self::refreshRequirements($project);
 
         return redirect()->route('project.index')->with('success', 'Project created successfully.');
     }
@@ -120,7 +125,10 @@ class ProjectController extends Controller
             "eligibility" => 'nullable',
             "is_public" => 'nullable',
             "company_info_disclose" => 'nullable',
-            "locations" => 'required'
+            "locations" => 'required',
+            // Optional: leaving both empty means no experience is required.
+            "experience_years" => 'nullable|integer|min:0|max:40',
+            "experience_months" => 'nullable|integer|min:0|max:11',
         ];
     }
 
@@ -200,7 +208,49 @@ class ProjectController extends Controller
             ),
             "number_of_application" => self::blankToNull($validated["number_of_application"] ?? null),
             "number_of_interviewers" => self::blankToNull($validated["number_of_interviewers"] ?? null),
+            "min_experience_months" => self::experienceMonths(
+                $validated["experience_years"] ?? null,
+                $validated["experience_months"] ?? null,
+            ),
         ];
+    }
+
+    /**
+     * The form's years + months as one number, or null when none is required.
+     *
+     * Zero is stored as null: "0 years 0 months" and two empty boxes mean the
+     * same thing, and only one of them should exist in the column.
+     */
+    private static function experienceMonths(mixed $years, mixed $months): ?int
+    {
+        $total = ((int) ($years ?? 0)) * 12 + (int) ($months ?? 0);
+
+        return $total > 0 ? $total : null;
+    }
+
+    /**
+     * Rebuild the matching screen's requirement list from what was just saved.
+     *
+     * The list used to be rebuilt only when matching ran, so a project edited
+     * after its last run showed requirements it no longer had — a category
+     * unticked on the form still offered as a must-have. Done here, straight
+     * after the save, the list always reflects the form.
+     *
+     * Database-only, no AI call: the description is not re-read here, only the
+     * form fields. Caught and logged rather than thrown, because the project
+     * itself is already saved, and a recruiter told "error" after a successful
+     * save would save it again.
+     */
+    private static function refreshRequirements(Project $project): void
+    {
+        try {
+            app(ProjectRequirementService::class)->syncFromParse($project->fresh());
+        } catch (\Throwable $e) {
+            Log::error('project.requirements_refresh_failed', [
+                'project_id' => $project->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -353,6 +403,8 @@ class ProjectController extends Controller
         $project->subCategories()->sync($request->input('category_id', []));
         $project->features()->sync($request->input('project_features', []));
         $project->locations()->sync($request->input('locations', []));
+
+        self::refreshRequirements($project);
 
         return redirect()
             ->route('project.show', $project)

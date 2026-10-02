@@ -145,27 +145,62 @@ return [
 
             'slots_offered' => env('INTERVIEW_SLOTS_OFFERED', 3),
 
-            // How long the candidate has to answer before the offer goes stale.
+            /*
+             * How long a *pinned* offer stays answerable.
+             *
+             * Applies only when a recruiter typed specific times: those are
+             * particular windows that go stale, so the link dies with them.
+             * A calendar invitation ignores this and expires with its window
+             * instead — see `horizon_days`.
+             */
             'offer_valid_hours' => env('INTERVIEW_OFFER_VALID_HOURS', 72),
 
-            // Never offer a time sooner than this. A slot 20 minutes away is a
-            // slot nobody can prepare for.
-            'lead_time_hours' => env('INTERVIEW_LEAD_TIME_HOURS', 24),
-
-            // ...nor further out than this; an interview a fortnight away is
-            // one the candidate will have forgotten agreeing to.
-            'horizon_days' => env('INTERVIEW_HORIZON_DAYS', 7),
+            /*
+             * Never offer a time sooner than this. A slot forty minutes away
+             * is one the candidate cannot get somewhere quiet for.
+             *
+             * Two hours rather than a day: the calendar is the candidate's own
+             * choice now, and a 24-hour floor silently removed today and most
+             * of tomorrow from a fortnight that was advertised as starting
+             * immediately.
+             */
+            'lead_time_hours' => env('INTERVIEW_LEAD_TIME_HOURS', 2),
 
             /*
-             * Business hours, in the candidate's timezone. Slot length is the
-             * spacing between bookings, not the call length — the call is
-             * ~5 minutes, and the rest is margin, because with a single
-             * concurrent line an overrun delays the next candidate.
+             * How many days of calendar an invitation opens, counting the day
+             * it was sent. This is the fortnight: it sizes the window the
+             * candidate books inside *and* the life of the link, because a
+             * link that outlives its last bookable day is a link that opens on
+             * an empty page.
              */
-            'business_start_hour' => env('INTERVIEW_BUSINESS_START_HOUR', 10),
-            'business_end_hour' => env('INTERVIEW_BUSINESS_END_HOUR', 18),
+            'horizon_days' => env('INTERVIEW_HORIZON_DAYS', 14),
+
+            /*
+             * The hours a candidate may book inside, in their timezone.
+             *
+             * 8am to 8pm, which is wider than office hours on purpose: this is
+             * a five-minute automated call to somebody who in most cases
+             * currently has a job, and the evening is when they can take it.
+             * The last window *ends* at the closing hour, so 8-20 on a
+             * half-hour grid offers 08:00 through 19:30.
+             *
+             * Slot length is the spacing between bookings, not the call
+             * length — the call is ~5 minutes and the rest is margin, because
+             * with a single concurrent line an overrun delays the next
+             * candidate.
+             */
+            'business_start_hour' => env('INTERVIEW_BUSINESS_START_HOUR', 8),
+            'business_end_hour' => env('INTERVIEW_BUSINESS_END_HOUR', 20),
             'slot_minutes' => env('INTERVIEW_SLOT_MINUTES', 30),
-            'skip_weekends' => env('INTERVIEW_SKIP_WEEKENDS', true),
+
+            /*
+             * Off by default. Nobody from SES attends these calls — a bot
+             * dials and the recruiter reads the result afterwards — so a
+             * Saturday morning costs us nothing and is the slot a working
+             * candidate is most likely to take. Turning it on greys weekends
+             * out of the calendar rather than shortening the fortnight.
+             */
+            'skip_weekends' => env('INTERVIEW_SKIP_WEEKENDS', false),
 
             // Used when the interview carries no timezone of its own. SES
             // stores none against a user yet.

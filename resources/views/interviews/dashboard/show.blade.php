@@ -142,6 +142,26 @@
         {{-- ── left: the interview itself ──────────────────────────────── --}}
         <div class="col-lg-7">
 
+            {{-- A calendar offer writes no slot rows until something is
+                 booked, so without this the card below simply vanished and
+                 the recruiter could not see what the candidate was looking
+                 at. --}}
+            {{-- Only while it is still open: once booked, "can book any time
+                 until…" is no longer true, and the chosen slot below says
+                 what happened. --}}
+            @if($interview->offersCalendar() && $interview->offer_window_ends_at
+                && in_array($interview->status, [\App\Enums\InterviewStatus::INVITED, \App\Enums\InterviewStatus::SLOT_SELECTION], true))
+                <div class="card mb-3">
+                    <div class="card-body py-2 small">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        <strong>{{ __('interview.dashboard.calendar_offered') }}</strong>
+                        {{ __('interview.dashboard.calendar_offered_detail', [
+                            'until' => \App\Support\InterviewTime::full($interview->offer_window_ends_at, $timezone),
+                        ]) }}
+                    </div>
+                </div>
+            @endif
+
             {{-- Offered / chosen times --}}
             @if($interview->slots->isNotEmpty())
                 <div class="card mb-3">

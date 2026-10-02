@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Interview\SlotUnavailable;
 use App\Models\InterviewSlot;
+use App\Services\InterviewAvailabilityService;
 use App\Services\InterviewSchedulingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
@@ -32,17 +33,35 @@ class InterviewSlotController extends Controller
 {
     public function __construct(
         private readonly InterviewSchedulingService $scheduling,
+        private readonly InterviewAvailabilityService $availability,
     ) {
     }
 
     /**
-     * Show the offered times.
+     * Show the times on offer — a calendar, or a short pinned list.
      */
-    public function show(string $token): View
+    public function show(Request $request, string $token): View|RedirectResponse
     {
         $interview = $this->scheduling->findByToken($token);
 
         if (! $interview) {
+            /*
+             * The token is destroyed on booking, so a second tap that arrives
+             * after the first has committed — or the candidate re-opening the
+             * email a minute later in the same browser — finds nothing. Sent
+             * to their confirmation instead of "this link is no longer valid",
+             * which reads as the booking having failed.
+             *
+             * Session-scoped, so it only ever recognises the browser that made
+             * the booking; anyone else holding the link still gets the
+             * not-recognised page and learns nothing.
+             */
+            $bookedId = $request->session()->get(self::bookedKey($token));
+
+            if ($bookedId) {
+                return $this->toConfirmation((int) $bookedId);
+            }
+
             return $this->page('interviews.slots.unavailable', [
                 'reason' => __('interview.link_not_recognised'),
             ]);
@@ -61,6 +80,51 @@ class InterviewSlotController extends Controller
             ]);
         }
 
+        $common = [
+            'interview' => $interview,
+            'timezone' => $interview->timezone,
+            'minutes' => max(1, (int) round(
+                ((int) config('services.interview.duration_seconds', 300)) / 60
+            )),
+        ];
+
+        if ($interview->offersCalendar()) {
+            $days = $this->availability->calendar($interview);
+
+            /*
+             * Nothing left to offer. Two different causes, one sentence.
+             *
+             * Either every remaining half-hour is spoken for, or the window is
+             * still formally open but has run out of usable time — at 19:00 on
+             * the last day, a two-hour lead puts the earliest bookable instant
+             * past the 20:00 close.
+             *
+             * Deliberately does not say "fully booked". In the second case
+             * nobody took anything, and a candidate told otherwise would
+             * reasonably ask who beat them to it. It also cannot say "all the
+             * times offered have passed", which would be a lie about a window
+             * that has not closed.
+             */
+            if ($days->sum('available_count') === 0) {
+                return $this->page('interviews.slots.unavailable', [
+                    'reason' => __('interview.calendar_nothing_left'),
+                ]);
+            }
+
+            $config = $this->availability->config();
+            $window = $this->availability->windowFor($interview);
+
+            return $this->page('interviews.slots.calendar', $common + [
+                'days' => $days,
+                // The day to open on: the first with anything left in it, so a
+                // candidate reading on day nine does not land on an empty one.
+                'openDate' => $days->firstWhere('available_count', '>', 0)['date'] ?? null,
+                'opensAt' => sprintf('%02d:00', $config['day_start_hour']),
+                'closesAt' => sprintf('%02d:00', $config['day_end_hour'] % 24),
+                'until' => $window['end'],
+            ]);
+        }
+
         $choosable = $interview->slots->filter->isChoosable()->values();
 
         if ($choosable->isEmpty()) {
@@ -70,14 +134,7 @@ class InterviewSlotController extends Controller
             ]);
         }
 
-        return $this->page('interviews.slots.show', [
-            'interview' => $interview,
-            'slots' => $choosable,
-            'timezone' => $interview->timezone,
-            'minutes' => max(1, (int) round(
-                ((int) config('services.interview.duration_seconds', 300)) / 60
-            )),
-        ]);
+        return $this->page('interviews.slots.show', $common + ['slots' => $choosable]);
     }
 
     /**
@@ -91,35 +148,123 @@ class InterviewSlotController extends Controller
             return redirect()->route('interview-slots.show', ['token' => $token]);
         }
 
-        $validated = $request->validate([
-            'slot_id' => ['required', 'integer'],
-        ]);
-
-        $slot = InterviewSlot::find($validated['slot_id']);
-
-        if (! $slot) {
-            return back()->with('slot_error', __('interview.slot_no_longer_available'));
-        }
-
         try {
-            $confirmed = $this->scheduling->confirm($interview, $slot);
+            $confirmed = $interview->offersCalendar()
+                ? $this->confirmFromCalendar($request, $interview)
+                : $this->confirmPinned($request, $interview);
         } catch (SlotUnavailable $e) {
-            // Expected: somebody else took this window between the page being
-            // rendered and the button being pressed. Re-render with what is
-            // left rather than reporting a failure.
+            /*
+             * A double tap that lost to itself.
+             *
+             * On a slow phone connection "Confirm" gets pressed twice. Both
+             * requests pass the checks above; the first books and destroys the
+             * token while the second waits on the row lock, then finds the
+             * invitation closed and throws. Reported as an error, the
+             * candidate reads "this invitation has expired" a second after
+             * successfully booking — and either rings to complain or, worse,
+             * assumes it failed and does not pick up.
+             *
+             * Re-read rather than trusted: if this interview is now booked, it
+             * was booked through this candidate's own link, so the
+             * confirmation is theirs to see.
+             */
+            $now = $interview->fresh();
+
+            if ($now?->slot_selected_at && $now->status === \App\Enums\InterviewStatus::SCHEDULED) {
+                return $this->toConfirmation($now->id);
+            }
+
+            // Otherwise expected: somebody else took this window between the
+            // page being rendered and the button being pressed, or the page
+            // sat open until the time passed. Re-render with what is left
+            // rather than reporting a failure.
             return back()->with('slot_error', $e->getMessage());
         }
 
-        // Relative signature: valid for a day, and unaffected by the app being
-        // reached on a host that differs from APP_URL.
-        return redirect()
-            ->to(URL::temporarySignedRoute(
-                'interview-slots.confirmed',
-                now()->addDay(),
-                ['interview' => $interview->id],
-                absolute: false
-            ))
+        // Remembered in this browser's session, keyed by a hash of the token
+        // rather than the token — see show(). Lets a second tap that arrives
+        // after this one has fully committed land on the same confirmation.
+        $request->session()->put(self::bookedKey($token), $interview->id);
+
+        return $this->toConfirmation($interview->id)
             ->with('confirmed_slot', $confirmed->id);
+    }
+
+    /**
+     * Where a successful booking lands.
+     *
+     * Relative signature: valid for a day, and unaffected by the app being
+     * reached on a host that differs from APP_URL.
+     */
+    private function toConfirmation(int $interviewId): RedirectResponse
+    {
+        return redirect()->to(URL::temporarySignedRoute(
+            'interview-slots.confirmed',
+            now()->addDay(),
+            ['interview' => $interviewId],
+            absolute: false
+        ));
+    }
+
+    /**
+     * Session key recording that this browser booked with this token.
+     *
+     * Hashed so the session store never holds a usable credential; the token
+     * is dead by the time this is written anyway, but a session table is the
+     * kind of thing that ends up in a backup nobody thought about.
+     */
+    private static function bookedKey(string $token): string
+    {
+        return 'interview.booked.'.hash('sha256', $token);
+    }
+
+    /**
+     * A time the candidate picked off the calendar.
+     *
+     * Validated as a shape here and as a *time* in the service. The two are
+     * different jobs: this one rejects a field that is missing or absurdly
+     * long before any of it reaches a date parser, and the service decides
+     * whether the instant it describes is one this invitation may book.
+     *
+     * @throws SlotUnavailable
+     */
+    private function confirmFromCalendar(Request $request, \App\Models\Interview $interview): InterviewSlot
+    {
+        $start = trim((string) $request->input('slot_start', ''));
+
+        if ($start === '') {
+            // Nothing was chosen. Not an error worth a stack trace — the
+            // candidate pressed the button before picking a time.
+            throw new SlotUnavailable(__('interview.slot_none_chosen'));
+        }
+
+        if (strlen($start) > 32) {
+            throw new SlotUnavailable(__('interview.slot_time_unreadable', ['value' => '…']));
+        }
+
+        return $this->scheduling->confirmAt($interview, $start);
+    }
+
+    /**
+     * One of the times a recruiter pinned.
+     *
+     * @throws SlotUnavailable
+     */
+    private function confirmPinned(Request $request, \App\Models\Interview $interview): InterviewSlot
+    {
+        $slotId = $request->input('slot_id');
+
+        if (! is_numeric($slotId)) {
+            throw new SlotUnavailable(__('interview.slot_none_chosen'));
+        }
+
+        $slot = InterviewSlot::find((int) $slotId);
+
+        if (! $slot) {
+            throw new SlotUnavailable(__('interview.slot_no_longer_available'));
+        }
+
+        return $this->scheduling->confirm($interview, $slot);
     }
 
     /**
