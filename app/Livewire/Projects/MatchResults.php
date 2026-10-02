@@ -32,16 +32,17 @@ class MatchResults extends Component
 
     public Project $project;
 
-    /** matched | review | all — which slice of the pool is on screen. */
+    /** matched | review | all; untyped so a crafted ?filter[]= is cleaned in mount() instead of a TypeError 500. */
     #[Url]
-    public string $filter = 'matched';
+    public $filter = 'matched';
 
-    /** The score floor, or null when the recruiter has emptied the box. */
+    /** The Min score box exactly as typed; untyped so the server echoes the client's string and never overwrites keystrokes. */
     #[Url]
-    public ?int $threshold = 70;
+    public $threshold = null;
 
+    /** Untyped for the same reason as $filter. */
     #[Url]
-    public string $search = '';
+    public $search = '';
 
     /**
      * Talent ids ticked on screen.
@@ -77,8 +78,33 @@ class MatchResults extends Component
         $this->assertVisible($project);
         $this->project = $project;
 
-        $this->threshold = (int) config('services.interview.invitation.min_match_score', 70);
+        // #[Url] has already filled this from ?threshold=; only fall back to the default when the URL had none.
+        $this->threshold = $this->threshold === null
+            ? (string) config('services.interview.invitation.min_match_score', 70)
+            : self::normalizeThreshold($this->threshold);
+        $this->filter = self::normalizeFilter($this->filter);
+        $this->search = is_string($this->search) ? $this->search : '';
         $this->interviewAgentId = (string) ($project->interview_agent_id ?? '');
+    }
+
+    /** One of the three tabs; anything else falls back to "matched". */
+    private static function normalizeFilter(mixed $value): string
+    {
+        return in_array($value, ['matched', 'review', 'all'], true) ? $value : 'matched';
+    }
+
+    /** A threshold from the URL or the box as a clean "0"-"100" string, '' for an emptied box, the default for junk. */
+    private static function normalizeThreshold(mixed $value): string
+    {
+        if (is_string($value) && trim($value) === '') {
+            return '';
+        }
+
+        if (! is_scalar($value) || is_bool($value) || ! is_numeric($value)) {
+            return (string) config('services.interview.invitation.min_match_score', 70);
+        }
+
+        return (string) max(0, min(100, (int) floor((float) $value)));
     }
 
     // ── guards ───────────────────────────────────────────────────────────── #
@@ -360,30 +386,41 @@ class MatchResults extends Component
     /** Changing the slice invalidates a selection made against the old one. */
     public function updatedFilter(): void
     {
+        $this->filter = self::normalizeFilter($this->filter);
         $this->clearSelection();
         $this->resetPage();
     }
 
     public function updatedThreshold(): void
     {
-        if ($this->threshold !== null) {
-            $this->threshold = max(0, min(100, $this->threshold));
+        // Rewrite only what is actually wrong (out of range, junk); an in-range value is left exactly as typed.
+        $typed = $this->threshold;
+
+        if (! is_string($typed) || (trim($typed) !== '' && (! is_numeric($typed) || $typed < 0 || $typed > 100))) {
+            $this->threshold = self::normalizeThreshold($this->threshold);
         }
 
         $this->clearSelection();
         $this->resetPage();
-        unset($this->tallies);
+        unset($this->tallies, $this->scoreFloor);
     }
 
-    /** The score floor actually applied to every query on this page. */
+    /** The score floor actually applied to every query on this page; an empty or unreadable box means no floor. */
     #[Computed]
     public function scoreFloor(): int
     {
-        return max(0, min(100, $this->threshold ?? 0));
+        $value = is_scalar($this->threshold) ? trim((string) $this->threshold) : '';
+
+        return is_numeric($value) ? max(0, min(100, (int) floor((float) $value))) : 0;
     }
 
     public function updatedSearch(): void
     {
+        // Only a non-string is rewritten, so typed text is echoed back untouched.
+        if (! is_string($this->search)) {
+            $this->search = '';
+        }
+
         $this->resetPage();
     }
 

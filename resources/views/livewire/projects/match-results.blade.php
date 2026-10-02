@@ -93,8 +93,14 @@
         <div class="card-body d-flex flex-wrap align-items-end gap-3">
             <div>
                 <label class="form-label small mb-1" for="threshold">{{ __('interview.dashboard.threshold') }}</label>
-                <input type="number" class="form-control form-control-sm" id="threshold"
-                       min="0" max="100" style="width: 6rem;" wire:model.live.debounce.500ms="threshold">
+                <div class="d-flex align-items-center gap-2">
+                    <input type="number" class="form-control form-control-sm" id="threshold"
+                           min="0" max="100" step="1" inputmode="numeric" style="width: 6rem;"
+                           wire:model.live.debounce.500ms="threshold">
+                    {{-- Shows the list is catching up with what was typed. --}}
+                    <span class="spinner-border spinner-border-sm text-secondary" role="status"
+                          wire:loading wire:target="threshold" aria-hidden="true"></span>
+                </div>
             </div>
 
             <button class="btn btn-primary" wire:click="analyze" wire:loading.attr="disabled">
